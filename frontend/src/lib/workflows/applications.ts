@@ -1,14 +1,14 @@
 /**
  * Application workflow server actions.
  * All functions are server-side only (import only from server components or route handlers).
- * Client cannot directly call these — they go through API routes.
+ * Multi-step mutations execute atomically via PostgreSQL RPC functions.
  */
 import {
+  createAdminClient,
   createSessionClient,
   getUserContext,
-  requireRole,
   requireDirectorMfa,
-  type AppRole,
+  requireRole,
 } from '../auth/authorization';
 
 export type ApplicationType =
@@ -31,14 +31,13 @@ export async function submitApplication(
   const client = await createSessionClient();
   if (!client) return { ok: false, error: 'Service unavailable.' };
 
-  // Check for an existing pending application of the same type
   const { data: existing } = await client
     .from('applications')
     .select('id')
     .eq('applicant_id', ctx.id)
     .eq('application_type', applicationType)
     .is('reviewed_at', null)
-    .single();
+    .maybeSingle();
 
   if (existing) {
     return { ok: false, error: 'You already have a pending application of this type.' };
@@ -60,7 +59,7 @@ export async function submitApplication(
 }
 
 // ---------------------------------------------------------------------------
-// Advisor reviews a core_team_application or alumni_verification
+// Review an application atomically via process_application_review RPC
 // ---------------------------------------------------------------------------
 
 export async function reviewApplication(
@@ -75,7 +74,7 @@ export async function reviewApplication(
   const client = await createSessionClient();
   if (!client) return { ok: false, error: 'Service unavailable.' };
 
-  // Fetch the application to validate type and prevent self-approval
+  // Pre-flight authorization check (also enforced atomically inside DB RPC)
   const { data: app, error: fetchErr } = await client
     .from('applications')
     .select('id, applicant_id, application_type, status, reviewed_at')
@@ -84,61 +83,28 @@ export async function reviewApplication(
 
   if (fetchErr || !app) return { ok: false, error: 'Application not found.' };
   if (app.applicant_id === ctx!.id) return { ok: false, error: 'You cannot review your own application.' };
-  if (app.reviewed_at) return { ok: false, error: 'This application has already been reviewed.' };
-  if (app.status !== 'pending') return { ok: false, error: 'Only pending applications can be reviewed.' };
+  if (app.reviewed_at || app.status !== 'pending') {
+    return { ok: false, error: 'This application has already been reviewed.' };
+  }
 
-  // Advisors can only review core_team_application and alumni_verification
   const isDirector = ctx!.role === 'director';
   if (!isDirector && !['core_team_application', 'alumni_verification'].includes(app.application_type)) {
     return { ok: false, error: 'Advisors can only review Core Team and Alumni Verification applications.' };
   }
-  if (app.application_type === 'advisor_application') {
+  if (isDirector || app.application_type === 'advisor_application') {
     const mfaErr = requireDirectorMfa(ctx);
     if (mfaErr) return { ok: false, error: mfaErr.message };
   }
 
-  const { error: updateErr } = await client
-    .from('applications')
-    .update({
-      status: decision,
-      reviewed_by: ctx!.id,
-      reviewed_at: new Date().toISOString(),
-      review_note: note.trim(),
-    })
-    .eq('id', applicationId);
+  const admin = createAdminClient();
+  const { error: rpcErr } = await admin.rpc('process_application_review', {
+    p_application_id: applicationId,
+    p_reviewer_id: ctx!.id,
+    p_decision: decision,
+    p_note: note.trim(),
+  });
 
-  if (updateErr) return { ok: false, error: updateErr.message };
-
-  // If approved, create the org membership (via service-role to bypass RLS)
-  if (decision === 'approved') {
-    const roleMap: Record<string, AppRole> = {
-      core_team_application: 'core_team',
-      alumni_verification: 'alumni',
-      advisor_application: 'advisor',
-    };
-    const grantedRole = roleMap[app.application_type];
-    if (grantedRole) {
-      const { createAdminClient } = await import('../auth/authorization');
-      const admin = createAdminClient();
-      await admin.from('org_memberships').insert({
-        user_id: app.applicant_id,
-        role: grantedRole,
-        status: 'approved',
-        reviewed_by: ctx!.id,
-        reviewed_at: new Date().toISOString(),
-        effective_from: new Date().toISOString().slice(0, 10),
-      });
-
-      await admin.from('audit_log').insert({
-        actor_id: ctx!.id,
-        event: 'role_granted',
-        target_id: app.applicant_id,
-        target_type: 'org_membership',
-        detail: { role: grantedRole, application_id: applicationId, decision },
-      });
-    }
-  }
-
+  if (rpcErr) return { ok: false, error: rpcErr.message };
   return { ok: true };
 }
 
@@ -153,12 +119,15 @@ export async function nominateForPromotion(
   const ctx = await getUserContext();
   const authErr = requireRole(ctx, 'advisor');
   if (authErr) return { ok: false, error: authErr.message };
+  if (ctx!.role === 'director') {
+    const mfaErr = requireDirectorMfa(ctx);
+    if (mfaErr) return { ok: false, error: mfaErr.message };
+  }
   if (nomineeId === ctx!.id) return { ok: false, error: 'You cannot nominate yourself.' };
 
   const client = await createSessionClient();
   if (!client) return { ok: false, error: 'Service unavailable.' };
 
-  // Verify nominee is an approved Core Team member
   const { data: membership } = await client
     .from('org_memberships')
     .select('id')
@@ -166,7 +135,7 @@ export async function nominateForPromotion(
     .eq('role', 'core_team')
     .eq('status', 'approved')
     .is('effective_until', null)
-    .single();
+    .maybeSingle();
 
   if (!membership) return { ok: false, error: 'Nominee must be an approved active Core Team member.' };
 
@@ -183,7 +152,7 @@ export async function nominateForPromotion(
 }
 
 // ---------------------------------------------------------------------------
-// Director approves a promotion nomination
+// Director approves/rejects a promotion nomination atomically via RPC
 // ---------------------------------------------------------------------------
 
 export async function approvePromotion(
@@ -195,83 +164,20 @@ export async function approvePromotion(
   const authErr = requireDirectorMfa(ctx);
   if (authErr) return { ok: false, error: authErr.message };
 
-  const client = await createSessionClient();
-  if (!client) return { ok: false, error: 'Service unavailable.' };
+  const admin = createAdminClient();
+  const { error: rpcErr } = await admin.rpc('process_promotion_approval', {
+    p_application_id: applicationId,
+    p_director_id: ctx!.id,
+    p_decision: decision,
+    p_note: note.trim(),
+  });
 
-  const { data: app } = await client
-    .from('applications')
-    .select('id, applicant_id, nominee_id, application_type, status, reviewed_at')
-    .eq('id', applicationId)
-    .eq('application_type', 'promotion_nomination')
-    .single();
-
-  if (!app) return { ok: false, error: 'Nomination not found.' };
-  if (app.reviewed_at) return { ok: false, error: 'Already reviewed.' };
-  if (!app.nominee_id) return { ok: false, error: 'Nominee ID is missing.' };
-
-  const { error: updateErr } = await client
-    .from('applications')
-    .update({
-      status: decision,
-      reviewed_by: ctx!.id,
-      reviewed_at: new Date().toISOString(),
-      review_note: note.trim(),
-    })
-    .eq('id', applicationId);
-
-  if (updateErr) return { ok: false, error: updateErr.message };
-
-  if (decision === 'approved') {
-    const { createAdminClient } = await import('../auth/authorization');
-    const admin = createAdminClient();
-
-    // Deactivate existing core_team membership
-    await admin
-      .from('org_memberships')
-      .update({ status: 'departed', effective_until: new Date().toISOString().slice(0, 10) })
-      .eq('user_id', app.nominee_id)
-      .eq('role', 'core_team')
-      .eq('status', 'approved');
-
-    // Grant Advisor membership
-    await admin.from('org_memberships').insert({
-      user_id: app.nominee_id,
-      role: 'advisor',
-      status: 'approved',
-      reviewed_by: ctx!.id,
-      reviewed_at: new Date().toISOString(),
-      effective_from: new Date().toISOString().slice(0, 10),
-    });
-
-    await admin.from('audit_log').insert({
-      actor_id: ctx!.id,
-      event: 'promotion_approved',
-      target_id: app.nominee_id,
-      target_type: 'org_membership',
-      detail: {
-        from_role: 'core_team',
-        to_role: 'advisor',
-        nominated_by: app.applicant_id,
-        application_id: applicationId,
-      },
-    });
-  } else {
-    const { createAdminClient } = await import('../auth/authorization');
-    const admin = createAdminClient();
-    await admin.from('audit_log').insert({
-      actor_id: ctx!.id,
-      event: 'promotion_rejected',
-      target_id: app.nominee_id,
-      target_type: 'application',
-      detail: { application_id: applicationId, reason: note },
-    });
-  }
-
+  if (rpcErr) return { ok: false, error: rpcErr.message };
   return { ok: true };
 }
 
 // ---------------------------------------------------------------------------
-// Director revokes a membership (suspend or mark departed)
+// Director revokes a membership atomically via RPC
 // ---------------------------------------------------------------------------
 
 export async function revokeMembership(
@@ -282,32 +188,18 @@ export async function revokeMembership(
   const ctx = await getUserContext();
   const authErr = requireDirectorMfa(ctx);
   if (authErr) return { ok: false, error: authErr.message };
-  if (targetUserId === ctx!.id) return { ok: false, error: 'The Director cannot revoke their own membership this way.' };
+  if (targetUserId === ctx!.id) {
+    return { ok: false, error: 'The Director cannot revoke their own membership this way.' };
+  }
 
-  const { createAdminClient } = await import('../auth/authorization');
   const admin = createAdminClient();
-
-  const { data, error } = await admin
-    .from('org_memberships')
-    .update({
-      status: newStatus,
-      effective_until: new Date().toISOString().slice(0, 10),
-      handover_note: reason,
-    })
-    .eq('user_id', targetUserId)
-    .eq('status', 'approved')
-    .select();
-
-  if (error) return { ok: false, error: error.message };
-  if (!data || data.length === 0) return { ok: false, error: 'No active membership found for this user.' };
-
-  await admin.from('audit_log').insert({
-    actor_id: ctx!.id,
-    event: newStatus === 'suspended' ? 'membership_suspended' : 'membership_departed',
-    target_id: targetUserId,
-    target_type: 'org_membership',
-    detail: { reason, affected_records: data.length },
+  const { error: rpcErr } = await admin.rpc('process_membership_revocation', {
+    p_target_user_id: targetUserId,
+    p_director_id: ctx!.id,
+    p_new_status: newStatus,
+    p_reason: reason.trim(),
   });
 
+  if (rpcErr) return { ok: false, error: rpcErr.message };
   return { ok: true };
 }

@@ -23,6 +23,7 @@ export default function ProfilePage() {
   const [supabase] = useState(() => createClient());
   const [profile, setProfile] = useState<Profile>(EMPTY);
   const [userId, setUserId] = useState<string | null>(null);
+  const [canManageDisplay, setCanManageDisplay] = useState(false);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
@@ -33,12 +34,16 @@ export default function ProfilePage() {
     supabase.auth.getUser().then(async ({ data, error }) => {
       if (error || !data.user) { setLoading(false); return; }
       setUserId(data.user.id);
-      const { data: p } = await supabase
-        .from('profiles')
-        .select('full_name,phone,bio,designation,linkedin_url,college,enrollment_no,is_public')
-        .eq('id', data.user.id)
-        .single();
+      const [{ data: p }, { data: roleData }] = await Promise.all([
+        supabase
+          .from('profiles')
+          .select('full_name,phone,bio,designation,linkedin_url,college,enrollment_no,is_public')
+          .eq('id', data.user.id)
+          .single(),
+        supabase.rpc('get_user_role', { user_uuid: data.user.id }),
+      ]);
       if (p) setProfile(p as Profile);
+      setCanManageDisplay(roleData === 'advisor' || roleData === 'director');
       setLoading(false);
     });
   }, [supabase]);
@@ -57,18 +62,21 @@ export default function ProfilePage() {
       if (profile.linkedin_url && !/^https?:\/\//i.test(profile.linkedin_url)) {
         throw new Error('LinkedIn URL must start with https://');
       }
+      const payload: Record<string, unknown> = {
+        full_name: profile.full_name.trim(),
+        phone: profile.phone.trim() || null,
+        bio: profile.bio.trim() || null,
+        linkedin_url: profile.linkedin_url.trim() || null,
+        college: profile.college.trim() || null,
+        enrollment_no: profile.enrollment_no.trim() || null,
+      };
+      if (canManageDisplay) {
+        payload.designation = profile.designation.trim() || null;
+        payload.is_public = profile.is_public;
+      }
       const { error } = await supabase
         .from('profiles')
-        .update({
-          full_name: profile.full_name.trim(),
-          phone: profile.phone.trim() || null,
-          bio: profile.bio.trim() || null,
-          designation: profile.designation.trim() || null,
-          linkedin_url: profile.linkedin_url.trim() || null,
-          college: profile.college.trim() || null,
-          enrollment_no: profile.enrollment_no.trim() || null,
-          is_public: profile.is_public,
-        })
+        .update(payload)
         .eq('id', userId);
       if (error) throw error;
       setMessage('Profile saved successfully.');

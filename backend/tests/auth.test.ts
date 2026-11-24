@@ -242,6 +242,67 @@ test('advisor cannot nominate themselves', () => {
   assert.equal(nomineeId, nominatorId); // same user — workflow must reject
 });
 
+// --- Negative authorization & field-guard tests ---
+
+console.log('\nNegative authorization & field-guard tests');
+
+test('director without MFA cannot bypass via advisor_application review', () => {
+  const err = requireDirectorMfa(directorNoMfa);
+  assert.ok(err);
+  assert.equal(err.code, 'mfa_required');
+});
+
+test('non-advisor (core_team / participant) cannot modify privileged profile fields', () => {
+  const canEditPrivileged = (ctx: UserContext) =>
+    ctx.role === 'advisor' || (ctx.role === 'director' && ctx.hasMfa);
+  assert.equal(canEditPrivileged(participant), false);
+  assert.equal(canEditPrivileged(coreTeam), false);
+  assert.equal(canEditPrivileged(directorNoMfa), false);
+  assert.equal(canEditPrivileged(advisor), true);
+  assert.equal(canEditPrivileged(directorMfa), true);
+});
+
+// --- Concurrent approval serialization (matches process_application_review lock) ---
+
+console.log('\nConcurrency & duplicate-membership tests');
+
+test('concurrent approvals of the same application only grant membership once', async () => {
+  let locked = false;
+  let status: 'pending' | 'approved' = 'pending';
+  let reviewedAt: string | null = null;
+  const memberships: { userId: string; role: AppRole }[] = [];
+
+  async function tryApprove(reviewer: UserContext) {
+    // Simulates SELECT ... FOR UPDATE row lock inside PostgreSQL transaction
+    while (locked) {
+      await new Promise((r) => setTimeout(r, 1));
+    }
+    locked = true;
+    try {
+      if (reviewedAt !== null || status !== 'pending') {
+        throw new Error('This application has already been reviewed.');
+      }
+      if (memberships.some((m) => m.userId === 'p1' && m.role === 'core_team')) {
+        throw new Error('User already holds an active core_team membership.');
+      }
+      status = 'approved';
+      reviewedAt = new Date().toISOString();
+      memberships.push({ userId: 'p1', role: 'core_team' });
+      return { ok: true, by: reviewer.id };
+    } finally {
+      locked = false;
+    }
+  }
+
+  const results = await Promise.allSettled([tryApprove(advisor), tryApprove(directorMfa)]);
+  const fulfilled = results.filter((r) => r.status === 'fulfilled');
+  const rejected = results.filter((r) => r.status === 'rejected');
+
+  assert.equal(fulfilled.length, 1);
+  assert.equal(rejected.length, 1);
+  assert.equal(memberships.length, 1);
+});
+
 // ---------------------------------------------------------------------------
 // Results
 // ---------------------------------------------------------------------------

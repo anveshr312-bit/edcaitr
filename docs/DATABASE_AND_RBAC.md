@@ -218,6 +218,8 @@ Run migrations **in order** in the Supabase SQL Editor (or via `supabase db push
 backend/migrations/001_profiles_and_roles.sql   ← Tables, enums, triggers, helper functions
 backend/migrations/002_rls_policies.sql          ← All RLS policies
 backend/migrations/003_director_bootstrap.sql    ← Director bootstrap (edit UUID first)
+backend/migrations/004_director_mfa_rls.sql      ← DB-level aal2 MFA enforcement for Director
+backend/migrations/005_hardening_rls_and_rpcs.sql ← Public profile isolation, field guard trigger, atomic RPCs
 ```
 
 > **Important:** Migrations 001 and 002 are idempotent-safe if run once. Migration 003 has guards to prevent double-bootstrapping.

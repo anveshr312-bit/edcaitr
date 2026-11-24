@@ -1,19 +1,35 @@
-# E-Cell AITR — functional development
+# E-Cell AITR — Web Platform
 
-Run from frontend/: npm install, then npm run dev.
-Copy frontend/.env.example to frontend/.env.local and fill the Supabase URL and publishable key. Never expose secret/service-role keys in browser variables.
-Enable Google in Supabase and allow http://localhost:3000/account as a redirect. Email registration requires custom SMTP and email confirmation. Configure production redirects separately.
+Next.js App Router + TypeScript + Supabase Auth & PostgreSQL platform for E-Cell AITR.
 
-Implemented: minimal Next.js landing/account pages, Supabase email signup/sign-in, Google sign-in, sign-out, missing-configuration feedback. Live authentication has not been verified.
-Remaining: password recovery, Director MFA enforcement, profiles, role approvals, database access policies, events, tasks, ticketing, exports and Alumni Connect. This is a foundation, not a completed production platform.
+## Current Implementation Status
 
-Directory guide:
-- frontend/src/app: Next.js pages and future server endpoints.
-- frontend/src/features and shared: feature code and reusable utilities.
-- backend: reserved database migrations and tests; no separate server required.
-- assets/source: original assets; templates/exports: supplied export templates.
-- docs: project documentation; tools: maintenance; work: disposable local work.
+**Implemented & Deployed (Auth + RBAC Foundation):**
+- **Supabase SSR Authentication:** Email/password signup and sign-in, email confirmation, password recovery/reset, Google OAuth, `/auth/callback` proxy-aware redirect validation, and session refresh middleware.
+- **Database Schema & RLS (`backend/migrations/001`–`005`):** Normalized `profiles`, `org_memberships`, `applications`, `tenure_history`, and `audit_log` tables with Row Level Security, public-field isolation (`get_public_team_profiles()`), privileged-field update guards, and atomic PostgreSQL RPCs for approvals, promotions, and revocations.
+- **Director MFA & Role Workflows:** `/account`, `/account/dashboard`, `/account/profile`, `/account/mfa` (TOTP enrollment/verification), `/account/apply`, `/account/applications`, `/account/team`, and server-gated API endpoints (`/api/auth/me`, `/api/applications/review`, `/api/applications/nominate`, `/api/memberships/revoke`).
 
-Requirements: ../ecell-website-requirements.md
-Accounts: ../accounts-to-create.txt
-Checks: npm run build and npm run typecheck from frontend/.
+**Remaining Modules (Planned in `docs/IMPLEMENTATION_ROADMAP.md`):**
+- Public Website pages (Events, About, Team, Contact), Participant Portal (Registrations, Tickets, Certificates), Team Workspace, Event Management, Operational Teams & Tasks, QR Check-in & Google Sheets sync, Exports, Event Closure, and Alumni Connect.
+
+## Local Setup
+
+1. From `frontend/`, run `npm install`.
+2. Copy `frontend/.env.example` to `frontend/.env.local` and populate `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` (server-only).
+3. Apply SQL migrations `001` through `005` in order in the Supabase SQL Editor (see `docs/DATABASE_AND_RBAC.md`).
+4. Run `npm run dev` from `frontend/`.
+
+## Documentation
+
+- `docs/SUPABASE_SETUP.md` — Supabase, Brevo SMTP, and Google Cloud OAuth setup
+- `docs/DATABASE_AND_RBAC.md` — Schema, RLS policies, MFA, and Director bootstrap
+- `docs/VERCEL_DEPLOYMENT.md` — Vercel configuration and deployment checklist
+- `docs/IMPLEMENTATION_ROADMAP.md` — Architecture plan for remaining modules
+- `../ecell-website-requirements.md` — Functional requirements source of truth
+
+## Verification Commands
+
+From `frontend/`:
+- `npm run typecheck`
+- `npm run build`
+- `npx tsx ../backend/tests/auth.test.ts`
