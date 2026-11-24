@@ -303,6 +303,29 @@ test('concurrent approvals of the same application only grant membership once', 
   assert.equal(memberships.length, 1);
 });
 
+// --- Phase 1: Event & Media authorization guards ---
+
+console.log('\nPhase 1: Event & Media authorization guards');
+
+test('only core_team or above can create events or sign event media uploads', () => {
+  assert.ok(requireRole(participant, 'core_team'));
+  assert.ok(requireRole(alumni, 'core_team'));
+  assert.equal(requireRole(coreTeam, 'core_team'), null);
+  assert.equal(requireRole(advisor, 'core_team'), null);
+  assert.equal(requireRole(directorMfa, 'core_team'), null);
+});
+
+test('non-SPOC core_team member cannot manage another event', () => {
+  const canManageEvent = (ctx: UserContext, spocIds: string[]) =>
+    roleRank(ctx.role) >= roleRank('advisor') ||
+    (ctx.role === 'core_team' && spocIds.includes(ctx.id));
+
+  assert.equal(canManageEvent(coreTeam, ['other-spoc-id']), false);
+  assert.equal(canManageEvent(coreTeam, [coreTeam.id]), true);
+  assert.equal(canManageEvent(advisor, ['other-spoc-id']), true);
+  assert.equal(canManageEvent(participant, [participant.id]), false);
+});
+
 // ---------------------------------------------------------------------------
 // Results
 // ---------------------------------------------------------------------------

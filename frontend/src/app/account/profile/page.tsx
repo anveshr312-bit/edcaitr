@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from 'react';
 import { createClient } from '../../../lib/supabase/client';
+import ImageUploadField from '../../../components/ImageUploadField';
 
 interface Profile {
   full_name: string;
@@ -9,6 +10,7 @@ interface Profile {
   bio: string;
   designation: string;
   linkedin_url: string;
+  avatar_ref: string;
   college: string;
   enrollment_no: string;
   is_public: boolean;
@@ -16,7 +18,7 @@ interface Profile {
 
 const EMPTY: Profile = {
   full_name: '', phone: '', bio: '', designation: '',
-  linkedin_url: '', college: '', enrollment_no: '', is_public: false,
+  linkedin_url: '', avatar_ref: '', college: '', enrollment_no: '', is_public: false,
 };
 
 export default function ProfilePage() {
@@ -37,7 +39,7 @@ export default function ProfilePage() {
       const [{ data: p }, { data: roleData }] = await Promise.all([
         supabase
           .from('profiles')
-          .select('full_name,phone,bio,designation,linkedin_url,college,enrollment_no,is_public')
+          .select('full_name,phone,bio,designation,linkedin_url,avatar_ref,college,enrollment_no,is_public')
           .eq('id', data.user.id)
           .single(),
         supabase.rpc('get_user_role', { user_uuid: data.user.id }),
@@ -67,6 +69,7 @@ export default function ProfilePage() {
         phone: profile.phone.trim() || null,
         bio: profile.bio.trim() || null,
         linkedin_url: profile.linkedin_url.trim() || null,
+        avatar_ref: profile.avatar_ref.trim() || null,
         college: profile.college.trim() || null,
         enrollment_no: profile.enrollment_no.trim() || null,
       };
@@ -153,6 +156,13 @@ export default function ProfilePage() {
             placeholder="https://linkedin.com/in/yourprofile"
           />
         </label>
+
+        <ImageUploadField
+          label="Profile Photo"
+          folder="avatars"
+          value={profile.avatar_ref ?? ''}
+          onChange={(val) => setProfile(prev => ({ ...prev, avatar_ref: val }))}
+        />
 
         <label>
           Short bio
