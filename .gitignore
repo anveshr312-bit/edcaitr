@@ -1,0 +1,24 @@
+# Local secrets and environment configuration
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Dependencies and generated output
+node_modules/
+dist/
+build/
+target/
+coverage/
+.next/
+.venv/
+__pycache__/
+*.pyc
+*.log
+
+# Temporary project files and local exports
+/work/
+
+# Operating system files
+.DS_Store
+Thumbs.db
