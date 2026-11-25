@@ -22,9 +22,9 @@
   --success: #15803d;
   --danger: #b91c1c;
 
-  --radius-panel: 16px;
-  --radius-card: 12px;
-  --radius-control: 8px;
+  --radius-panel: 9px;
+  --radius-card: 9px;
+  --radius-control: 9px;
   --radius-tag: 4px;
 }
 

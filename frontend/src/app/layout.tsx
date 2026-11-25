@@ -70,46 +70,46 @@ export default function Layout({ children }: { children: ReactNode }) {
 
         <main>{children}</main>
 
-        <footer style={{ background: 'var(--color-2-mood)', color: 'var(--color-1-mood)', padding: '56px clamp(16px, 4vw, 48px) 36px', marginTop: 80, borderTop: '1px solid rgba(251,249,245,0.1)' }}>
+        <footer style={{ background: 'var(--surface-subtle)', color: 'var(--text-primary)', padding: '56px clamp(16px, 4vw, 48px) 36px', marginTop: 80, borderTop: '1px solid var(--border-hairline)' }}>
           <div style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 40, marginBottom: 48 }}>
             {/* Col 1: Brand & College */}
             <div>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/edc-logo-dark.png"
+                src="/edc-logo-light.webp"
                 alt="EDC AITR"
                 width={140}
                 height={48}
                 style={{ height: 38, width: 'auto', objectFit: 'contain', display: 'block', marginBottom: 16 }}
               />
-              <p style={{ margin: 0, fontSize: 13, color: 'rgba(251,249,245,0.65)', lineHeight: 1.65 }}>
+              <p style={{ margin: 0, fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.65 }}>
                 Entrepreneurship Development Cell &amp; AIIH Foundation at Acropolis Institute of Technology and Research (AITR), Indore.
               </p>
-              <p style={{ margin: '12px 0 0', fontSize: 12, color: 'rgba(251,249,245,0.45)', lineHeight: 1.5 }}>
+              <p style={{ margin: '12px 0 0', fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5 }}>
                 Bypass Road, Manglia Square, Indore, Madhya Pradesh 453771
               </p>
             </div>
 
             {/* Col 2: Navigation */}
             <div>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(251,249,245,0.4)', marginBottom: 16 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 16 }}>
                 Explore
               </div>
               <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 10, fontSize: 14 }}>
-                <li><Link href="/" style={{ color: 'rgba(251,249,245,0.75)', textDecoration: 'none' }}>Home</Link></li>
-                <li><Link href="/events" style={{ color: 'rgba(251,249,245,0.75)', textDecoration: 'none' }}>Events &amp; E-Summit</Link></li>
-                <li><Link href="/team" style={{ color: 'rgba(251,249,245,0.75)', textDecoration: 'none' }}>Leadership &amp; Coordinators</Link></li>
-                <li><Link href="/about" style={{ color: 'rgba(251,249,245,0.75)', textDecoration: 'none' }}>About EDC &amp; 12 Teams</Link></li>
-                <li><Link href="/contact" style={{ color: 'rgba(251,249,245,0.75)', textDecoration: 'none' }}>Contact &amp; Partnerships</Link></li>
+                <li><Link href="/" style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>Home</Link></li>
+                <li><Link href="/events" style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>Events &amp; E-Summit</Link></li>
+                <li><Link href="/team" style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>Leadership &amp; Coordinators</Link></li>
+                <li><Link href="/about" style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>About EDC &amp; 12 Teams</Link></li>
+                <li><Link href="/contact" style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>Contact &amp; Partnerships</Link></li>
               </ul>
             </div>
 
             {/* Col 3: Student Leads */}
             <div>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(251,249,245,0.4)', marginBottom: 16 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 16 }}>
                 Coordinators
               </div>
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 10, fontSize: 13, color: 'rgba(251,249,245,0.75)' }}>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 10, fontSize: 13, color: 'var(--text-secondary)' }}>
                 <li><strong>Kavyansh Singh Rajput</strong> · +91 8839988997</li>
                 <li><strong>Pradhyumn Mehta</strong> · +91 8770527096</li>
                 <li><strong>Ishaan Dadoo</strong> · +91 6232400399</li>
@@ -119,17 +119,17 @@ export default function Layout({ children }: { children: ReactNode }) {
 
             {/* Col 4: Community & Reach */}
             <div>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(251,249,245,0.4)', marginBottom: 16 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 16 }}>
                 Community &amp; Reach
               </div>
-              <p style={{ margin: '0 0 14px', fontSize: 13, color: 'rgba(251,249,245,0.65)', lineHeight: 1.6 }}>
+              <p style={{ margin: '0 0 14px', fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
                 Central India&apos;s leading student innovation hub with <strong>2 Lakh+ audience reach</strong> and bus networks across Indore, Dewas, Ujjain, and Maksi.
               </p>
               <a
                 href="https://www.instagram.com/edc_acropolis"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 16px', background: 'var(--color-3-accent-personality)', color: '#fff', borderRadius: 6, textDecoration: 'none', fontSize: 13, fontWeight: 600 }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 16px', background: 'var(--color-3-accent-personality)', color: '#fff', borderRadius: 'var(--radius-control)', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
@@ -141,7 +141,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             </div>
           </div>
 
-          <div style={{ maxWidth: 1100, margin: '0 auto', paddingTop: 24, borderTop: '1px solid rgba(251,249,245,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, fontSize: 12, color: 'rgba(251,249,245,0.4)' }}>
+          <div style={{ maxWidth: 1100, margin: '0 auto', paddingTop: 24, borderTop: '1px solid var(--border-hairline)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, fontSize: 12, color: 'var(--text-muted)' }}>
             <div>
               &copy; {new Date().getFullYear()} Entrepreneurship Development Cell (EDC), AITR. All rights reserved.
             </div>

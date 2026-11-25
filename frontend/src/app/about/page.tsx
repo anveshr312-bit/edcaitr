@@ -37,17 +37,20 @@ export default function AboutPage() {
   ];
 
   return (
-    <div style={{ display: 'grid', gap: 64 }}>
-      {/* Header Band */}
-      <section style={{ background: 'var(--color-2-mood)', color: 'var(--color-1-mood)', padding: '56px clamp(16px,4vw,48px)', marginLeft: -24, marginRight: -24, marginTop: -24 }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <p style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(251,249,245,0.4)', margin: '0 0 10px' }}>
-            Acropolis Group of Institutions
-          </p>
-          <h1 style={{ margin: '0 0 16px', fontSize: 'clamp(2rem,4vw,3.2rem)', fontWeight: 800, lineHeight: 1.1 }}>
+    <div style={{ display: 'grid', gap: 56 }}>
+      {/* Light Header Band */}
+      <section className="card" style={{ background: 'var(--surface)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--radius-panel)', padding: 'clamp(32px, 4vw, 48px)', margin: 0 }}>
+        <div style={{ maxWidth: 1100 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 10px', borderRadius: 4, background: 'var(--accent-tint)', border: '1px solid rgba(224,72,38,0.2)', marginBottom: 12 }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-3-accent-personality)' }} />
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--color-3-accent-personality)' }}>
+              Acropolis Group of Institutions
+            </span>
+          </div>
+          <h1 style={{ margin: '0 0 12px', fontSize: 'clamp(1.8rem, 3.2vw, 2.6rem)', fontWeight: 800, lineHeight: 1.15, color: 'var(--text-primary)' }}>
             About EDC AITR
           </h1>
-          <p style={{ margin: 0, color: 'rgba(251,249,245,0.7)', fontSize: 16, maxWidth: 640, lineHeight: 1.65 }}>
+          <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 15, maxWidth: 640, lineHeight: 1.65 }}>
             The Entrepreneurship Development Cell (EDC) &amp; AIIH Foundation at Acropolis Institute of Technology and Research, Indore.
           </p>
         </div>

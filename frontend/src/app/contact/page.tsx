@@ -67,17 +67,20 @@ export default function ContactPage() {
   }
 
   return (
-    <div style={{ display: 'grid', gap: 64 }}>
-      {/* Header Band */}
-      <section style={{ background: 'var(--color-2-mood)', color: 'var(--color-1-mood)', padding: '56px clamp(16px,4vw,48px)', marginLeft: -24, marginRight: -24, marginTop: -24 }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <p style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(251,249,245,0.4)', margin: '0 0 10px' }}>
-            Get in Touch
-          </p>
-          <h1 style={{ margin: '0 0 16px', fontSize: 'clamp(2rem,4vw,3.2rem)', fontWeight: 800, lineHeight: 1.1 }}>
+    <div style={{ display: 'grid', gap: 56 }}>
+      {/* Light Header Band */}
+      <section className="card" style={{ background: 'var(--surface)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--radius-panel)', padding: 'clamp(32px, 4vw, 48px)', margin: 0 }}>
+        <div style={{ maxWidth: 1100 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 10px', borderRadius: 4, background: 'var(--accent-tint)', border: '1px solid rgba(224,72,38,0.2)', marginBottom: 12 }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-3-accent-personality)' }} />
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--color-3-accent-personality)' }}>
+              Get in Touch
+            </span>
+          </div>
+          <h1 style={{ margin: '0 0 12px', fontSize: 'clamp(1.8rem, 3.2vw, 2.6rem)', fontWeight: 800, lineHeight: 1.15, color: 'var(--text-primary)' }}>
             Contact &amp; Partnerships
           </h1>
-          <p style={{ margin: 0, color: 'rgba(251,249,245,0.7)', fontSize: 16, maxWidth: 640, lineHeight: 1.65 }}>
+          <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 15, maxWidth: 640, lineHeight: 1.65 }}>
             Partner with E-Summit 2026, sponsor an event track, inquire about startup pitching, or connect with our student coordinators.
           </p>
         </div>
@@ -172,16 +175,16 @@ export default function ContactPage() {
         {/* Sidebar: Direct Contacts & Campus Information */}
         <aside style={{ display: 'grid', gap: 20 }}>
           {/* Instagram Community Card */}
-          <div className="card" style={{ padding: '24px', background: 'var(--color-2-mood)', color: '#fff' }}>
+          <div className="card" style={{ padding: '24px', background: 'var(--surface)', border: '1px solid var(--border-hairline)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-3-accent-personality)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
                 <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
                 <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
               </svg>
-              <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: '#fff' }}>Official Instagram</h3>
+              <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>Official Instagram</h3>
             </div>
-            <p style={{ margin: '0 0 14px', fontSize: 13, color: 'rgba(251,249,245,0.7)', lineHeight: 1.55 }}>
+            <p style={{ margin: '0 0 14px', fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.55 }}>
               Follow our daily summit reveals, behind-the-scenes preparation, and speaker updates.
             </p>
             <a

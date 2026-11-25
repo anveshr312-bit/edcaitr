@@ -61,17 +61,20 @@ export default async function TeamPage() {
   const groups: ('director' | 'advisor' | 'core_team')[] = ['director', 'advisor', 'core_team'];
 
   return (
-    <div style={{ display: 'grid', gap: 64 }}>
-      {/* Header Band */}
-      <section style={{ background: 'var(--color-2-mood)', color: 'var(--color-1-mood)', padding: '56px clamp(16px,4vw,48px)', marginLeft: -24, marginRight: -24, marginTop: -24 }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <p style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(251,249,245,0.4)', margin: '0 0 10px' }}>
-            EDC AITR &amp; AIIH Foundation
-          </p>
-          <h1 style={{ margin: '0 0 16px', fontSize: 'clamp(2rem,4vw,3.2rem)', fontWeight: 800, lineHeight: 1.1 }}>
+    <div style={{ display: 'grid', gap: 56 }}>
+      {/* Light Header Band */}
+      <section className="card" style={{ background: 'var(--surface)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--radius-panel)', padding: 'clamp(32px, 4vw, 48px)', margin: 0 }}>
+        <div style={{ maxWidth: 1100 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 10px', borderRadius: 4, background: 'var(--accent-tint)', border: '1px solid rgba(224,72,38,0.2)', marginBottom: 12 }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-3-accent-personality)' }} />
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--color-3-accent-personality)' }}>
+              EDC AITR &amp; AIIH Foundation
+            </span>
+          </div>
+          <h1 style={{ margin: '0 0 12px', fontSize: 'clamp(1.8rem, 3.2vw, 2.6rem)', fontWeight: 800, lineHeight: 1.15, color: 'var(--text-primary)' }}>
             Leadership &amp; Execution Team
           </h1>
-          <p style={{ margin: 0, color: 'rgba(251,249,245,0.7)', fontSize: 16, maxWidth: 640, lineHeight: 1.65 }}>
+          <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 15, maxWidth: 640, lineHeight: 1.65 }}>
             Meet the student coordinators, faculty advisors, and 12 operational teams driving the entrepreneurship movement at Acropolis Institute of Technology and Research.
           </p>
         </div>
@@ -91,7 +94,7 @@ export default async function TeamPage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20 }}>
           {SUMMIT_COORDINATORS.map((c) => (
             <article key={c.name} className="card" style={{ padding: '24px' }}>
-              <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--color-2-mood)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '1.2rem', marginBottom: 14 }}>
+              <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--accent-tint)', color: 'var(--color-3-accent-personality)', border: '1px solid rgba(224,72,38,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '1.2rem', marginBottom: 14 }}>
                 {c.name.charAt(0)}
               </div>
               <h3 style={{ margin: '0 0 4px', fontSize: '1.1rem', fontWeight: 700 }}>{c.name}</h3>
@@ -225,7 +228,7 @@ export default async function TeamPage() {
       )}
 
       {/* Join Call to Action */}
-      <section style={{ maxWidth: 1100, margin: '0 auto', width: '100%', textAlign: 'center', background: 'var(--surface-subtle)', padding: '48px 24px', borderRadius: 8, border: '1px solid var(--border-hairline)' }}>
+      <section style={{ maxWidth: 1100, margin: '0 auto', width: '100%', textAlign: 'center', background: 'var(--surface-subtle)', padding: '48px 24px', borderRadius: 'var(--radius-panel)', border: '1px solid var(--border-hairline)' }}>
         <h2 style={{ margin: '0 0 12px', fontSize: '1.6rem', fontWeight: 800 }}>
           Want to Lead at EDC AITR?
         </h2>

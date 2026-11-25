@@ -59,7 +59,7 @@ export default async function HomePage() {
     { code: 'CLIX', name: 'CLIX (Photo & Media)', desc: 'Official event photography, session documentation & reels.' },
     { code: 'GUEST', name: 'Guest Relations', desc: 'Hospitality, transport & protocol for keynote speakers.' },
     { code: 'DOCS', name: 'Documentation', desc: 'Reports, official MoUs, post-event analytics & compliance.' },
-    { code: 'ANCHORING', name: 'Anchoring', desc: 'Emcees, stage hosting & session moderation.' },
+    { code: 'ANCHORING', name: 'Anchoring', desc: 'Emcees, stage hosts & session moderation.' },
     { code: 'DESIGN', name: 'Design & Visual Identity', desc: 'Banners, stage backdrops, passes & digital collateral.' },
     { code: 'VIDEO', name: 'Video Production', desc: 'Recap films, live broadcasts & promo campaigns.' },
     { code: 'SOCIAL', name: 'Social Media & Outreach', desc: 'Real-time coverage on @edc_acropolis & viral engagement.' },
@@ -67,41 +67,41 @@ export default async function HomePage() {
 
   return (
     <div style={{ display: 'grid', gap: 64 }}>
-      {/* Hero Section — Inspired by Modulify Metric */}
-      <section style={{ background: 'var(--color-2-mood)', color: 'var(--color-1-mood)', padding: 'clamp(56px,8vw,96px) clamp(16px,4vw,48px)', marginLeft: -24, marginRight: -24, marginTop: -24 }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: 'minmax(0,1.5fr) minmax(260px,1fr)', gap: 48, alignItems: 'center' }}>
+      {/* Light Hero Section — Metric Structure with Warm Studio Aesthetic */}
+      <section className="card" style={{ padding: 'clamp(36px, 5vw, 56px)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--radius-panel)', background: 'var(--surface)', margin: 0 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(260px, 1fr)', gap: 40, alignItems: 'center' }}>
           <div>
             {/* Live Flagship Badge */}
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '6px 14px', borderRadius: 32, background: 'rgba(224,72,38,0.12)', border: '1px solid rgba(224,72,38,0.3)', marginBottom: 20 }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-3-accent-personality)', display: 'inline-block', boxShadow: '0 0 10px var(--color-3-accent-personality)' }} />
-              <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--color-3-accent-personality)' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 12px', borderRadius: 32, background: 'var(--accent-tint)', border: '1px solid rgba(224,72,38,0.2)', marginBottom: 18 }}>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-3-accent-personality)', display: 'inline-block' }} />
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--color-3-accent-personality)' }}>
                 18th – 20th March 2026 · AITR Indore
               </span>
             </div>
 
-            <h1 style={{ margin: '0 0 20px', fontSize: 'clamp(2.2rem,4.5vw,3.6rem)', fontWeight: 800, lineHeight: 1.08, letterSpacing: '-0.02em' }}>
+            <h1 style={{ margin: '0 0 16px', fontSize: 'clamp(2rem, 3.8vw, 3.2rem)', fontWeight: 800, lineHeight: 1.1, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
               FOKUS X E-SUMMIT 2026
             </h1>
-            <p style={{ margin: '0 0 16px', fontSize: 'clamp(1.1rem,1.8vw,1.35rem)', color: 'rgba(251,249,245,0.9)', fontWeight: 600, lineHeight: 1.4 }}>
+            <p style={{ margin: '0 0 12px', fontSize: 'clamp(1.05rem, 1.5vw, 1.25rem)', color: 'var(--text-primary)', fontWeight: 600, lineHeight: 1.4 }}>
               Central India&apos;s Flagship Student Entrepreneurship &amp; Venture Conclave.
             </p>
-            <p style={{ margin: '0 0 32px', fontSize: 15, color: 'rgba(251,249,245,0.68)', lineHeight: 1.7, maxWidth: 540 }}>
-              Presented by the Entrepreneurship Development Cell (EDC) &amp; AIIH Foundation at Acropolis Group of Institutions. Bridging the gap between academia and industry through pitching, mentor circles, and high-impact keynotes.
+            <p style={{ margin: '0 0 28px', fontSize: 15, color: 'var(--text-secondary)', lineHeight: 1.7, maxWidth: 520 }}>
+              Presented by the Entrepreneurship Development Cell (EDC) &amp; AIIH Foundation at Acropolis Group of Institutions. Bridging academia and industry through live pitching, mentor circles, and high-impact keynotes.
             </p>
 
-            <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'center' }}>
-              <Link href="/events" className="btn btn-primary" style={{ fontSize: 15, padding: '13px 30px' }}>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+              <Link href="/events" className="btn btn-primary" style={{ fontSize: 14, padding: '12px 26px' }}>
                 Explore Events &amp; Passes
               </Link>
-              <Link href="/contact" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 15, color: 'rgba(251,249,245,0.85)', textDecoration: 'none', padding: '12px 18px', border: '1px solid rgba(251,249,245,0.2)', borderRadius: 6 }}>
+              <Link href="/contact" className="btn" style={{ fontSize: 14, padding: '12px 20px' }}>
                 Sponsor &amp; Partner
               </Link>
             </div>
           </div>
 
-          {/* Institutional Reach Ledger */}
-          <aside style={{ borderLeft: '1px solid rgba(251,249,245,0.12)', paddingLeft: 'clamp(24px, 4vw, 44px)' }}>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(251,249,245,0.4)', marginBottom: 12 }}>
+          {/* Institutional Reach Ledger — Light Surface with Dark Badges */}
+          <aside style={{ background: 'var(--surface-subtle)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--radius-card)', padding: '24px 28px' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 14, borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 8 }}>
               Ecosystem Snapshot
             </div>
             {[
@@ -111,33 +111,33 @@ export default async function HomePage() {
               { label: 'Past Investors & Angels', value: '15+' },
               { label: 'Regional Bus Transit', value: '4 Cities' },
             ].map(({ label, value }) => (
-              <div key={label} style={{ padding: '14px 0', borderBottom: '1px solid rgba(251,249,245,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 16 }}>
-                <span style={{ fontSize: 13, color: 'rgba(251,249,245,0.5)', letterSpacing: '0.02em' }}>{label}</span>
-                <span style={{ fontSize: '1.6rem', fontWeight: 800, color: '#fff', fontVariantNumeric: 'tabular-nums' }}>{value}</span>
+              <div key={label} style={{ padding: '12px 0', borderBottom: '1px solid var(--border-hairline)', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 16 }}>
+                <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{label}</span>
+                <span style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>{value}</span>
               </div>
             ))}
           </aside>
         </div>
       </section>
 
-      {/* Flagship Activities — The Metric Layout */}
+      {/* Flagship Activities — The Metric Bento Layout */}
       <section style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
-        <div style={{ marginBottom: 32 }}>
-          <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)', margin: '0 0 10px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
+        <div style={{ marginBottom: 28 }}>
+          <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)', margin: '0 0 8px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
             What You Can Expect
           </h2>
-          <div style={{ fontSize: 'clamp(1.5rem, 2.8vw, 2.2rem)', fontWeight: 800, letterSpacing: '-0.01em' }}>
+          <div style={{ fontSize: 'clamp(1.5rem, 2.6vw, 2.1rem)', fontWeight: 800 }}>
             Flagship Activities at E-Summit
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 18 }}>
           {SUMMIT_TRACKS.map((t) => (
-            <article key={t.title} className="card" style={{ display: 'flex', flexDirection: 'column', padding: '28px 24px' }}>
+            <article key={t.title} className="card" style={{ display: 'flex', flexDirection: 'column', padding: '26px 22px' }}>
               <span className="badge badge-accent" style={{ width: 'fit-content', marginBottom: 12 }}>
                 {t.badge}
               </span>
-              <h3 style={{ margin: '0 0 10px', fontSize: '1.15rem', fontWeight: 700 }}>{t.title}</h3>
+              <h3 style={{ margin: '0 0 10px', fontSize: '1.1rem', fontWeight: 700 }}>{t.title}</h3>
               <p style={{ margin: 0, fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.65 }}>
                 {t.desc}
               </p>
@@ -148,12 +148,12 @@ export default async function HomePage() {
 
       {/* Past Keynote Speakers & Luminaries */}
       <section style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 28, flexWrap: 'wrap', gap: 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
           <div>
             <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)', margin: '0 0 8px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
               Eminent Voices
             </h2>
-            <div style={{ fontSize: 'clamp(1.5rem, 2.8vw, 2.2rem)', fontWeight: 800 }}>
+            <div style={{ fontSize: 'clamp(1.5rem, 2.6vw, 2.1rem)', fontWeight: 800 }}>
               Past Keynotes &amp; Industry Leaders
             </div>
           </div>
@@ -163,11 +163,11 @@ export default async function HomePage() {
           </span>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 18 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
           {PAST_SPEAKERS.map((s) => (
-            <div key={s.name} className="card" style={{ padding: '22px' }}>
+            <div key={s.name} className="card" style={{ padding: '20px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
-                <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--color-2-mood)', color: 'var(--color-1-mood)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '1.1rem' }}>
+                <div style={{ width: 42, height: 42, borderRadius: 'var(--radius-control)', background: 'var(--surface-subtle)', border: '1px solid var(--border-hairline)', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '1.05rem' }}>
                   {s.name.charAt(0)}
                 </div>
                 <span className="mono-meta" style={{ fontSize: 11, background: 'var(--accent-tint)', color: 'var(--color-3-accent-personality)', padding: '3px 8px', borderRadius: 4, fontWeight: 600 }}>
@@ -185,20 +185,20 @@ export default async function HomePage() {
 
       {/* Past Mega Events Showcase */}
       <section style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
-        <div style={{ marginBottom: 28 }}>
+        <div style={{ marginBottom: 24 }}>
           <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)', margin: '0 0 8px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
             Legacy &amp; Footprint
           </h2>
-          <div style={{ fontSize: 'clamp(1.5rem, 2.8vw, 2.2rem)', fontWeight: 800 }}>
+          <div style={{ fontSize: 'clamp(1.5rem, 2.6vw, 2.1rem)', fontWeight: 800 }}>
             Past Mega Events at Acropolis
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 18 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
           {PAST_MEGA_EVENTS.map((ev) => (
-            <div key={ev.title} className="card" style={{ padding: '24px' }}>
-              <span className="badge" style={{ marginBottom: 10 }}>Flagship Record</span>
-              <h3 style={{ margin: '0 0 6px', fontSize: '1.1rem', fontWeight: 700 }}>{ev.title}</h3>
+            <div key={ev.title} className="card" style={{ padding: '22px' }}>
+              <span className="badge" style={{ marginBottom: 8 }}>Flagship Record</span>
+              <h3 style={{ margin: '0 0 6px', fontSize: '1.05rem', fontWeight: 700 }}>{ev.title}</h3>
               <p style={{ margin: 0, fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
                 {ev.desc}
               </p>
@@ -209,28 +209,28 @@ export default async function HomePage() {
 
       {/* 12 Operational Teams Showcase */}
       <section style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
-        <div style={{ marginBottom: 28 }}>
+        <div style={{ marginBottom: 24 }}>
           <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)', margin: '0 0 8px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
             Student Execution Engine
           </h2>
-          <div style={{ fontSize: 'clamp(1.5rem, 2.8vw, 2.2rem)', fontWeight: 800 }}>
+          <div style={{ fontSize: 'clamp(1.5rem, 2.6vw, 2.1rem)', fontWeight: 800 }}>
             The 12 Operational Teams
           </div>
-          <p style={{ color: 'var(--text-secondary)', margin: '8px 0 0', maxWidth: 600 }}>
-            Every summit and campus initiative is powered by student-led operational teams with verified responsibilities and measurable outcomes.
+          <p style={{ color: 'var(--text-secondary)', margin: '8px 0 0', maxWidth: 600, fontSize: 14 }}>
+            Every summit and campus initiative is powered by student-led operational teams with verified responsibilities under the Director and faculty advisors.
           </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
           {OPERATIONAL_TEAMS.map((t) => (
-            <div key={t.code} className="card" style={{ padding: '18px 20px' }}>
+            <div key={t.code} className="card" style={{ padding: '16px 18px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, color: 'var(--color-3-accent-personality)', background: 'var(--accent-tint)', padding: '2px 6px', borderRadius: 4 }}>
                   {t.code}
                 </span>
                 <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>{t.name}</h3>
               </div>
-              <p style={{ margin: 0, fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.55 }}>
+              <p style={{ margin: 0, fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
                 {t.desc}
               </p>
             </div>
@@ -273,33 +273,33 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* Community & Instagram Banner */}
-      <section style={{ background: 'var(--color-2-mood)', color: 'var(--color-1-mood)', padding: '56px clamp(16px,4vw,48px)', marginLeft: -24, marginRight: -24, textAlign: 'center' }}>
-        <p style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(251,249,245,0.4)', marginBottom: 12 }}>
+      {/* Light Community & Instagram Banner */}
+      <section className="card" style={{ background: 'var(--surface)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--radius-panel)', padding: '48px clamp(16px, 4vw, 40px)', textAlign: 'center', margin: 0 }}>
+        <p style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 10 }}>
           Stay in the Loop
         </p>
-        <h2 style={{ margin: '0 auto 16px', fontSize: 'clamp(1.6rem,3vw,2.4rem)', fontWeight: 800, maxWidth: 600, lineHeight: 1.15 }}>
+        <h2 style={{ margin: '0 auto 12px', fontSize: 'clamp(1.5rem, 2.6vw, 2.2rem)', fontWeight: 800, maxWidth: 600, lineHeight: 1.2 }}>
           Join the EDC AITR Community on Instagram
         </h2>
-        <p style={{ margin: '0 auto 28px', maxWidth: 520, color: 'rgba(251,249,245,0.68)', fontSize: 15, lineHeight: 1.65 }}>
+        <p style={{ margin: '0 auto 24px', maxWidth: 520, color: 'var(--text-secondary)', fontSize: 15, lineHeight: 1.65 }}>
           Real-time updates, speaker reveals, hackathon announcements, and backstage moments from the 12 operational teams.
         </p>
-        <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
           <a
             href="https://www.instagram.com/edc_acropolis"
             target="_blank"
             rel="noopener noreferrer"
             className="btn btn-primary"
-            style={{ fontSize: 15, padding: '12px 28px', display: 'inline-flex', alignItems: 'center', gap: 8 }}
+            style={{ fontSize: 14, padding: '10px 24px', display: 'inline-flex', alignItems: 'center', gap: 8 }}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
               <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
               <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
             </svg>
             Follow @edc_acropolis
           </a>
-          <Link href="/account" className="btn" style={{ fontSize: 15, padding: '12px 24px', background: 'rgba(251,249,245,0.1)', color: 'var(--color-1-mood)', borderColor: 'rgba(251,249,245,0.2)' }}>
+          <Link href="/account" className="btn" style={{ fontSize: 14, padding: '10px 20px' }}>
             Create Account
           </Link>
         </div>
