@@ -142,36 +142,35 @@ export default function Account() {
 
   return (
     <div style={{ maxWidth: 440, margin: '40px auto', padding: '0 16px' }}>
-      <div className="card" style={{ padding: '32px 28px', boxShadow: '0 8px 30px rgba(17,19,24,0.06)' }}>
+      <div className="card" style={{ padding: '32px 28px', border: '1px solid var(--border-hairline)', borderRadius: 'var(--radius-panel)', background: 'var(--surface)' }}>
         {/* Brand Header */}
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/edc-logo-light.png"
+            src="/edc-logo-light.webp"
             alt="EDC AITR Logo"
-            style={{ height: 42, width: 'auto', margin: '0 auto 12px', display: 'block' }}
+            style={{ height: 40, width: 'auto', margin: '0 auto 12px', display: 'block' }}
           />
-          <h1 style={{ fontSize: '1.4rem', fontWeight: 700, margin: '0 0 6px', color: '#111318' }}>
+          <h1 style={{ fontSize: '1.35rem', fontWeight: 700, margin: '0 0 6px', color: 'var(--text-primary)' }}>
             EDC AITR Portal
           </h1>
-          <p style={{ fontSize: '0.875rem', color: '#686D7A', margin: 0 }}>
+          <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', margin: 0 }}>
             Entrepreneurship Development Cell · AITR
           </p>
         </div>
 
         {/* Tab switch between Sign In and Sign Up */}
         {mode !== 'forgot_password' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, background: '#f0ece2', padding: 4, borderRadius: 8, marginBottom: 20 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, background: 'var(--surface-subtle)', padding: 4, borderRadius: 'var(--radius-control)', marginBottom: 20, border: '1px solid var(--border-hairline)' }}>
             <button
               type="button"
               onClick={() => { setMode('signin'); setMessage(''); }}
               style={{
-                background: mode === 'signin' ? '#ffffff' : 'transparent',
-                color: mode === 'signin' ? '#111318' : '#686D7A',
+                background: mode === 'signin' ? 'var(--surface)' : 'transparent',
+                color: mode === 'signin' ? 'var(--text-primary)' : 'var(--text-muted)',
                 fontWeight: mode === 'signin' ? 600 : 500,
-                boxShadow: mode === 'signin' ? '0 2px 6px rgba(0,0,0,0.06)' : 'none',
-                border: 'none',
-                borderRadius: 6,
+                border: mode === 'signin' ? '1px solid var(--border-hairline)' : '1px solid transparent',
+                borderRadius: 'var(--radius-control)',
                 padding: '8px 12px',
                 fontSize: '0.875rem',
                 cursor: 'pointer',
@@ -183,12 +182,11 @@ export default function Account() {
               type="button"
               onClick={() => { setMode('signup'); setMessage(''); }}
               style={{
-                background: mode === 'signup' ? '#ffffff' : 'transparent',
-                color: mode === 'signup' ? '#111318' : '#686D7A',
+                background: mode === 'signup' ? 'var(--surface)' : 'transparent',
+                color: mode === 'signup' ? 'var(--text-primary)' : 'var(--text-muted)',
                 fontWeight: mode === 'signup' ? 600 : 500,
-                boxShadow: mode === 'signup' ? '0 2px 6px rgba(0,0,0,0.06)' : 'none',
-                border: 'none',
-                borderRadius: 6,
+                border: mode === 'signup' ? '1px solid var(--border-hairline)' : '1px solid transparent',
+                borderRadius: 'var(--radius-control)',
                 padding: '8px 12px',
                 fontSize: '0.875rem',
                 cursor: 'pointer',

@@ -31,17 +31,30 @@ export default async function ParticipantPortalPage() {
 
   return (
     <>
-      {/* Dark header */}
-      <div style={{ background: 'var(--color-2-mood)', color: 'var(--color-1-mood)', padding: '40px 36px', marginLeft: -24, marginRight: -24, marginTop: -24 }}>
-        <p style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(251,249,245,0.4)', margin: '0 0 10px' }}>EDC AITR</p>
-        <h1 style={{ margin: '0 0 12px', fontSize: 'clamp(1.5rem,3vw,2.2rem)', fontWeight: 800, lineHeight: 1.1 }}>Participant Portal</h1>
-        <p style={{ margin: '0 0 24px', color: 'rgba(251,249,245,0.65)', fontSize: 15, maxWidth: 540 }}>
-          Your event registrations, QR tickets, certificates, and announcements.
+      {/* Light header card */}
+      <div className="card" style={{ background: 'var(--surface)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--radius-panel)', padding: 'clamp(24px, 3.5vw, 36px)', margin: 0 }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 10px', borderRadius: 'var(--radius-control)', background: 'var(--accent-tint)', border: '1px solid rgba(224,72,38,0.2)', marginBottom: 10 }}>
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-3-accent-personality)' }} />
+          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-3-accent-personality)' }}>
+            Participant Portal
+          </span>
+        </div>
+        <h1 style={{ margin: '0 0 8px', fontSize: 'clamp(1.5rem, 2.8vw, 2.2rem)', fontWeight: 700, lineHeight: 1.15, color: 'var(--text-primary)' }}>
+          Participant Portal
+        </h1>
+        <p style={{ margin: '0 0 20px', color: 'var(--text-secondary)', fontSize: 14, maxWidth: 540, lineHeight: 1.6 }}>
+          Your event registrations, QR admission passes, verified certificates, and official announcements.
         </p>
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          <Link href="/portal/registrations" className="btn btn-primary" style={{ fontSize: 14 }}>Your Registrations</Link>
-          <Link href="/portal/certificates" className="btn" style={{ fontSize: 14, background: 'rgba(251,249,245,0.1)', color: 'var(--color-1-mood)', borderColor: 'rgba(251,249,245,0.2)' }}>Certificates</Link>
-          <Link href="/portal/announcements" className="btn" style={{ fontSize: 14, background: 'rgba(251,249,245,0.1)', color: 'var(--color-1-mood)', borderColor: 'rgba(251,249,245,0.2)' }}>Announcements</Link>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <Link href="/portal/registrations" className="btn btn-primary" style={{ fontSize: 13 }}>
+            Your Registrations
+          </Link>
+          <Link href="/portal/certificates" className="btn" style={{ fontSize: 13 }}>
+            Certificates
+          </Link>
+          <Link href="/portal/announcements" className="btn" style={{ fontSize: 13 }}>
+            Announcements
+          </Link>
         </div>
       </div>
 
@@ -64,7 +77,7 @@ export default async function ParticipantPortalPage() {
       {/* Recent registrations */}
       <section style={{ marginTop: 40 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16, gap: 12 }}>
-          <h2 style={{ margin: 0, fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
+          <h2 style={{ margin: 0, fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.02em', color: 'var(--text-muted)', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
             Recent Registrations
           </h2>
           <Link href="/portal/registrations" style={{ fontSize: 13, color: 'var(--color-3-accent-personality)', textDecoration: 'none', fontWeight: 600 }}>View all →</Link>
@@ -108,7 +121,7 @@ export default async function ParticipantPortalPage() {
       {announcements && announcements.length > 0 && (
         <section style={{ marginTop: 40 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16, gap: 12 }}>
-            <h2 style={{ margin: 0, fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
+            <h2 style={{ margin: 0, fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.02em', color: 'var(--text-muted)', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
               Recent Announcements
             </h2>
             <Link href="/portal/announcements" style={{ fontSize: 13, color: 'var(--color-3-accent-personality)', textDecoration: 'none', fontWeight: 600 }}>All →</Link>
@@ -133,7 +146,7 @@ export default async function ParticipantPortalPage() {
       {events.length > 0 && (
         <section style={{ marginTop: 40 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16, gap: 12 }}>
-            <h2 style={{ margin: 0, fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)', borderLeft: '3px solid var(--border-hairline)', paddingLeft: 12 }}>
+            <h2 style={{ margin: 0, fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.02em', color: 'var(--text-muted)', borderLeft: '3px solid var(--border-hairline)', paddingLeft: 12 }}>
               Explore Events
             </h2>
             <Link href="/events" style={{ fontSize: 13, color: 'var(--text-muted)', textDecoration: 'none' }}>All events →</Link>

@@ -67,7 +67,7 @@ export default async function TeamPage() {
         <div style={{ maxWidth: 1100 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 10px', borderRadius: 4, background: 'var(--accent-tint)', border: '1px solid rgba(224,72,38,0.2)', marginBottom: 12 }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-3-accent-personality)' }} />
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--color-3-accent-personality)' }}>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.02em', color: 'var(--color-3-accent-personality)' }}>
               EDC AITR &amp; AIIH Foundation
             </span>
           </div>
@@ -83,7 +83,7 @@ export default async function TeamPage() {
       {/* Flagship Coordinators (Brochure verified) */}
       <section style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
         <div style={{ marginBottom: 28 }}>
-          <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)', margin: '0 0 8px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
+          <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.02em', color: 'var(--text-muted)', margin: '0 0 8px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
             Central Leadership
           </h2>
           <div style={{ fontSize: 'clamp(1.5rem, 2.8vw, 2.2rem)', fontWeight: 800 }}>
@@ -118,7 +118,7 @@ export default async function TeamPage() {
             if (members.length === 0) return null;
             return (
               <div key={roleKey} style={{ marginBottom: 40 }}>
-                <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)', margin: '0 0 20px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
+                <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.02em', color: 'var(--text-muted)', margin: '0 0 20px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
                   {ROLE_TITLES[roleKey]}
                 </h2>
                 <div className="grid">
@@ -176,7 +176,7 @@ export default async function TeamPage() {
       {/* 12 Operational Units Reference */}
       <section style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
         <div style={{ marginBottom: 28 }}>
-          <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)', margin: '0 0 8px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
+          <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.02em', color: 'var(--text-muted)', margin: '0 0 8px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
             Operational Hierarchy
           </h2>
           <div style={{ fontSize: 'clamp(1.5rem, 2.8vw, 2.2rem)', fontWeight: 800 }}>
@@ -208,7 +208,7 @@ export default async function TeamPage() {
       {pastTeam && pastTeam.length > 0 && (
         <section style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
           <div style={{ marginBottom: 20 }}>
-            <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)', margin: '0 0 8px', borderLeft: '3px solid var(--border-hairline)', paddingLeft: 12 }}>
+            <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.02em', color: 'var(--text-muted)', margin: '0 0 8px', borderLeft: '3px solid var(--border-hairline)', paddingLeft: 12 }}>
               Alumni Roster
             </h2>
             <div style={{ fontSize: 'clamp(1.3rem, 2.5vw, 1.8rem)', fontWeight: 800 }}>

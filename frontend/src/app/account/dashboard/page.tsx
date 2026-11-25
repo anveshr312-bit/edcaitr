@@ -86,23 +86,22 @@ export default async function DashboardPage() {
   const displayName = profile?.full_name || user.email?.split('@')[0] || 'User';
 
   return (
-    <div style={{ maxWidth: 1040, margin: '0 auto', paddingBottom: 60 }}>
-      {/* Executive User Header Banner */}
+    <div style={{ maxWidth: 1040, margin: '0 auto', paddingBottom: 60, display: 'grid', gap: 28 }}>
+      {/* Executive User Header Card */}
       <section
         className="card"
         style={{
-          background: '#111318',
-          color: '#FBF9F5',
-          border: '1px solid #222631',
-          padding: '28px 32px',
-          marginBottom: 28,
-          borderRadius: 16,
+          background: 'var(--surface)',
+          border: '1px solid var(--border-hairline)',
+          padding: 'clamp(24px, 3.5vw, 36px)',
+          borderRadius: 'var(--radius-panel)',
+          margin: 0,
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 8 }}>
-              <span className={roleMeta.badgeClass} style={{ fontSize: '0.75rem', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 10 }}>
+              <span className={roleMeta.badgeClass} style={{ fontSize: '0.75rem', letterSpacing: '0.04em' }}>
                 {roleMeta.label}
               </span>
               {isDirector && (
@@ -110,22 +109,23 @@ export default async function DashboardPage() {
                   style={{
                     fontSize: '0.75rem',
                     padding: '2px 8px',
-                    borderRadius: 4,
-                    background: hasMfa ? 'rgba(34,197,94,0.15)' : 'rgba(224,72,38,0.2)',
-                    color: hasMfa ? '#4ade80' : '#f87171',
-                    border: `1px solid ${hasMfa ? 'rgba(34,197,94,0.3)' : 'rgba(224,72,38,0.4)'}`,
+                    borderRadius: 'var(--radius-control)',
+                    background: hasMfa ? 'rgba(34,197,94,0.1)' : 'rgba(224,72,38,0.1)',
+                    color: hasMfa ? 'var(--success)' : 'var(--color-3-accent-personality)',
+                    border: `1px solid ${hasMfa ? 'rgba(34,197,94,0.25)' : 'rgba(224,72,38,0.25)'}`,
+                    fontWeight: 600,
                   }}
                 >
-                  {hasMfa ? '✓ MFA Session Verified' : isMfaEnrolled ? '⚠ MFA Verification Required' : '⚠ MFA Setup Needed'}
+                  {hasMfa ? 'MFA verified' : isMfaEnrolled ? 'MFA verification required' : 'MFA setup needed'}
                 </span>
               )}
             </div>
 
-            <h1 style={{ fontSize: '1.75rem', margin: '0 0 6px', color: '#FBF9F5', letterSpacing: '-0.02em' }}>
-              Welcome back, {displayName}
+            <h1 style={{ fontSize: 'clamp(1.5rem, 2.5vw, 2rem)', margin: '0 0 6px', fontWeight: 700, color: 'var(--text-primary)' }}>
+              {displayName}
             </h1>
-            <p style={{ color: '#9CA3AF', margin: 0, fontSize: '0.875rem' }}>
-              Signed in as <strong style={{ color: '#F3F4F6' }}>{user.email}</strong>
+            <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.875rem' }}>
+              Signed in as <strong style={{ color: 'var(--text-primary)' }}>{user.email}</strong>
               {membership?.effective_from && ` · Member since ${membership.effective_from}`}
             </p>
           </div>
@@ -134,30 +134,20 @@ export default async function DashboardPage() {
             <Link
               href="/account/profile"
               className="btn"
-              style={{
-                background: 'rgba(255,255,255,0.08)',
-                color: '#FBF9F5',
-                border: '1px solid rgba(255,255,255,0.15)',
-                fontSize: '0.85rem',
-              }}
+              style={{ fontSize: '0.85rem' }}
             >
               Edit Profile
             </Link>
-            <form action="/auth/callback" method="GET" style={{ margin: 0 }}>
-              {/* Signout trigger */}
-              <Link
-                href="/account"
-                className="btn"
-                style={{
-                  background: 'transparent',
-                  color: '#9CA3AF',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  fontSize: '0.85rem',
-                }}
-              >
-                Sign Out
-              </Link>
-            </form>
+            <Link
+              href="/account"
+              className="btn"
+              style={{
+                fontSize: '0.85rem',
+                color: 'var(--text-muted)',
+              }}
+            >
+              Sign Out
+            </Link>
           </div>
         </div>
       </section>
@@ -167,23 +157,23 @@ export default async function DashboardPage() {
         <section
           className="card"
           style={{
-            borderColor: '#E04826',
-            background: '#FFF5F3',
-            marginBottom: 24,
-            padding: '20px 24px',
+            borderColor: 'rgba(224,72,38,0.25)',
+            background: 'var(--accent-tint)',
+            padding: '18px 24px',
+            margin: 0,
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
             <div>
-              <strong style={{ color: '#991B1B', fontSize: '0.95rem' }}>
+              <strong style={{ color: 'var(--color-3-accent-personality)', fontSize: '0.95rem' }}>
                 Director Authenticator (TOTP) MFA Required
               </strong>
-              <p style={{ margin: '4px 0 0', fontSize: '0.875rem', color: '#7F1D1D' }}>
+              <p style={{ margin: '4px 0 0', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
                 Director-gated administrative actions require multi-factor authentication to be enrolled and verified each session.
               </p>
             </div>
             <Link href="/account/mfa" className="btn btn-primary" style={{ fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
-              Configure MFA Now →
+              Configure MFA →
             </Link>
           </div>
         </section>
@@ -194,18 +184,18 @@ export default async function DashboardPage() {
         <section
           className="card"
           style={{
-            borderColor: '#3B82F6',
-            background: '#EFF6FF',
-            marginBottom: 24,
+            borderColor: 'var(--border-hairline)',
+            background: 'var(--surface-subtle)',
             padding: '18px 24px',
+            margin: 0,
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
             <div>
-              <strong style={{ color: '#1E40AF', fontSize: '0.95rem' }}>
+              <strong style={{ fontSize: '0.95rem', color: 'var(--text-primary)' }}>
                 {pendingCount} Pending Recruitment Application{pendingCount > 1 ? 's' : ''}
               </strong>
-              <p style={{ margin: '4px 0 0', fontSize: '0.875rem', color: '#1E3A8A' }}>
+              <p style={{ margin: '4px 0 0', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
                 Candidates have applied for cell roles and are awaiting review and approval.
               </p>
             </div>
@@ -217,175 +207,210 @@ export default async function DashboardPage() {
       )}
 
       {/* Main Command Hub Grid */}
-      <h2 style={{ fontSize: '1.25rem', marginBottom: 16, color: '#111318' }}>
-        Organization Modules &amp; Services
-      </h2>
+      <section>
+        <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: '0 0 16px', color: 'var(--text-primary)' }}>
+          Organization Modules &amp; Services
+        </h2>
 
-      <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
-        {/* Module 1: Participant Portal & Passes */}
-        <article className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-          <div>
-            <div style={{ fontSize: '1.5rem', marginBottom: 8 }}>🎟️</div>
-            <h3 style={{ margin: '0 0 6px', fontSize: '1.1rem' }}>
-              Participant Portal &amp; Passes
-            </h3>
-            <p className="card-meta" style={{ margin: 0, lineHeight: 1.45 }}>
-              Access your registered events, download PVR-style admission QR tickets, view attendance check-ins, and claim event certificates.
-            </p>
-          </div>
-          <div style={{ marginTop: 20, paddingTop: 14, borderTop: '1px solid var(--border-hairline)' }}>
-            <Link href="/portal" className="btn btn-primary" style={{ width: '100%', textAlign: 'center' }}>
-              Open Participant Portal →
-            </Link>
-          </div>
-        </article>
-
-        {/* Module 2: Alumni Connect */}
-        {['director', 'advisor', 'core_team', 'alumni'].includes(role) && (
+        <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
+          {/* Module 1: Participant Portal & Passes */}
           <article className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div>
-              <div style={{ fontSize: '1.5rem', marginBottom: 8 }}>🌐</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                <h3 style={{ margin: 0, fontSize: '1.1rem' }}>Alumni Connect</h3>
-                <span className="badge badge-accent" style={{ fontSize: '0.7rem' }}>Private</span>
+              <div style={{ width: 36, height: 36, borderRadius: 'var(--radius-control)', background: 'var(--surface-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-3-accent-personality)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>
+                  <path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/>
+                </svg>
               </div>
-              <p className="card-meta" style={{ margin: 0, lineHeight: 1.45 }}>
-                Private networking directory across batches, founder startup showcases, internship and co-founder opportunities, and inbox.
-              </p>
-            </div>
-            <div style={{ marginTop: 20, paddingTop: 14, borderTop: '1px solid var(--border-hairline)' }}>
-              <Link href="/alumni" className="btn" style={{ width: '100%', textAlign: 'center' }}>
-                Enter Alumni Network →
-              </Link>
-            </div>
-          </article>
-        )}
-
-        {/* Module 3: Event Workspace (My Event Work) */}
-        {['core_team', 'advisor', 'director'].includes(role) && (
-          <article className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <div>
-              <div style={{ fontSize: '1.5rem', marginBottom: 8 }}>📋</div>
-              <h3 style={{ margin: '0 0 6px', fontSize: '1.1rem' }}>
-                My Event Work (Workspace)
+              <h3 style={{ margin: '0 0 6px', fontSize: '1.05rem', fontWeight: 700 }}>
+                Participant Portal &amp; Passes
               </h3>
-              <p className="card-meta" style={{ margin: 0, lineHeight: 1.45 }}>
-                View your assigned operational tasks across the 12 confirmed teams (RD Check-in, AV, Logistics, Stage, Clix, and more).
+              <p className="card-meta" style={{ margin: 0, lineHeight: 1.5 }}>
+                Access registered events, download admission QR passes, view check-in status, and claim verified credentials.
               </p>
             </div>
             <div style={{ marginTop: 20, paddingTop: 14, borderTop: '1px solid var(--border-hairline)' }}>
-              <Link href="/workspace" className="btn" style={{ width: '100%', textAlign: 'center' }}>
-                Open Workspace Tasks →
+              <Link href="/portal" className="btn btn-primary" style={{ width: '100%', textAlign: 'center' }}>
+                Open Participant Portal →
               </Link>
             </div>
           </article>
-        )}
 
-        {/* Module 4: Event Management & Closure */}
-        {['core_team', 'advisor', 'director'].includes(role) && (
-          <article className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <div>
-              <div style={{ fontSize: '1.5rem', marginBottom: 8 }}>⚡</div>
-              <h3 style={{ margin: '0 0 6px', fontSize: '1.1rem' }}>
-                Event Management
-              </h3>
-              <p className="card-meta" style={{ margin: 0, lineHeight: 1.45 }}>
-                Create new events, assign SPOCs and operational teams, upload pre-event manuals, publish highlights, and issue digital certificates.
-              </p>
-            </div>
-            <div style={{ marginTop: 20, paddingTop: 14, borderTop: '1px solid var(--border-hairline)' }}>
-              <Link href="/workspace/events" className="btn" style={{ width: '100%', textAlign: 'center' }}>
-                Manage Events →
-              </Link>
-            </div>
-          </article>
-        )}
-
-        {/* Module 5: Application Review (Advisors & Directors) */}
-        {(role === 'advisor' || role === 'director') && (
-          <article className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <div>
-              <div style={{ fontSize: '1.5rem', marginBottom: 8 }}>📝</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                <h3 style={{ margin: 0, fontSize: '1.1rem' }}>Recruitment Applications</h3>
-                {pendingCount > 0 && (
-                  <span className="badge badge-accent" style={{ fontSize: '0.7rem' }}>
-                    {pendingCount} Pending
-                  </span>
-                )}
+          {/* Module 2: Alumni Connect */}
+          {['director', 'advisor', 'core_team', 'alumni'].includes(role) && (
+            <article className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <div>
+                <div style={{ width: 36, height: 36, borderRadius: 'var(--radius-control)', background: 'var(--surface-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-3-accent-personality)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                  </svg>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                  <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700 }}>Alumni Connect</h3>
+                  <span className="badge badge-accent" style={{ fontSize: '0.7rem' }}>Private</span>
+                </div>
+                <p className="card-meta" style={{ margin: 0, lineHeight: 1.5 }}>
+                  Private networking directory across batches, founder startup showcases, internship and co-founder opportunities, and inbox.
+                </p>
               </div>
-              <p className="card-meta" style={{ margin: 0, lineHeight: 1.45 }}>
-                Review candidate applications submitted for Core Team recruitment and Advisor nominations with audit-trail verification.
-              </p>
-            </div>
-            <div style={{ marginTop: 20, paddingTop: 14, borderTop: '1px solid var(--border-hairline)' }}>
-              <Link href="/account/applications" className="btn" style={{ width: '100%', textAlign: 'center' }}>
-                Review Applications →
-              </Link>
-            </div>
-          </article>
-        )}
+              <div style={{ marginTop: 20, paddingTop: 14, borderTop: '1px solid var(--border-hairline)' }}>
+                <Link href="/alumni" className="btn" style={{ width: '100%', textAlign: 'center' }}>
+                  Enter Alumni Network →
+                </Link>
+              </div>
+            </article>
+          )}
 
-        {/* Module 6: Team & Tenure Roster */}
-        {(role === 'advisor' || role === 'director') && (
-          <article className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <div>
-              <div style={{ fontSize: '1.5rem', marginBottom: 8 }}>🛡️</div>
-              <h3 style={{ margin: '0 0 6px', fontSize: '1.1rem' }}>
-                Team &amp; Tenure Management
-              </h3>
-              <p className="card-meta" style={{ margin: 0, lineHeight: 1.45 }}>
-                Inspect the full organizational roster, manage executive tenures, grant promotions, and review public team visibility.
-              </p>
-            </div>
-            <div style={{ marginTop: 20, paddingTop: 14, borderTop: '1px solid var(--border-hairline)' }}>
-              <Link href="/account/team" className="btn" style={{ width: '100%', textAlign: 'center' }}>
-                Manage Team Roster →
-              </Link>
-            </div>
-          </article>
-        )}
+          {/* Module 3: Event Workspace (My Event Work) */}
+          {['core_team', 'advisor', 'director'].includes(role) && (
+            <article className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <div>
+                <div style={{ width: 36, height: 36, borderRadius: 'var(--radius-control)', background: 'var(--surface-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-3-accent-personality)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/>
+                  </svg>
+                </div>
+                <h3 style={{ margin: '0 0 6px', fontSize: '1.05rem', fontWeight: 700 }}>
+                  My Event Work
+                </h3>
+                <p className="card-meta" style={{ margin: 0, lineHeight: 1.5 }}>
+                  View assigned operational tasks across the 12 confirmed teams (RD, AV, Logistics, Stage, Clix, and more).
+                </p>
+              </div>
+              <div style={{ marginTop: 20, paddingTop: 14, borderTop: '1px solid var(--border-hairline)' }}>
+                <Link href="/workspace" className="btn" style={{ width: '100%', textAlign: 'center' }}>
+                  Open Workspace Tasks →
+                </Link>
+              </div>
+            </article>
+          )}
 
-        {/* Module 7: MFA Settings (Director) */}
-        {isDirector && (
-          <article className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <div>
-              <div style={{ fontSize: '1.5rem', marginBottom: 8 }}>🔐</div>
-              <h3 style={{ margin: '0 0 6px', fontSize: '1.1rem' }}>
-                Director MFA Security
-              </h3>
-              <p className="card-meta" style={{ margin: 0, lineHeight: 1.45 }}>
-                Configure and verify your Time-based One-Time Password (TOTP) authenticator required for Director-level authorizations.
-              </p>
-            </div>
-            <div style={{ marginTop: 20, paddingTop: 14, borderTop: '1px solid var(--border-hairline)' }}>
-              <Link href="/account/mfa" className="btn" style={{ width: '100%', textAlign: 'center' }}>
-                Configure Authenticator →
-              </Link>
-            </div>
-          </article>
-        )}
+          {/* Module 4: Event Management & Closure */}
+          {['core_team', 'advisor', 'director'].includes(role) && (
+            <article className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <div>
+                <div style={{ width: 36, height: 36, borderRadius: 'var(--radius-control)', background: 'var(--surface-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-3-accent-personality)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                  </svg>
+                </div>
+                <h3 style={{ margin: '0 0 6px', fontSize: '1.05rem', fontWeight: 700 }}>
+                  Event Management
+                </h3>
+                <p className="card-meta" style={{ margin: 0, lineHeight: 1.5 }}>
+                  Create new events, assign SPOCs and operational teams, upload pre-event manuals, publish highlights, and issue digital certificates.
+                </p>
+              </div>
+              <div style={{ marginTop: 20, paddingTop: 14, borderTop: '1px solid var(--border-hairline)' }}>
+                <Link href="/workspace/events" className="btn" style={{ width: '100%', textAlign: 'center' }}>
+                  Manage Events →
+                </Link>
+              </div>
+            </article>
+          )}
 
-        {/* Module 8: Role Application (Participants only) */}
-        {!isDirector && !membership && (
-          <article className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <div>
-              <div style={{ fontSize: '1.5rem', marginBottom: 8 }}>🚀</div>
-              <h3 style={{ margin: '0 0 6px', fontSize: '1.1rem' }}>
-                Join the EDC AITR Team
-              </h3>
-              <p className="card-meta" style={{ margin: 0, lineHeight: 1.45 }}>
-                Apply to join the Entrepreneurship Development Cell Core Team for operational roles across logistics, media, and tech.
-              </p>
-            </div>
-            <div style={{ marginTop: 20, paddingTop: 14, borderTop: '1px solid var(--border-hairline)' }}>
-              <Link href="/account/apply" className="btn btn-primary" style={{ width: '100%', textAlign: 'center' }}>
-                Submit Application →
-              </Link>
-            </div>
-          </article>
-        )}
-      </div>
+          {/* Module 5: Application Review (Advisors & Directors) */}
+          {(role === 'advisor' || role === 'director') && (
+            <article className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <div>
+                <div style={{ width: 36, height: 36, borderRadius: 'var(--radius-control)', background: 'var(--surface-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-3-accent-personality)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+                  </svg>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                  <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700 }}>Recruitment Applications</h3>
+                  {pendingCount > 0 && (
+                    <span className="badge badge-accent" style={{ fontSize: '0.7rem' }}>
+                      {pendingCount} Pending
+                    </span>
+                  )}
+                </div>
+                <p className="card-meta" style={{ margin: 0, lineHeight: 1.5 }}>
+                  Review candidate applications submitted for Core Team recruitment and Advisor nominations with audit-trail verification.
+                </p>
+              </div>
+              <div style={{ marginTop: 20, paddingTop: 14, borderTop: '1px solid var(--border-hairline)' }}>
+                <Link href="/account/applications" className="btn" style={{ width: '100%', textAlign: 'center' }}>
+                  Review Applications →
+                </Link>
+              </div>
+            </article>
+          )}
+
+          {/* Module 6: Team & Tenure Roster */}
+          {(role === 'advisor' || role === 'director') && (
+            <article className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <div>
+                <div style={{ width: 36, height: 36, borderRadius: 'var(--radius-control)', background: 'var(--surface-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-3-accent-personality)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  </svg>
+                </div>
+                <h3 style={{ margin: '0 0 6px', fontSize: '1.05rem', fontWeight: 700 }}>
+                  Team &amp; Tenure Management
+                </h3>
+                <p className="card-meta" style={{ margin: 0, lineHeight: 1.5 }}>
+                  Inspect organizational roster, manage tenures, record promotions, and review public team visibility.
+                </p>
+              </div>
+              <div style={{ marginTop: 20, paddingTop: 14, borderTop: '1px solid var(--border-hairline)' }}>
+                <Link href="/account/team" className="btn" style={{ width: '100%', textAlign: 'center' }}>
+                  Manage Team Roster →
+                </Link>
+              </div>
+            </article>
+          )}
+
+          {/* Module 7: MFA Settings (Director) */}
+          {isDirector && (
+            <article className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <div>
+                <div style={{ width: 36, height: 36, borderRadius: 'var(--radius-control)', background: 'var(--surface-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-3-accent-personality)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                    <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  </svg>
+                </div>
+                <h3 style={{ margin: '0 0 6px', fontSize: '1.05rem', fontWeight: 700 }}>
+                  Director MFA Security
+                </h3>
+                <p className="card-meta" style={{ margin: 0, lineHeight: 1.5 }}>
+                  Configure and verify your Time-based One-Time Password (TOTP) authenticator required for Director-level authorizations.
+                </p>
+              </div>
+              <div style={{ marginTop: 20, paddingTop: 14, borderTop: '1px solid var(--border-hairline)' }}>
+                <Link href="/account/mfa" className="btn" style={{ width: '100%', textAlign: 'center' }}>
+                  Configure Authenticator →
+                </Link>
+              </div>
+            </article>
+          )}
+
+          {/* Module 8: Role Application (Participants only) */}
+          {!isDirector && !membership && (
+            <article className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <div>
+                <div style={{ width: 36, height: 36, borderRadius: 'var(--radius-control)', background: 'var(--surface-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-3-accent-personality)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                  </svg>
+                </div>
+                <h3 style={{ margin: '0 0 6px', fontSize: '1.05rem', fontWeight: 700 }}>
+                  Join the EDC AITR Team
+                </h3>
+                <p className="card-meta" style={{ margin: 0, lineHeight: 1.5 }}>
+                  Apply to join the Entrepreneurship Development Cell Core Team for operational roles across logistics, media, and tech.
+                </p>
+              </div>
+              <div style={{ marginTop: 20, paddingTop: 14, borderTop: '1px solid var(--border-hairline)' }}>
+                <Link href="/account/apply" className="btn btn-primary" style={{ width: '100%', textAlign: 'center' }}>
+                  Submit Application →
+                </Link>
+              </div>
+            </article>
+          )}
+        </div>
+      </section>
     </div>
   );
 }

@@ -74,7 +74,7 @@ export default async function HomePage() {
             {/* Institutional Cell Pill */}
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 12px', borderRadius: 32, background: 'var(--accent-tint)', border: '1px solid rgba(224,72,38,0.2)', marginBottom: 18 }}>
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-3-accent-personality)', display: 'inline-block' }} />
-              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--color-3-accent-personality)' }}>
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.02em', color: 'var(--color-3-accent-personality)' }}>
                 Entrepreneurship Development Cell · Acropolis Indore
               </span>
             </div>
@@ -115,7 +115,7 @@ export default async function HomePage() {
 
           {/* Institutional Reach Ledger — Light Surface */}
           <aside style={{ background: 'var(--surface-subtle)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--radius-card)', padding: '24px 28px' }}>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 14, borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 8 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.02em', color: 'var(--text-muted)', marginBottom: 14, borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 8 }}>
               EDC Ecosystem Snapshot
             </div>
             {[
@@ -192,7 +192,7 @@ export default async function HomePage() {
       {/* Core Institutional Pillars — What EDC AITR Does */}
       <section style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
         <div style={{ marginBottom: 28 }}>
-          <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)', margin: '0 0 8px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
+          <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.02em', color: 'var(--text-muted)', margin: '0 0 8px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
             What We Do
           </h2>
           <div style={{ fontSize: 'clamp(1.5rem, 2.6vw, 2.1rem)', fontWeight: 800 }}>
@@ -222,7 +222,7 @@ export default async function HomePage() {
       <section style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
           <div>
-            <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)', margin: '0 0 8px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
+            <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.02em', color: 'var(--text-muted)', margin: '0 0 8px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
               Eminent Voices
             </h2>
             <div style={{ fontSize: 'clamp(1.5rem, 2.6vw, 2.1rem)', fontWeight: 800 }}>
@@ -258,7 +258,7 @@ export default async function HomePage() {
       {/* EDC Event Portfolio & Legacy */}
       <section style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
         <div style={{ marginBottom: 24 }}>
-          <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)', margin: '0 0 8px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
+          <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.02em', color: 'var(--text-muted)', margin: '0 0 8px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
             Legacy &amp; Conclaves
           </h2>
           <div style={{ fontSize: 'clamp(1.5rem, 2.6vw, 2.1rem)', fontWeight: 800 }}>
@@ -285,7 +285,7 @@ export default async function HomePage() {
       {/* 12 Operational Teams Showcase */}
       <section style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
         <div style={{ marginBottom: 24 }}>
-          <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)', margin: '0 0 8px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
+          <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.02em', color: 'var(--text-muted)', margin: '0 0 8px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
             Student Execution Engine
           </h2>
           <div style={{ fontSize: 'clamp(1.5rem, 2.6vw, 2.1rem)', fontWeight: 800 }}>
@@ -317,7 +317,7 @@ export default async function HomePage() {
       {activeEvents.length > 0 && (
         <section style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 20 }}>
-            <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)', margin: 0, borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
+            <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.02em', color: 'var(--text-muted)', margin: 0, borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
               Active Calendar Registrations
             </h2>
             <Link href="/events" style={{ fontSize: 14, color: 'var(--color-3-accent-personality)', fontWeight: 600, textDecoration: 'none' }}>
@@ -350,7 +350,7 @@ export default async function HomePage() {
 
       {/* Light Community & Instagram Banner */}
       <section className="card" style={{ background: 'var(--surface)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--radius-panel)', padding: '48px clamp(16px, 4vw, 40px)', textAlign: 'center', margin: 0 }}>
-        <p style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 10 }}>
+        <p style={{ fontSize: 11, letterSpacing: '0.02em', color: 'var(--text-muted)', marginBottom: 10 }}>
           Stay in the Loop
         </p>
         <h2 style={{ margin: '0 auto 12px', fontSize: 'clamp(1.5rem, 2.6vw, 2.2rem)', fontWeight: 800, maxWidth: 600, lineHeight: 1.2 }}>

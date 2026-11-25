@@ -95,7 +95,7 @@ export default async function EventsPage() {
         <div style={{ maxWidth: 1100 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 10px', borderRadius: 4, background: 'var(--accent-tint)', border: '1px solid rgba(224,72,38,0.2)', marginBottom: 12 }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-3-accent-personality)' }} />
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--color-3-accent-personality)' }}>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.02em', color: 'var(--color-3-accent-personality)' }}>
               EDC AITR Event Calendar
             </span>
           </div>
@@ -166,7 +166,7 @@ export default async function EventsPage() {
       {/* Ticket Pass Tiers — Modulify Metric "Choose your pass" */}
       <section style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
         <div style={{ marginBottom: 24 }}>
-          <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)', margin: '0 0 8px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
+          <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.02em', color: 'var(--text-muted)', margin: '0 0 8px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
             Pass Categories
           </h2>
           <div style={{ fontSize: 'clamp(1.4rem, 2.5vw, 2rem)', fontWeight: 800 }}>
@@ -208,7 +208,7 @@ export default async function EventsPage() {
       {activeEvents.length > 0 && (
         <section style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
           <div style={{ marginBottom: 20 }}>
-            <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)', margin: '0 0 6px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
+            <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.02em', color: 'var(--text-muted)', margin: '0 0 6px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
               Current Registrations Open
             </h2>
             <div style={{ fontSize: 'clamp(1.2rem, 2.2vw, 1.6rem)', fontWeight: 800 }}>
@@ -250,7 +250,7 @@ export default async function EventsPage() {
       {/* Past Editions Archive */}
       <section style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
         <div style={{ marginBottom: 20 }}>
-          <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)', margin: '0 0 6px', borderLeft: '3px solid var(--border-hairline)', paddingLeft: 12 }}>
+          <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.02em', color: 'var(--text-muted)', margin: '0 0 6px', borderLeft: '3px solid var(--border-hairline)', paddingLeft: 12 }}>
             Past Editions Archive
           </h2>
           <div style={{ fontSize: 'clamp(1.2rem, 2.2vw, 1.6rem)', fontWeight: 800 }}>

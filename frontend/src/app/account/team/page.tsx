@@ -40,18 +40,21 @@ export default async function TeamAdminPage() {
 
   return (
     <div style={{ display: 'grid', gap: 32 }}>
-      {/* Dark header */}
-      <div style={{ background: 'var(--color-2-mood)', color: 'var(--color-1-mood)', padding: '40px 36px', marginLeft: -24, marginRight: -24, marginTop: -24 }}>
-        <p style={{ fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(251,249,245,0.5)', margin: '0 0 8px' }}>
-          {isDirector ? 'Director' : 'Advisor'} Panel
-        </p>
-        <h1 style={{ margin: 0, fontSize: 'clamp(1.4rem,2.5vw,2rem)', fontWeight: 700 }}>
+      {/* Light header card */}
+      <div className="card" style={{ background: 'var(--surface)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--radius-panel)', padding: 'clamp(24px, 3.5vw, 36px)', margin: 0 }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 10px', borderRadius: 'var(--radius-control)', background: 'var(--accent-tint)', border: '1px solid rgba(224,72,38,0.2)', marginBottom: 10 }}>
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-3-accent-personality)' }} />
+          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-3-accent-personality)' }}>
+            {isDirector ? 'Director' : 'Advisor'} Governance
+          </span>
+        </div>
+        <h1 style={{ margin: '0 0 8px', fontSize: 'clamp(1.5rem, 2.8vw, 2.2rem)', fontWeight: 700, lineHeight: 1.15, color: 'var(--text-primary)' }}>
           Team &amp; Tenure Management
         </h1>
-        <p style={{ margin: '12px 0 0', color: 'rgba(251,249,245,0.65)', fontSize: 15, maxWidth: 580 }}>
+        <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 14, maxWidth: 580, lineHeight: 1.6 }}>
           {isDirector
-            ? 'Director view — nominate promotions or record departures/suspensions (MFA required for revocations).'
-            : 'Advisor view — nominate approved Core Team members for promotion to Advisor.'}
+            ? 'Nominate promotions or record departures and suspensions with MFA verification.'
+            : 'Nominate approved Core Team members for promotion to Advisor.'}
         </p>
       </div>
 
@@ -70,7 +73,7 @@ export default async function TeamAdminPage() {
 
       {/* Members table */}
       <section>
-        <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)', margin: '0 0 16px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
+        <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.02em', color: 'var(--text-muted)', margin: '0 0 16px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
           Active Members ({normalized.length})
         </h2>
         <TeamAdminClient

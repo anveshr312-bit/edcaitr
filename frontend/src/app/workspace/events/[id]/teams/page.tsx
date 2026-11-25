@@ -51,22 +51,25 @@ export default async function EventTeamsPage({
 
   return (
     <>
-      {/* Header */}
-      <div style={{ background: 'var(--color-2-mood)', color: 'var(--color-1-mood)', padding: '40px 36px', marginLeft: -24, marginRight: -24, marginTop: -24 }}>
-        <p style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(251,249,245,0.4)', margin: '0 0 8px' }}>
-          <Link href={`/workspace/events/${id}`} style={{ color: 'inherit', textDecoration: 'none' }}>{event.title}</Link> / Operational Teams
-        </p>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap' }}>
+      {/* Light header card */}
+      <div className="card" style={{ background: 'var(--surface)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--radius-panel)', padding: 'clamp(24px, 3.5vw, 36px)', margin: 0 }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 10px', borderRadius: 'var(--radius-control)', background: 'var(--accent-tint)', border: '1px solid rgba(224,72,38,0.2)', marginBottom: 10 }}>
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-3-accent-personality)' }} />
+          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-3-accent-personality)' }}>
+            <Link href={`/workspace/events/${id}`} style={{ color: 'inherit', textDecoration: 'none' }}>{event.title}</Link> / Teams
+          </span>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
           <div>
-            <h1 style={{ margin: '0 0 8px', fontSize: 'clamp(1.3rem,2.5vw,1.9rem)', fontWeight: 700 }}>Operational Teams</h1>
-            <p style={{ margin: 0, color: 'rgba(251,249,245,0.65)', fontSize: 15 }}>
+            <h1 style={{ margin: '0 0 6px', fontSize: 'clamp(1.4rem, 2.6vw, 2rem)', fontWeight: 700, color: 'var(--text-primary)' }}>Operational Teams</h1>
+            <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 14 }}>
               {normalizedMembers.length} member{normalizedMembers.length !== 1 ? 's' : ''} across 12 confirmed teams.
             </p>
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-          <Link href={`/workspace/events/${id}`} style={{ padding: '6px 14px', borderRadius: 4, background: 'rgba(251,249,245,0.1)', color: 'rgba(251,249,245,0.8)', textDecoration: 'none', fontSize: 13 }}>Overview</Link>
-          <Link href={`/workspace/events/${id}/tasks`} style={{ padding: '6px 14px', borderRadius: 4, background: 'rgba(251,249,245,0.1)', color: 'rgba(251,249,245,0.8)', textDecoration: 'none', fontSize: 13 }}>Task Board</Link>
+          <Link href={`/workspace/events/${id}`} style={{ padding: '6px 14px', borderRadius: 'var(--radius-control)', background: 'var(--surface-subtle)', color: 'var(--text-secondary)', border: '1px solid var(--border-hairline)', textDecoration: 'none', fontSize: 13 }}>Overview</Link>
+          <Link href={`/workspace/events/${id}/tasks`} style={{ padding: '6px 14px', borderRadius: 'var(--radius-control)', background: 'var(--surface-subtle)', color: 'var(--text-secondary)', border: '1px solid var(--border-hairline)', textDecoration: 'none', fontSize: 13 }}>Task Board</Link>
         </div>
       </div>
 

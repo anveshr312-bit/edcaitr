@@ -37,18 +37,27 @@ export default async function WorkspaceHomePage() {
 
   return (
     <>
-      {/* Dark header */}
-      <div style={{ background: 'var(--color-2-mood)', color: 'var(--color-1-mood)', padding: '40px 36px', marginLeft: -24, marginRight: -24, marginTop: -24 }}>
-        <p style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(251,249,245,0.4)', margin: '0 0 10px' }}>
-          Workspace — <span style={{ color: 'var(--color-3-accent-personality)' }}>{role.replace('_', ' ')}</span>
-        </p>
-        <h1 style={{ margin: '0 0 12px', fontSize: 'clamp(1.5rem,3vw,2.2rem)', fontWeight: 800, lineHeight: 1.1 }}>My Event Work</h1>
-        <p style={{ margin: '0 0 24px', color: 'rgba(251,249,245,0.65)', fontSize: 15, maxWidth: 540 }}>
-          Assigned operational teams, active tasks, and accessible event workspaces.
-        </p>
-        <Link href="/workspace/events" className="btn btn-primary" style={{ fontSize: 14 }}>
-          Event Management →
-        </Link>
+      {/* Light header card */}
+      <div className="card" style={{ background: 'var(--surface)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--radius-panel)', padding: 'clamp(24px, 3.5vw, 36px)', margin: 0 }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 10px', borderRadius: 'var(--radius-control)', background: 'var(--accent-tint)', border: '1px solid rgba(224,72,38,0.2)', marginBottom: 10 }}>
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-3-accent-personality)' }} />
+          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-3-accent-personality)' }}>
+            Workspace · {role.replace('_', ' ')}
+          </span>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
+          <div>
+            <h1 style={{ margin: '0 0 6px', fontSize: 'clamp(1.5rem, 2.8vw, 2.2rem)', fontWeight: 700, lineHeight: 1.15, color: 'var(--text-primary)' }}>
+              My Event Work
+            </h1>
+            <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 14, maxWidth: 540, lineHeight: 1.6 }}>
+              Assigned operational teams, active tasks, and accessible event workspaces.
+            </p>
+          </div>
+          <Link href="/workspace/events" className="btn btn-primary" style={{ fontSize: 13 }}>
+            Event Management →
+          </Link>
+        </div>
       </div>
 
       {/* Stats */}
@@ -75,7 +84,7 @@ export default async function WorkspaceHomePage() {
 
       {/* Assigned teams */}
       <section style={{ marginTop: 40 }}>
-        <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)', margin: '0 0 16px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
+        <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.02em', color: 'var(--text-muted)', margin: '0 0 16px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
           Assigned Operational Teams
         </h2>
         {!myTeams || myTeams.length === 0 ? (
@@ -108,7 +117,7 @@ export default async function WorkspaceHomePage() {
 
       {/* Open tasks */}
       <section style={{ marginTop: 40 }}>
-        <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)', margin: '0 0 16px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
+        <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.02em', color: 'var(--text-muted)', margin: '0 0 16px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
           Open Tasks ({openTasks.length})
         </h2>
         {openTasks.length === 0 ? (

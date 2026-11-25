@@ -54,19 +54,22 @@ export default async function ManageEventPage({
 
   return (
     <>
-      {/* Dark header */}
-      <div style={{ background: 'var(--color-2-mood)', color: 'var(--color-1-mood)', padding: '40px 36px', marginLeft: -24, marginRight: -24, marginTop: -24 }}>
-        <p style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(251,249,245,0.4)', margin: '0 0 8px' }}>
-          <Link href="/workspace/events" style={{ color: 'inherit', textDecoration: 'none' }}>Events</Link> / Manage
-        </p>
+      {/* Light header card */}
+      <div className="card" style={{ background: 'var(--surface)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--radius-panel)', padding: 'clamp(24px, 3.5vw, 36px)', margin: 0 }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 10px', borderRadius: 'var(--radius-control)', background: 'var(--accent-tint)', border: '1px solid rgba(224,72,38,0.2)', marginBottom: 10 }}>
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-3-accent-personality)' }} />
+          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-3-accent-personality)' }}>
+            <Link href="/workspace/events" style={{ color: 'inherit', textDecoration: 'none' }}>Events</Link> / Manage
+          </span>
+        </div>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap', marginBottom: 16 }}>
-          <h1 style={{ margin: 0, fontSize: 'clamp(1.3rem,2.5vw,1.9rem)', fontWeight: 700, flex: 1 }}>{event.title}</h1>
-          <span style={{ background: STATUS_COLOR[event.status] ?? 'rgba(251,249,245,0.2)', color: '#fff', fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 10px', borderRadius: 4, flexShrink: 0 }}>
+          <h1 style={{ margin: 0, fontSize: 'clamp(1.4rem, 2.6vw, 2rem)', fontWeight: 700, flex: 1, color: 'var(--text-primary)' }}>{event.title}</h1>
+          <span style={{ background: STATUS_COLOR[event.status] ?? 'var(--surface-subtle)', color: '#fff', fontSize: 11, fontWeight: 700, letterSpacing: '0.04em', textTransform: 'capitalize', padding: '4px 10px', borderRadius: 'var(--radius-control)', flexShrink: 0 }}>
             {event.status}
           </span>
         </div>
         {/* Sub-nav tabs */}
-        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {[
             { label: 'Overview', href: `/workspace/events/${id}` },
             { label: 'Operational Teams', href: `/workspace/events/${id}/teams` },
@@ -75,12 +78,12 @@ export default async function ManageEventPage({
             { label: 'QR Check-in', href: `/workspace/events/${id}/checkin` },
             { label: 'Highlights & Closure', href: `/workspace/events/${id}/closure` },
           ].map(({ label, href }) => (
-            <Link key={href} href={href} style={{ padding: '6px 14px', borderRadius: 4, background: 'rgba(251,249,245,0.1)', color: 'rgba(251,249,245,0.8)', textDecoration: 'none', fontSize: 13, fontWeight: 500, whiteSpace: 'nowrap' }}>
+            <Link key={href} href={href} style={{ padding: '6px 14px', borderRadius: 'var(--radius-control)', background: href === `/workspace/events/${id}` ? 'var(--color-3-accent-personality)' : 'var(--surface-subtle)', color: href === `/workspace/events/${id}` ? '#fff' : 'var(--text-secondary)', border: '1px solid var(--border-hairline)', textDecoration: 'none', fontSize: 13, fontWeight: 500, whiteSpace: 'nowrap' }}>
               {label}
             </Link>
           ))}
           {event.status !== 'draft' && (
-            <Link href={`/events/${event.slug}`} style={{ padding: '6px 14px', borderRadius: 4, background: 'var(--color-3-accent-personality)', color: '#fff', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>
+            <Link href={`/events/${event.slug}`} style={{ padding: '6px 14px', borderRadius: 'var(--radius-control)', background: 'var(--surface)', color: 'var(--color-3-accent-personality)', border: '1px solid rgba(224,72,38,0.3)', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>
               Public page →
             </Link>
           )}

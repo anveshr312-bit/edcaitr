@@ -22,15 +22,19 @@ export default async function NewEventPage() {
 
   return (
     <>
-      {/* Header */}
-      <div style={{ background: 'var(--color-2-mood)', color: 'var(--color-1-mood)', padding: '40px 36px', marginLeft: -24, marginRight: -24, marginTop: -24 }}>
-        <p style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(251,249,245,0.4)', margin: '0 0 8px' }}>
-          <Link href="/workspace/events" style={{ color: 'inherit', textDecoration: 'none' }}>Event Management</Link> / New
-        </p>
-        <h1 style={{ margin: '0 0 10px', fontSize: 'clamp(1.4rem,2.5vw,2rem)', fontWeight: 700 }}>Create Event</h1>
-        <p style={{ margin: 0, color: 'rgba(251,249,245,0.65)', fontSize: 15, maxWidth: 560 }}>
-          Configure event details, registration capacity, free/paid settings, and select one or more
-          approved Event Leads (SPOCs).
+      {/* Light header card */}
+      <div className="card" style={{ background: 'var(--surface)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--radius-panel)', padding: 'clamp(24px, 3.5vw, 36px)', margin: 0 }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 10px', borderRadius: 'var(--radius-control)', background: 'var(--accent-tint)', border: '1px solid rgba(224,72,38,0.2)', marginBottom: 10 }}>
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-3-accent-personality)' }} />
+          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-3-accent-personality)' }}>
+            <Link href="/workspace/events" style={{ color: 'inherit', textDecoration: 'none' }}>Events</Link> / New
+          </span>
+        </div>
+        <h1 style={{ margin: '0 0 6px', fontSize: 'clamp(1.5rem, 2.8vw, 2.2rem)', fontWeight: 700, lineHeight: 1.15, color: 'var(--text-primary)' }}>
+          Create Event
+        </h1>
+        <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 14, maxWidth: 560, lineHeight: 1.6 }}>
+          Configure event details, registration capacity, fee settings, and select approved Event Leads (SPOCs).
         </p>
       </div>
 

@@ -93,19 +93,19 @@ export default function MfaPage() {
 
   return (
     <div style={{ display: 'grid', gap: 32 }}>
-      {/* Dark header */}
-      <div style={{ background: 'var(--color-2-mood)', color: 'var(--color-1-mood)', padding: '40px 36px', marginLeft: -24, marginRight: -24, marginTop: -24 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 8 }}>
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-3-accent-personality)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-          </svg>
-          <h1 style={{ margin: 0, fontSize: 'clamp(1.4rem,2.5vw,2rem)', fontWeight: 700 }}>
-            Authenticator MFA
-          </h1>
+      {/* Light header card */}
+      <div className="card" style={{ background: 'var(--surface)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--radius-panel)', padding: 'clamp(24px, 3.5vw, 36px)', margin: 0 }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 10px', borderRadius: 'var(--radius-control)', background: 'var(--accent-tint)', border: '1px solid rgba(224,72,38,0.2)', marginBottom: 10 }}>
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-3-accent-personality)' }} />
+          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-3-accent-personality)' }}>
+            Director Security
+          </span>
         </div>
-        <p style={{ margin: 0, color: 'rgba(251,249,245,0.65)', fontSize: 15, maxWidth: 520 }}>
-          Director-gated actions require two-factor authentication via a TOTP authenticator app.
+        <h1 style={{ margin: '0 0 8px', fontSize: 'clamp(1.5rem, 2.8vw, 2rem)', fontWeight: 700, color: 'var(--text-primary)' }}>
+          Authenticator MFA
+        </h1>
+        <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 14, maxWidth: 520, lineHeight: 1.6 }}>
+          Director-gated administrative actions require two-factor authentication via a TOTP authenticator app.
         </p>
       </div>
 
@@ -136,21 +136,21 @@ export default function MfaPage() {
           {qrCode && (
             <div className="card" style={{ maxWidth: 480 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-                <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--color-2-mood)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, flexShrink: 0 }}>1</div>
+                <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--accent-tint)', color: 'var(--color-3-accent-personality)', border: '1px solid rgba(224,72,38,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, flexShrink: 0 }}>1</div>
                 <strong>Scan this QR code with your authenticator app</strong>
               </div>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={qrCode} alt="TOTP QR code" width={180} height={180} style={{ display: 'block', margin: '0 0 16px', border: '2px solid var(--border-hairline)', borderRadius: 8, padding: 8, background: '#fff' }} />
               <div style={{ padding: '10px 14px', background: 'var(--surface-subtle)', borderRadius: 6, fontSize: 13, color: 'var(--text-secondary)' }}>
                 Can&apos;t scan? Enter this key manually:
-                <code style={{ display: 'block', marginTop: 6, fontFamily: 'var(--font-mono)', fontSize: 12, background: 'var(--color-2-mood)', color: '#fff', padding: '6px 10px', borderRadius: 4, letterSpacing: '0.08em', wordBreak: 'break-all' }}>{secret}</code>
+                <code style={{ display: 'block', marginTop: 6, fontFamily: 'var(--font-mono)', fontSize: 12, background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border-hairline)', padding: '6px 10px', borderRadius: 'var(--radius-control)', letterSpacing: '0.04em', wordBreak: 'break-all' }}>{secret}</code>
               </div>
             </div>
           )}
 
           <div className="card" style={{ maxWidth: 480 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-              <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--color-2-mood)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, flexShrink: 0 }}>{qrCode ? '2' : '1'}</div>
+              <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--accent-tint)', color: 'var(--color-3-accent-personality)', border: '1px solid rgba(224,72,38,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, flexShrink: 0 }}>{qrCode ? '2' : '1'}</div>
               <strong>Enter the 6-digit code from your app</strong>
             </div>
             <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>

@@ -115,13 +115,23 @@ export default function AlumniMessagesPage() {
 
   return (
     <div style={{ display: 'grid', gap: 32 }}>
-      {/* Header */}
-      <div style={{ background: 'var(--color-2-mood)', color: 'var(--color-1-mood)', padding: '40px 36px', marginLeft: -24, marginRight: -24, marginTop: -24 }}>
-        <p style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(251,249,245,0.4)', margin: '0 0 8px' }}>Alumni Connect</p>
-        <h1 style={{ margin: '0 0 20px', fontSize: 'clamp(1.4rem,2.5vw,2rem)', fontWeight: 700 }}>Messages</h1>
-        <div style={{ display: 'flex', gap: 8 }}>
+      {/* Light header card */}
+      <div className="card" style={{ background: 'var(--surface)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--radius-panel)', padding: 'clamp(24px, 3.5vw, 36px)', margin: 0 }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 10px', borderRadius: 'var(--radius-control)', background: 'var(--accent-tint)', border: '1px solid rgba(224,72,38,0.2)', marginBottom: 10 }}>
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-3-accent-personality)' }} />
+          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-3-accent-personality)' }}>
+            Alumni Connect
+          </span>
+        </div>
+        <h1 style={{ margin: '0 0 6px', fontSize: 'clamp(1.5rem, 2.8vw, 2.2rem)', fontWeight: 700, lineHeight: 1.15, color: 'var(--text-primary)' }}>
+          Messages
+        </h1>
+        <p style={{ margin: '0 0 20px', color: 'var(--text-secondary)', fontSize: 14 }}>
+          Direct peer-to-peer discussions, founder introductions, and mentorship conversations.
+        </p>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           {[{ label: 'Directory', href: '/alumni/directory' }, { label: 'Startups', href: '/alumni/startups' }, { label: 'Opportunities', href: '/alumni/opportunities' }, { label: 'Messages', href: '/alumni/messages' }].map(({ label, href }) => (
-            <a key={href} href={href} style={{ padding: '6px 14px', borderRadius: 4, background: href === '/alumni/messages' ? 'var(--color-3-accent-personality)' : 'rgba(251,249,245,0.1)', color: href === '/alumni/messages' ? '#fff' : 'rgba(251,249,245,0.8)', textDecoration: 'none', fontSize: 13, fontWeight: 500 }}>
+            <a key={href} href={href} style={{ padding: '6px 14px', borderRadius: 'var(--radius-control)', background: href === '/alumni/messages' ? 'var(--color-3-accent-personality)' : 'var(--surface-subtle)', color: href === '/alumni/messages' ? '#fff' : 'var(--text-secondary)', border: '1px solid var(--border-hairline)', textDecoration: 'none', fontSize: 13, fontWeight: 500 }}>
               {label}
             </a>
           ))}
@@ -143,7 +153,7 @@ export default function AlumniMessagesPage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(220px,280px) 1fr', gap: 20, alignItems: 'start' }}>
           {/* Conversation list */}
           <div style={{ display: 'grid', gap: 8 }}>
-            <h2 style={{ margin: '0 0 12px', fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text-muted)', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 10 }}>
+            <h2 style={{ margin: '0 0 12px', fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.02em', color: 'var(--text-muted)', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 10 }}>
               Conversations ({conversations.length})
             </h2>
             {conversations.map((c) => (
@@ -193,7 +203,7 @@ export default function AlumniMessagesPage() {
                   const isOwn = m.sender_id === userId;
                   return (
                     <div key={m.id} style={{ display: 'flex', flexDirection: 'column', alignItems: isOwn ? 'flex-end' : 'flex-start' }}>
-                      <div style={{ maxWidth: '80%', padding: '10px 14px', borderRadius: 10, background: isOwn ? 'var(--color-2-mood)' : 'var(--surface-subtle)', color: isOwn ? 'var(--color-1-mood)' : 'var(--text-primary)', fontSize: 14, lineHeight: 1.55 }}>
+                      <div style={{ maxWidth: '80%', padding: '10px 14px', borderRadius: 'var(--radius-control)', background: isOwn ? 'var(--color-3-accent-personality)' : 'var(--surface-subtle)', color: isOwn ? '#ffffff' : 'var(--text-primary)', fontSize: 14, lineHeight: 1.55 }}>
                         {m.body}
                       </div>
                       <div className="mono-meta" style={{ marginTop: 3, fontSize: 11 }}>

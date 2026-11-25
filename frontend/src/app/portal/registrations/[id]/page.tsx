@@ -43,18 +43,23 @@ export default async function RegistrationDetailPage({
 
   return (
     <div style={{ display: 'grid', gap: 28 }}>
-      {/* Header */}
-      <div style={{ background: 'var(--color-2-mood)', color: 'var(--color-1-mood)', padding: '40px 36px', marginLeft: -24, marginRight: -24, marginTop: -24 }}>
-        <p style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(251,249,245,0.4)', margin: '0 0 8px' }}>
-          <Link href="/portal/registrations" style={{ color: 'inherit', textDecoration: 'none' }}>Your registrations</Link> / Ticket Pass
-        </p>
-        <h1 style={{ margin: '0 0 16px', fontSize: 'clamp(1.4rem,2.5vw,2rem)', fontWeight: 700 }}>
+      {/* Light header card */}
+      <div className="card" style={{ background: 'var(--surface)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--radius-panel)', padding: 'clamp(24px, 3.5vw, 36px)', margin: 0 }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 10px', borderRadius: 'var(--radius-control)', background: 'var(--accent-tint)', border: '1px solid rgba(224,72,38,0.2)', marginBottom: 10 }}>
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-3-accent-personality)' }} />
+          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-3-accent-personality)' }}>
+            <Link href="/portal/registrations" style={{ color: 'inherit', textDecoration: 'none' }}>Registrations</Link> / Ticket Pass
+          </span>
+        </div>
+        <h1 style={{ margin: '0 0 14px', fontSize: 'clamp(1.5rem, 2.8vw, 2.2rem)', fontWeight: 700, lineHeight: 1.15, color: 'var(--text-primary)' }}>
           {ev?.title ?? 'Event Registration'}
         </h1>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <span className="badge badge-accent">Status: {reg.status.replace('_', ' ')}</span>
-          <span className="badge" style={{ background: 'rgba(251,249,245,0.1)', color: 'var(--color-1-mood)' }}>Payment: {reg.payment_status.replace('_', ' ')}</span>
-          <span className="badge" style={{ background: 'rgba(251,249,245,0.1)', color: 'var(--color-1-mood)' }}>
+          <span className="badge" style={{ background: 'var(--surface-subtle)', border: '1px solid var(--border-hairline)', color: 'var(--text-secondary)' }}>
+            Payment: {reg.payment_status.replace('_', ' ')}
+          </span>
+          <span className="badge" style={{ background: 'var(--surface-subtle)', border: '1px solid var(--border-hairline)', color: 'var(--text-secondary)' }}>
             Attendance: {att ? `Checked in (${new Date(att.checked_in_at).toLocaleTimeString('en-IN')})` : 'Not checked in'}
           </span>
         </div>

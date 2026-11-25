@@ -49,8 +49,8 @@ export default function ResetPasswordPage() {
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', padding: '24px' }}>
       <div className="card" style={{ maxWidth: 440, width: '100%', padding: '40px 36px' }}>
         {/* Lock icon */}
-        <div style={{ width: 48, height: 48, background: 'var(--color-2-mood)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-1-mood)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <div style={{ width: 44, height: 44, background: 'var(--accent-tint)', border: '1px solid rgba(224,72,38,0.25)', borderRadius: 'var(--radius-control)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-3-accent-personality)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
             <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
             <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
           </svg>

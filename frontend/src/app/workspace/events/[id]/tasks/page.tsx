@@ -58,29 +58,32 @@ export default async function EventTasksPage({
 
   return (
     <>
-      {/* Header */}
-      <div style={{ background: 'var(--color-2-mood)', color: 'var(--color-1-mood)', padding: '40px 36px', marginLeft: -24, marginRight: -24, marginTop: -24 }}>
-        <p style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(251,249,245,0.4)', margin: '0 0 8px' }}>
-          <Link href={`/workspace/events/${id}`} style={{ color: 'inherit', textDecoration: 'none' }}>{event.title}</Link> / Task Board
-        </p>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap' }}>
-          <h1 style={{ margin: 0, fontSize: 'clamp(1.3rem,2.5vw,1.9rem)', fontWeight: 700 }}>Task Board</h1>
+      {/* Light header card */}
+      <div className="card" style={{ background: 'var(--surface)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--radius-panel)', padding: 'clamp(24px, 3.5vw, 36px)', margin: 0 }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 10px', borderRadius: 'var(--radius-control)', background: 'var(--accent-tint)', border: '1px solid rgba(224,72,38,0.2)', marginBottom: 10 }}>
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-3-accent-personality)' }} />
+          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-3-accent-personality)' }}>
+            <Link href={`/workspace/events/${id}`} style={{ color: 'inherit', textDecoration: 'none' }}>{event.title}</Link> / Task Board
+          </span>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
+          <h1 style={{ margin: 0, fontSize: 'clamp(1.4rem, 2.6vw, 2rem)', fontWeight: 700, color: 'var(--text-primary)' }}>Task Board</h1>
           <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '1.6rem', fontWeight: 800, lineHeight: 1 }}>{openCount}</div>
-              <div style={{ fontSize: 11, color: 'rgba(251,249,245,0.5)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>open</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, lineHeight: 1, color: 'var(--text-primary)' }}>{openCount}</div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Open</div>
             </div>
             {blockedCount > 0 && (
-              <div style={{ textAlign: 'right', color: 'var(--color-3-accent-personality)' }}>
-                <div style={{ fontSize: '1.6rem', fontWeight: 800, lineHeight: 1 }}>{blockedCount}</div>
-                <div style={{ fontSize: 11, color: 'rgba(224,72,38,0.7)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>blocked</div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: '1.5rem', fontWeight: 700, lineHeight: 1, color: 'var(--color-3-accent-personality)' }}>{blockedCount}</div>
+                <div style={{ fontSize: 11, color: 'var(--color-3-accent-personality)' }}>Blocked</div>
               </div>
             )}
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-          <Link href={`/workspace/events/${id}`} style={{ padding: '6px 14px', borderRadius: 4, background: 'rgba(251,249,245,0.1)', color: 'rgba(251,249,245,0.8)', textDecoration: 'none', fontSize: 13 }}>Overview</Link>
-          <Link href={`/workspace/events/${id}/teams`} style={{ padding: '6px 14px', borderRadius: 4, background: 'rgba(251,249,245,0.1)', color: 'rgba(251,249,245,0.8)', textDecoration: 'none', fontSize: 13 }}>Teams</Link>
+          <Link href={`/workspace/events/${id}`} style={{ padding: '6px 14px', borderRadius: 'var(--radius-control)', background: 'var(--surface-subtle)', color: 'var(--text-secondary)', border: '1px solid var(--border-hairline)', textDecoration: 'none', fontSize: 13 }}>Overview</Link>
+          <Link href={`/workspace/events/${id}/teams`} style={{ padding: '6px 14px', borderRadius: 'var(--radius-control)', background: 'var(--surface-subtle)', color: 'var(--text-secondary)', border: '1px solid var(--border-hairline)', textDecoration: 'none', fontSize: 13 }}>Teams</Link>
         </div>
       </div>
 

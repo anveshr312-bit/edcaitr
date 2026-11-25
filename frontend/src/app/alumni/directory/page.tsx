@@ -118,14 +118,23 @@ export default function AlumniDirectoryPage() {
 
   return (
     <div style={{ display: 'grid', gap: 24 }}>
-      {/* Header */}
-      <div style={{ background: 'var(--color-2-mood)', color: 'var(--color-1-mood)', padding: '40px 36px', marginLeft: -24, marginRight: -24, marginTop: -24 }}>
-        <p style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(251,249,245,0.4)', margin: '0 0 8px' }}>Alumni Connect</p>
-        <h1 style={{ margin: '0 0 10px', fontSize: 'clamp(1.4rem,2.5vw,2rem)', fontWeight: 700 }}>Member Directory</h1>
-        <p style={{ margin: '0 0 20px', color: 'rgba(251,249,245,0.65)', fontSize: 15 }}>Verified current and alumni EDC AITR members.</p>
-        <div style={{ display: 'flex', gap: 8 }}>
+      {/* Light header card */}
+      <div className="card" style={{ background: 'var(--surface)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--radius-panel)', padding: 'clamp(24px, 3.5vw, 36px)', margin: 0 }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 10px', borderRadius: 'var(--radius-control)', background: 'var(--accent-tint)', border: '1px solid rgba(224,72,38,0.2)', marginBottom: 10 }}>
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-3-accent-personality)' }} />
+          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-3-accent-personality)' }}>
+            Alumni Connect
+          </span>
+        </div>
+        <h1 style={{ margin: '0 0 6px', fontSize: 'clamp(1.5rem, 2.8vw, 2.2rem)', fontWeight: 700, lineHeight: 1.15, color: 'var(--text-primary)' }}>
+          Member Directory
+        </h1>
+        <p style={{ margin: '0 0 20px', color: 'var(--text-secondary)', fontSize: 14 }}>
+          Verified current and alumni EDC AITR members across batches.
+        </p>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           {[{ label: 'Directory', href: '/alumni/directory' }, { label: 'Startups', href: '/alumni/startups' }, { label: 'Opportunities', href: '/alumni/opportunities' }, { label: 'Messages', href: '/alumni/messages' }].map(({ label, href }) => (
-            <a key={href} href={href} style={{ padding: '6px 14px', borderRadius: 4, background: href === '/alumni/directory' ? 'var(--color-3-accent-personality)' : 'rgba(251,249,245,0.1)', color: href === '/alumni/directory' ? '#fff' : 'rgba(251,249,245,0.8)', textDecoration: 'none', fontSize: 13, fontWeight: 500 }}>
+            <a key={href} href={href} style={{ padding: '6px 14px', borderRadius: 'var(--radius-control)', background: href === '/alumni/directory' ? 'var(--color-3-accent-personality)' : 'var(--surface-subtle)', color: href === '/alumni/directory' ? '#fff' : 'var(--text-secondary)', border: '1px solid var(--border-hairline)', textDecoration: 'none', fontSize: 13, fontWeight: 500 }}>
               {label}
             </a>
           ))}

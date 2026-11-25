@@ -43,7 +43,7 @@ export default function AboutPage() {
         <div style={{ maxWidth: 1100 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 10px', borderRadius: 4, background: 'var(--accent-tint)', border: '1px solid rgba(224,72,38,0.2)', marginBottom: 12 }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-3-accent-personality)' }} />
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--color-3-accent-personality)' }}>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.02em', color: 'var(--color-3-accent-personality)' }}>
               Acropolis Group of Institutions
             </span>
           </div>
@@ -60,7 +60,7 @@ export default function AboutPage() {
       <section style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(240px, 1fr)', gap: 40, alignItems: 'start' }}>
           <div>
-            <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)', margin: '0 0 12px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
+            <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.02em', color: 'var(--text-muted)', margin: '0 0 12px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
               Our Mission
             </h2>
             <div style={{ fontSize: 'clamp(1.5rem, 2.8vw, 2.2rem)', fontWeight: 800, marginBottom: 20 }}>
@@ -101,7 +101,7 @@ export default function AboutPage() {
       {/* 5 Core Objectives (Brochure verified) */}
       <section style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
         <div style={{ marginBottom: 28 }}>
-          <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)', margin: '0 0 8px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
+          <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.02em', color: 'var(--text-muted)', margin: '0 0 8px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
             Strategic Framework
           </h2>
           <div style={{ fontSize: 'clamp(1.5rem, 2.8vw, 2.2rem)', fontWeight: 800 }}>
@@ -127,7 +127,7 @@ export default function AboutPage() {
       {/* 12 Operational Teams Breakdown */}
       <section style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
         <div style={{ marginBottom: 28 }}>
-          <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)', margin: '0 0 8px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
+          <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.02em', color: 'var(--text-muted)', margin: '0 0 8px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
             Operational Anatomy
           </h2>
           <div style={{ fontSize: 'clamp(1.5rem, 2.8vw, 2.2rem)', fontWeight: 800 }}>
