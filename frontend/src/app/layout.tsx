@@ -38,6 +38,28 @@ export const metadata = {
 export default function Layout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={`${sans.variable} ${mono.variable}`}>
+      <head>
+        {/* Critical synchronous preloader initialization to eliminate initial homepage flash (P0) */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var seen = sessionStorage.getItem('edc_cinematic_intro_seen');
+                  var rm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                  if (!seen && !rm) {
+                    document.documentElement.classList.add('edc-preloader-active');
+                    // Safety fail-safe in case of any runtime stalling
+                    setTimeout(function() {
+                      document.documentElement.classList.remove('edc-preloader-active');
+                    }, 4200);
+                  }
+                } catch(e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body>
         <LogoParticleLoader />
         <WebVitals />

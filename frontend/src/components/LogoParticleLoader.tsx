@@ -81,13 +81,13 @@ interface Particle {
   vy: number;
   size: number;
   alpha: number;
-  dissolveOffset: number;
+  dissolveOffset: number; // 0.0 to 1.0 (spatial detachment threshold)
   speedMultiplier: number;
-  streamPhase: number;
+  swirlDir: number;
+  streamGroup: number;
 }
 
 export default function LogoParticleLoader() {
-  const [active, setActive] = useState(false);
   const [completed, setCompleted] = useState(false);
 
   // DOM Refs
@@ -95,26 +95,23 @@ export default function LogoParticleLoader() {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const path0Ref = useRef<SVGPathElement | null>(null);
   const path1Ref = useRef<SVGPathElement | null>(null);
-  const waveBackRef = useRef<SVGPathElement | null>(null);
+  const waveDeepRef = useRef<SVGPathElement | null>(null);
+  const waveMidRef = useRef<SVGPathElement | null>(null);
   const waveFrontRef = useRef<SVGPathElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
-    // Session check & accessibility check
     if (typeof window === 'undefined') return;
+
+    // Check if session has already seen the intro or prefers reduced motion
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const alreadySeen = sessionStorage.getItem('edc_cinematic_intro_seen');
 
     if (reducedMotion || alreadySeen) {
+      document.documentElement.classList.remove('edc-preloader-active');
       setCompleted(true);
       return;
     }
-
-    setActive(true);
-  }, []);
-
-  useEffect(() => {
-    if (!active || completed) return;
 
     let animId: number;
     let isCleanedUp = false;
@@ -123,27 +120,34 @@ export default function LogoParticleLoader() {
     const ctx = canvas?.getContext('2d', { willReadFrequently: true });
     const p0 = path0Ref.current;
     const p1 = path1Ref.current;
-    const wBack = waveBackRef.current;
+    const wDeep = waveDeepRef.current;
+    const wMid = waveMidRef.current;
     const wFront = waveFrontRef.current;
     const container = containerRef.current;
     const svgEl = svgRef.current;
 
-    // Fail-safe dismissal (guarantees site is visible within 4.2 seconds under all conditions)
-    const failSafeTimer = setTimeout(() => {
-      finishTransition();
-    }, 4200);
-
     const finishTransition = () => {
       if (isCleanedUp) return;
+      isCleanedUp = true;
       try {
         sessionStorage.setItem('edc_cinematic_intro_seen', 'true');
       } catch {}
+      document.documentElement.classList.remove('edc-preloader-active');
+      document.documentElement.style.removeProperty('--edc-main-opacity');
+      document.documentElement.style.removeProperty('--edc-main-y');
+      document.documentElement.style.removeProperty('--edc-header-opacity');
+      document.documentElement.style.removeProperty('--edc-header-y');
+      document.documentElement.style.removeProperty('--edc-footer-opacity');
       setCompleted(true);
     };
 
-    // Calculate dimensions
+    // Fail-safe dismissal (guarantees site is unlocked within 4.2s under all conditions)
+    const failSafeTimer = setTimeout(finishTransition, 4200);
+
+    // Viewport and device dimensions
     const winW = window.innerWidth;
     const winH = window.innerHeight;
+    const diag = Math.hypot(winW, winH);
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
     if (canvas && ctx) {
@@ -152,7 +156,7 @@ export default function LogoParticleLoader() {
       ctx.scale(dpr, dpr);
     }
 
-    // Geometry position on screen
+    // Centered Geometry coordinates
     const maxLogoW = Math.min(winW * 0.54, 280);
     const aspect = EMBLEM_VIEWBOX_H / EMBLEM_VIEWBOX_W;
     const logoW = maxLogoW;
@@ -162,7 +166,7 @@ export default function LogoParticleLoader() {
     const logoCenterX = logoX + logoW / 2;
     const logoCenterY = logoY + logoH / 2;
 
-    // Outline path measurements
+    // Precise path measurements for progressive stroke tracing (P1)
     const len0 = p0?.getTotalLength() || 620;
     const len1 = p1?.getTotalLength() || 3400;
 
@@ -175,7 +179,7 @@ export default function LogoParticleLoader() {
       p1.style.strokeDashoffset = `${len1}`;
     }
 
-    // --- PRECOMPUTE PARTICLES VIA OFFSCREEN CANVAS ---
+    // --- PRECOMPUTE DENSE MICRO-PARTICLE REPRESENTATION (P3, P4) ---
     const particles: Particle[] = [];
     const isMobile = winW < 768;
     const targetParticleCount = isMobile ? 3200 : 6400;
@@ -186,11 +190,9 @@ export default function LogoParticleLoader() {
     const offCtx = offscreen.getContext('2d', { willReadFrequently: true });
 
     if (offCtx) {
-      const p2d0 = new Path2D(EMBLEM_PATH_0);
-      const p2d1 = new Path2D(EMBLEM_PATH_1);
+      const p2d = new Path2D(`${EMBLEM_PATH_0} ${EMBLEM_PATH_1}`);
       offCtx.fillStyle = '#C01E30';
-      offCtx.fill(p2d0, 'evenodd');
-      offCtx.fill(p2d1, 'evenodd');
+      offCtx.fill(p2d, 'evenodd');
 
       const imgData = offCtx.getImageData(0, 0, EMBLEM_VIEWBOX_W, EMBLEM_VIEWBOX_H).data;
       const opaquePoints: [number, number][] = [];
@@ -213,8 +215,11 @@ export default function LogoParticleLoader() {
         const screenX = logoX + (vx / EMBLEM_VIEWBOX_W) * logoW;
         const screenY = logoY + (vy / EMBLEM_VIEWBOX_H) * logoH;
 
-        // Spatial coherent noise for organic dissolution peeling
-        const dissolveSeed = (noise2D(vx * 0.015, vy * 0.015) + 1) * 0.5;
+        // Spatially coherent noise sweep for dissolution (bottom-left to top-right with fluid noise)
+        const normX = vx / EMBLEM_VIEWBOX_W;
+        const normY = vy / EMBLEM_VIEWBOX_H;
+        const noiseVal = (noise2D(vx * 0.02, vy * 0.02) + 1) * 0.5;
+        const dissolveNorm = Math.min(Math.max(normY * 0.45 + (1 - normX) * 0.35 + noiseVal * 0.2, 0), 1);
 
         particles.push({
           originX: screenX,
@@ -223,29 +228,31 @@ export default function LogoParticleLoader() {
           y: screenY,
           vx: 0,
           vy: 0,
-          size: Math.random() * 0.8 + (isMobile ? 0.9 : 0.75),
+          size: Math.random() * 0.7 + (isMobile ? 0.9 : 0.8),
           alpha: 1,
-          dissolveOffset: dissolveSeed * 0.32,
-          speedMultiplier: Math.random() * 0.6 + 0.7,
-          streamPhase: Math.random() * Math.PI * 2,
+          dissolveOffset: dissolveNorm,
+          speedMultiplier: Math.random() * 0.5 + 0.8,
+          swirlDir: Math.random() > 0.5 ? 1 : -1,
+          streamGroup: i % 8,
         });
       }
     }
 
-    // --- TIMELINE ORCHESTRATION ---
+    // --- COORDINATED MOTION TIMELINE ---
     const startTime = performance.now();
 
     const loop = (currentTime: number) => {
       if (isCleanedUp) return;
-      const elapsed = (currentTime - startTime) / 1000; // seconds
+      const elapsed = (currentTime - startTime) / 1000; // in seconds
 
-      // ==========================================
-      // STAGE 1: PRECISION OUTLINE (0.0s – 0.8s)
-      // ==========================================
-      if (elapsed <= 0.85) {
-        const t1 = Math.min(elapsed / 0.8, 1);
-        // Easing: cubic-bezier(0.25, 1, 0.5, 1)
-        const ease1 = 1 - Math.pow(1 - t1, 3);
+      // ========================================================
+      // STAGE 1: PRECISION OUTLINE TRACING (0.00s – 0.70s)
+      // Thicker 4.8px contour, high-contrast, progressive cubic-out (P1)
+      // ========================================================
+      if (elapsed <= 0.70) {
+        const t1 = Math.min(elapsed / 0.70, 1);
+        // Smooth deceleration
+        const ease1 = 1 - Math.pow(1 - t1, 3.2);
 
         if (p0) p0.style.strokeDashoffset = `${len0 * (1 - ease1)}`;
         if (p1) p1.style.strokeDashoffset = `${len1 * (1 - ease1)}`;
@@ -254,124 +261,143 @@ export default function LogoParticleLoader() {
         if (p1) p1.style.strokeDashoffset = '0';
       }
 
-      // ==========================================
-      // STAGE 2: ORGANIC LIQUID INFUSION (0.8s – 1.8s)
-      // ==========================================
-      if (elapsed >= 0.8 && elapsed <= 1.85) {
-        const t2 = Math.min((elapsed - 0.8) / 1.0, 1);
-        // Smooth sine ease in-out
+      // ========================================================
+      // STAGE 2: ORGANIC MULTI-HARMONIC LIQUID INFUSION (0.65s – 1.55s)
+      // Compound fluid waves, lateral sloshing, settling cleanly (P2)
+      // ========================================================
+      if (elapsed >= 0.65 && elapsed <= 1.55) {
+        const t2 = Math.min((elapsed - 0.65) / 0.90, 1);
+        // S-curve rising progress
         const fillProgress = 0.5 - 0.5 * Math.cos(t2 * Math.PI);
-
-        // Fluid rises from bottom (620) to top (-10)
         const waterY = EMBLEM_VIEWBOX_H * (1 - fillProgress);
 
-        // Amplitude dampens to exactly 0 as it hits the top
-        const amp = Math.sin(t2 * Math.PI) * 24 * (1 - Math.pow(t2, 2));
-        const phase = elapsed * 7.5;
+        // Amplitude dampens smoothly to exactly 0 as logo fills
+        const amp = Math.sin(t2 * Math.PI) * 22 * Math.pow(1 - t2, 1.25);
+        const phase = elapsed * 8.0;
+        const lateralShift = Math.sin(elapsed * 2.8) * 14;
 
-        // Generate back wave
-        let dBack = `M -30 ${waterY} `;
+        // Wave 1: Deep crimson background wave
+        let dDeep = `M -30 ${waterY} `;
         for (let x = -30; x <= EMBLEM_VIEWBOX_W + 30; x += 30) {
-          const wy = waterY + Math.sin(x * 0.016 + phase + 1.8) * amp * 0.85;
-          dBack += `L ${x.toFixed(1)} ${wy.toFixed(1)} `;
+          const wy = waterY + Math.sin((x + lateralShift) * 0.014 + phase * 0.75 + 1.8) * amp * 0.75;
+          dDeep += `L ${x.toFixed(1)} ${wy.toFixed(1)} `;
         }
-        dBack += `L ${EMBLEM_VIEWBOX_W + 30} ${EMBLEM_VIEWBOX_H + 30} L -30 ${EMBLEM_VIEWBOX_H + 30} Z`;
-        if (wBack) wBack.setAttribute('d', dBack);
+        dDeep += `L ${EMBLEM_VIEWBOX_W + 30} ${EMBLEM_VIEWBOX_H + 30} L -30 ${EMBLEM_VIEWBOX_H + 30} Z`;
+        if (wDeep) wDeep.setAttribute('d', dDeep);
 
-        // Generate front wave
-        let dFront = `M -30 ${waterY} `;
+        // Wave 2: Mid-tone crimson wave
+        let dMid = `M -30 ${waterY} `;
         for (let x = -30; x <= EMBLEM_VIEWBOX_W + 30; x += 25) {
-          const wy = waterY + Math.sin(x * 0.02 + phase) * amp;
+          const wy = waterY + Math.sin((x - lateralShift * 0.6) * 0.02 + phase * 0.9 + 0.9) * amp * 0.85;
+          dMid += `L ${x.toFixed(1)} ${wy.toFixed(1)} `;
+        }
+        dMid += `L ${EMBLEM_VIEWBOX_W + 30} ${EMBLEM_VIEWBOX_H + 30} L -30 ${EMBLEM_VIEWBOX_H + 30} Z`;
+        if (wMid) wMid.setAttribute('d', dMid);
+
+        // Wave 3: Front signature crimson compound wave
+        let dFront = `M -30 ${waterY} `;
+        for (let x = -30; x <= EMBLEM_VIEWBOX_W + 30; x += 20) {
+          const harmonic1 = Math.sin((x + lateralShift) * 0.018 + phase) * 0.68;
+          const harmonic2 = Math.sin((x - lateralShift) * 0.036 - phase * 1.3) * 0.32;
+          const wy = waterY + (harmonic1 + harmonic2) * amp;
           dFront += `L ${x.toFixed(1)} ${wy.toFixed(1)} `;
         }
         dFront += `L ${EMBLEM_VIEWBOX_W + 30} ${EMBLEM_VIEWBOX_H + 30} L -30 ${EMBLEM_VIEWBOX_H + 30} Z`;
         if (wFront) wFront.setAttribute('d', dFront);
 
-        // Fade out outline stroke as solid fill finishes (1.6s to 1.8s)
-        if (elapsed >= 1.6) {
-          const strokeAlpha = Math.max(0, 1 - (elapsed - 1.6) / 0.2);
+        // Seamlessly blend outline strokes into the solid fill (1.35s to 1.55s)
+        if (elapsed >= 1.35) {
+          const strokeAlpha = Math.max(0, 1 - (elapsed - 1.35) / 0.20);
           if (p0) p0.style.strokeOpacity = `${strokeAlpha}`;
           if (p1) p1.style.strokeOpacity = `${strokeAlpha}`;
         }
-      } else if (elapsed > 1.85) {
-        // Perfectly solid, flat fill achieved
+      } else if (elapsed > 1.55) {
+        // Perfectly solid, flat crimson emblem achieved
         if (wFront) {
           wFront.setAttribute(
             'd',
             `M -30 -30 L ${EMBLEM_VIEWBOX_W + 30} -30 L ${EMBLEM_VIEWBOX_W + 30} ${EMBLEM_VIEWBOX_H + 30} L -30 ${EMBLEM_VIEWBOX_H + 30} Z`
           );
         }
-        if (wBack) wBack.style.display = 'none';
+        if (wMid) wMid.style.display = 'none';
+        if (wDeep) wDeep.style.display = 'none';
         if (p0) p0.style.strokeOpacity = '0';
         if (p1) p1.style.strokeOpacity = '0';
       }
 
-      // ==========================================
-      // STAGE 3: BRAND RECOGNITION HOLD (1.8s – 2.1s)
-      // (Logo remains completely still, solid, and pristine)
-      // ==========================================
+      // ========================================================
+      // STAGE 3: BRAND RECOGNITION HOLD (1.55s – 1.85s)
+      // Solid pristine logo held for 300ms. Canvas remains completely empty!
+      // ========================================================
 
-      // ==========================================
-      // STAGE 4 & 5: DISSOLUTION & ORGANIC SWARM (2.1s – 3.2s)
-      // ==========================================
-      if (elapsed >= 2.1 && ctx) {
+      // ========================================================
+      // STAGE 4: SEAMLESS PARTICLE TRANSFORMATION (1.85s – 2.25s)
+      // NO static particle mesh or glitch (P3)
+      // Particles appear ONLY as they detach and begin flowing!
+      // ========================================================
+      // ========================================================
+      // STAGE 5: FULL-VIEWPORT SWARM DISPERSION (2.15s – 3.40s)
+      // Viewport-diagonal scaling, curl-noise streams, corner reach (P4)
+      // ========================================================
+      if (elapsed >= 1.85 && ctx) {
         ctx.clearRect(0, 0, winW, winH);
 
-        // Crossfade: hide SVG smoothly as particles take over (2.1s to 2.25s)
-        if (svgEl && elapsed >= 2.1) {
-          const svgAlpha = Math.max(0, 1 - (elapsed - 2.1) / 0.16);
+        const sweepProgress = Math.min(Math.max((elapsed - 1.85) / 0.38, 0), 1);
+
+        // Solid SVG fades out in sync with particle detachment wave (zero stationary dot noise)
+        if (svgEl && elapsed >= 1.85) {
+          const svgAlpha = Math.max(0, 1 - sweepProgress * 1.15);
           svgEl.style.opacity = `${svgAlpha}`;
         }
 
-        const swarmTime = elapsed - 2.1;
-        const noiseScale = 0.0035;
-        const timeSpeed = 0.55;
+        const swarmTime = elapsed - 1.85;
 
         for (let i = 0; i < particles.length; i++) {
           const p = particles[i];
 
-          // Particle waits for its coherent dissolution threshold
-          if (swarmTime < p.dissolveOffset) {
-            // Draw particle pinned at origin
-            ctx.fillStyle = 'rgba(192, 30, 48, 1)';
-            ctx.beginPath();
-            ctx.arc(p.originX, p.originY, p.size, 0, Math.PI * 2);
-            ctx.fill();
+          // Particle does NOT render until its detachment threshold is reached.
+          // Before this moment, the solid SVG renders the pristine surface!
+          if (sweepProgress < p.dissolveOffset) {
             continue;
           }
 
-          // Active particle moving in fluid flow field
-          const life = swarmTime - p.dissolveOffset;
+          const life = swarmTime - p.dissolveOffset * 0.38;
 
-          // Outward radial direction from logo center
+          // Outward radial trajectory from logo center
           const dx = p.x - logoCenterX;
           const dy = p.y - logoCenterY;
-          const dist = Math.sqrt(dx * dx + dy * dy) + 0.1;
+          const dist = Math.hypot(dx, dy) + 0.1;
           const radX = dx / dist;
           const radY = dy / dist;
 
-          // Curl noise sample (divergence-free stream)
-          const curl = curlNoise2D(p.x * noiseScale, p.y * noiseScale, elapsed * timeSpeed);
+          // Swirl / vorticity (subtle angular curvature)
+          const tanX = -radY;
+          const tanY = radX;
 
-          // Acceleration curve: starts subtle, accelerates smoothly, then coasts
-          const speedRamp = Math.min(life * 4.2, 1);
-          const currentSpeed = (2.8 + life * 4.5) * p.speedMultiplier * speedRamp;
+          // Curl noise streams (procedural fluid currents)
+          const groupOffset = (p.streamGroup / 8) * Math.PI * 2;
+          const curl = curlNoise2D(p.x * 0.0018, p.y * 0.0018, elapsed * 0.35 + groupOffset * 0.1);
 
-          // Combine curl noise (65%) with outward expansion (35%)
-          const targetVx = (curl.vx * 0.65 + radX * 0.35) * currentSpeed;
-          const targetVy = (curl.vy * 0.65 + radY * 0.35) * currentSpeed;
+          // Full-viewport acceleration scaled to diagonal (P4)
+          const speedRamp = Math.min(Math.max(life / 0.35, 0), 1);
+          const maxSpeed = (diag * 0.0135 + 5.5) * p.speedMultiplier;
+          const currentSpeed = 2.2 + speedRamp * maxSpeed;
+
+          // Target velocity: 52% outward advection, 34% curl stream, 14% angular swirl
+          const targetVx = (radX * 0.52 + curl.vx * 0.34 + tanX * 0.14 * p.swirlDir) * currentSpeed;
+          const targetVy = (radY * 0.52 + curl.vy * 0.34 + tanY * 0.14 * p.swirlDir) * currentSpeed;
 
           // Fluid inertia smoothing
-          p.vx += (targetVx - p.vx) * 0.12;
-          p.vy += (targetVy - p.vy) * 0.12;
+          p.vx += (targetVx - p.vx) * 0.13;
+          p.vy += (targetVy - p.vy) * 0.13;
 
           p.x += p.vx;
           p.y += p.vy;
 
-          // Fade out as swarm expands past 2.9s
+          // Particle fade out towards viewport edges (2.85s to 3.40s)
           if (elapsed > 2.85) {
-            const fadeLife = Math.max(0, 1 - (elapsed - 2.85) / 0.7);
-            p.alpha = fadeLife;
+            const fade = Math.max(0, 1 - (elapsed - 2.85) / 0.55);
+            p.alpha = fade;
           }
 
           if (p.alpha > 0.02) {
@@ -383,21 +409,36 @@ export default function LogoParticleLoader() {
         }
       }
 
-      // ==========================================
-      // STAGE 6: CINEMATIC HOMEPAGE REVEAL (2.8s – 3.6s)
-      // ==========================================
-      if (elapsed >= 2.8 && container) {
-        const revealProgress = Math.min((elapsed - 2.8) / 0.75, 1);
-        // Ease out quad
-        const easedReveal = 1 - Math.pow(1 - revealProgress, 2.2);
-        const radius = easedReveal * 145; // expands to 145% to cover corners
+      // ========================================================
+      // STAGE 6: SYNCHRONIZED HOMEPAGE REVEAL (2.30s – 3.40s)
+      // Staggered unveiling of hero, nav and cards beneath the particles (P5, P6)
+      // Unified Alabaster background (#FAFAFC) with ZERO background color shifts!
+      // ========================================================
+      if (elapsed >= 2.30) {
+        // Fade out preloader container holding the SVG (revealing the identical #fafafc page background)
+        if (container) {
+          const containerFade = Math.max(0, 1 - (elapsed - 2.30) / 0.30);
+          container.style.opacity = `${containerFade}`;
+        }
 
-        container.style.maskImage = `radial-gradient(circle at center, transparent ${radius.toFixed(1)}%, black ${(radius + 28).toFixed(1)}%)`;
-        container.style.webkitMaskImage = `radial-gradient(circle at center, transparent ${radius.toFixed(1)}%, black ${(radius + 28).toFixed(1)}%)`;
+        // Stagger 1: Main hero text & headline (2.30s)
+        document.documentElement.style.setProperty('--edc-main-opacity', '1');
+        document.documentElement.style.setProperty('--edc-main-y', '0px');
+
+        // Stagger 2: Site header & navigation (2.45s)
+        if (elapsed >= 2.45) {
+          document.documentElement.style.setProperty('--edc-header-opacity', '1');
+          document.documentElement.style.setProperty('--edc-header-y', '0px');
+        }
+
+        // Stagger 3: Footer and lower sections (2.70s)
+        if (elapsed >= 2.70) {
+          document.documentElement.style.setProperty('--edc-footer-opacity', '1');
+        }
       }
 
-      // Completion check
-      if (elapsed < 3.65) {
+      // Completion check at 3.40s
+      if (elapsed < 3.42) {
         animId = requestAnimationFrame(loop);
       } else {
         finishTransition();
@@ -411,36 +452,44 @@ export default function LogoParticleLoader() {
       clearTimeout(failSafeTimer);
       cancelAnimationFrame(animId);
     };
-  }, [active, completed]);
+  }, []);
 
-  if (!active || completed) return null;
+  if (completed) return null;
 
   return (
     <>
-      {/* ─── 1. BLACK CINEMATIC BACKDROP WITH RADIAL REVEAL MASK ─── */}
+      {/* ─── 1. ALABASTER PRELOADER BACKDROP & SVG LOGO (STAGES 1, 2, 3) ─── */}
       <div
         ref={containerRef}
+        className="edc-cinematic-preloader"
         aria-hidden="true"
         onClick={() => {
           // Fast-forward on tap/click
-          sessionStorage.setItem('edc_cinematic_intro_seen', 'true');
+          try {
+            sessionStorage.setItem('edc_cinematic_intro_seen', 'true');
+          } catch {}
+          document.documentElement.classList.remove('edc-preloader-active');
+          document.documentElement.style.removeProperty('--edc-main-opacity');
+          document.documentElement.style.removeProperty('--edc-main-y');
+          document.documentElement.style.removeProperty('--edc-header-opacity');
+          document.documentElement.style.removeProperty('--edc-header-y');
+          document.documentElement.style.removeProperty('--edc-footer-opacity');
           setCompleted(true);
         }}
         style={{
           position: 'fixed',
           inset: 0,
           zIndex: 99990,
-          backgroundColor: '#080808', // Precision obsidian black
-          display: 'flex',
+          backgroundColor: 'var(--color-1-mood, #fafafc)', // Exact theme background (P6)
           alignItems: 'center',
           justifyContent: 'center',
           cursor: 'pointer',
           userSelect: 'none',
           overflow: 'hidden',
-          willChange: 'mask-image, -webkit-mask-image',
+          willChange: 'opacity',
         }}
       >
-        {/* ─── 2. CENTERED SVG EMBLEM (STAGES 1, 2, 3) ─── */}
+        {/* ─── 2. CENTERED SVG EMBLEM ─── */}
         <svg
           ref={svgRef}
           viewBox={`0 0 ${EMBLEM_VIEWBOX_W} ${EMBLEM_VIEWBOX_H}`}
@@ -460,19 +509,21 @@ export default function LogoParticleLoader() {
 
           {/* Liquid Infusion Layers (Strictly clipped inside emblem boundaries) */}
           <g clipPath="url(#edc-emblem-clip)">
-            {/* Deep crimson wave */}
-            <path ref={waveBackRef} fill="#8A1420" d="" />
+            {/* Deep crimson wave for depth */}
+            <path ref={waveDeepRef} fill="#8E1220" d="" />
+            {/* Mid crimson wave */}
+            <path ref={waveMidRef} fill="#A41625" d="" />
             {/* Signature official crimson wave */}
             <path ref={waveFrontRef} fill="#C01E30" d="" />
           </g>
 
-          {/* Precision Outline Stroke Layers */}
+          {/* Precision Outline Stroke Layers (Thicker 4.8px, high contrast - P1) */}
           <path
             ref={path0Ref}
             d={EMBLEM_PATH_0}
             fill="none"
             stroke="#C01E30"
-            strokeWidth="3.2"
+            strokeWidth="4.8"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
@@ -481,14 +532,14 @@ export default function LogoParticleLoader() {
             d={EMBLEM_PATH_1}
             fill="none"
             stroke="#C01E30"
-            strokeWidth="3.2"
+            strokeWidth="4.8"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
         </svg>
       </div>
 
-      {/* ─── 3. TRANSPARENT PARTICLE SWARM CANVAS (STAGES 4, 5, 6) ─── */}
+      {/* ─── 3. FULL-VIEWPORT PARTICLE SWARM CANVAS (STAGES 4, 5, 6) ─── */}
       <canvas
         ref={canvasRef}
         aria-hidden="true"

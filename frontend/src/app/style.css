@@ -28,6 +28,39 @@
   --radius-tag: 4px;
 }
 
+/* ─── CRITICAL PRELOADER SYNCHRONIZATION (P0, P5, P6) ─── */
+.edc-cinematic-preloader {
+  display: none;
+}
+
+html.edc-preloader-active .edc-cinematic-preloader {
+  display: flex !important;
+}
+
+html.edc-preloader-active body {
+  overflow-x: hidden;
+  background-color: var(--color-1-mood, #fafafc) !important;
+}
+
+html.edc-preloader-active header.site-header {
+  opacity: var(--edc-header-opacity, 0);
+  transform: translateY(var(--edc-header-y, -10px));
+  transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+html.edc-preloader-active main {
+  opacity: var(--edc-main-opacity, 0);
+  transform: translateY(var(--edc-main-y, 14px));
+  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+html.edc-preloader-active footer.site-footer {
+  opacity: var(--edc-footer-opacity, 0);
+  transition: opacity 0.5s ease-out;
+}
+
 *,
 *::before,
 *::after {
