@@ -123,10 +123,11 @@ footer.site-footer {
 footer.site-footer a {
   color: var(--text-secondary);
   text-decoration: none;
+  transition: color 150ms ease;
 }
 
 footer.site-footer a:hover {
-  color: var(--accent-ink);
+  color: var(--color-3-accent-personality);
 }
 
 /* Typography */
