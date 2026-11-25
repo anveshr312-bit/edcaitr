@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from 'react';
 import { createClient } from '../../../lib/supabase/client';
+import { CardGridSkeleton } from '../../../components/ui/Skeleton';
 
 interface Opportunity {
   id: string;
@@ -32,11 +33,23 @@ export default function AlumniOpportunitiesPage() {
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!supabase) return;
-    supabase.from('opportunities').select('*').eq('status', 'active').order('created_at', { ascending: false })
-      .then(({ data }) => { if (data) setItems(data as Opportunity[]); });
+    if (!supabase) {
+      setLoading(false);
+      return;
+    }
+    supabase
+      .from('opportunities')
+      .select('id, startup_name, listing_type, title, description, skills, location, compensation, application_method, deadline, status')
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .limit(20)
+      .then(({ data }) => {
+        if (data) setItems(data as Opportunity[]);
+        setLoading(false);
+      });
   }, [supabase]);
 
   async function submit(e: FormEvent<HTMLFormElement>) {
@@ -151,7 +164,9 @@ export default function AlumniOpportunitiesPage() {
       )}
 
       {/* Opportunities list */}
-      {items.length === 0 ? (
+      {loading ? (
+        <CardGridSkeleton count={4} />
+      ) : items.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '48px 24px' }}>
           <p className="card-meta" style={{ margin: 0 }}>No active opportunities posted yet.</p>
         </div>

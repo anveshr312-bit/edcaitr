@@ -28,6 +28,9 @@ export default function ApplicationsClient({ applications: initial }: Props) {
       setMessages(m => ({ ...m, [app.id]: 'Please enter a review note before deciding.' }));
       return;
     }
+    const previousApps = apps;
+    // Optimistic UI: remove reviewed application immediately, rollback if server fails
+    setApps(prev => prev.filter(a => a.id !== app.id));
     setBusy(b => ({ ...b, [app.id]: true }));
     setMessages(m => ({ ...m, [app.id]: '' }));
     try {
@@ -45,9 +48,9 @@ export default function ApplicationsClient({ applications: initial }: Props) {
       if (!res.ok) {
         throw new Error(payload.error ?? 'Action failed.');
       }
-      setApps(prev => prev.filter(a => a.id !== app.id));
       setMessages(m => ({ ...m, [app.id]: `${decision === 'approved' ? 'Approved' : 'Rejected'} successfully.` }));
     } catch (err) {
+      setApps(previousApps);
       setMessages(m => ({
         ...m,
         [app.id]: err instanceof Error ? err.message : 'Action failed.',

@@ -1,12 +1,18 @@
 import Link from 'next/link';
+import nextDynamic from 'next/dynamic';
 import { notFound } from 'next/navigation';
 import { getPublicEventBySlug } from '../../../lib/events/events';
 import { getImageKitUrl } from '../../../lib/media/imagekit';
 import { createClient } from '../../../lib/supabase/server';
-import EventRegisterForm from '../../../components/EventRegisterForm';
+import { SkeletonBox } from '../../../components/ui/Skeleton';
+
+const EventRegisterForm = nextDynamic(
+  () => import('../../../components/EventRegisterForm'),
+  { loading: () => <SkeletonBox height={180} borderRadius={8} /> }
+);
 import LiquidButton from '../../../components/ui/liquid-button';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 /** Reusable section heading with 2px vermilion left border */
 function SectionHeading({ children }: { children: React.ReactNode }) {

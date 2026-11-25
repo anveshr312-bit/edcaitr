@@ -26,14 +26,22 @@ async function getGoogleAccessToken(clientEmail: string, privateKey: string): Pr
   signer.update(unsigned);
   const signature = base64Url(signer.sign(privateKey.replace(/\\n/g, '\n')));
 
-  const res = await fetch('https://oauth2.googleapis.com/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-      assertion: `${unsigned}.${signature}`,
-    }),
-  });
+  const tokenController = new AbortController();
+  const tokenTimer = setTimeout(() => tokenController.abort(), 10_000);
+  let res: Response;
+  try {
+    res = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      signal: tokenController.signal,
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+        assertion: `${unsigned}.${signature}`,
+      }),
+    });
+  } finally {
+    clearTimeout(tokenTimer);
+  }
   const data = await res.json();
   if (!res.ok || !data.access_token) {
     throw new Error(data.error_description || 'Google token exchange failed.');
@@ -66,24 +74,32 @@ export async function syncAttendanceToGoogleSheet(params: {
       params.sheetId
     )}/values/A1:append?valueInputOption=USER_ENTERED`;
 
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        values: [
-          [
-            params.ticketCode,
-            params.participantName,
-            params.category,
-            params.organization,
-            params.checkedInAt,
+    const sheetController = new AbortController();
+    const sheetTimer = setTimeout(() => sheetController.abort(), 10_000);
+    let res: Response;
+    try {
+      res = await fetch(url, {
+        method: 'POST',
+        signal: sheetController.signal,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          values: [
+            [
+              params.ticketCode,
+              params.participantName,
+              params.category,
+              params.organization,
+              params.checkedInAt,
+            ],
           ],
-        ],
-      }),
-    });
+        }),
+      });
+    } finally {
+      clearTimeout(sheetTimer);
+    }
 
     if (!res.ok) {
       const errText = await res.text();

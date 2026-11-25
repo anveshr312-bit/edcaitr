@@ -3,7 +3,7 @@ import { getPublicEvents } from '../../lib/events/events';
 import { getImageKitUrl } from '../../lib/media/imagekit';
 import LiquidButton from '../../components/ui/liquid-button';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 export default async function EventsPage() {
   const events = await getPublicEvents(false);
@@ -40,12 +40,12 @@ export default async function EventsPage() {
               </h2>
               <div className="grid">
                 {upcoming.map((ev) => {
-                  const posterUrl = getImageKitUrl(ev.poster_ref);
+                  const posterUrl = getImageKitUrl(ev.poster_ref, 640);
                   return (
                     <article key={ev.id} className="card">
                       {posterUrl && (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={posterUrl} alt={ev.title} className="poster" />
+                        <img src={posterUrl} alt={ev.title} width={640} height={360} loading="lazy" decoding="async" className="poster" />
                       )}
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
                         <span className="badge badge-accent">{ev.status.replace('_', ' ')}</span>
@@ -76,12 +76,12 @@ export default async function EventsPage() {
               </h2>
               <div className="grid">
                 {concluded.map((ev) => {
-                  const posterUrl = getImageKitUrl(ev.poster_ref);
+                  const posterUrl = getImageKitUrl(ev.poster_ref, 640);
                   return (
                     <article key={ev.id} className="card" style={{ opacity: 0.85 }}>
                       {posterUrl && (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={posterUrl} alt={ev.title} className="poster" style={{ filter: 'grayscale(0.4)' }} />
+                        <img src={posterUrl} alt={ev.title} width={640} height={360} loading="lazy" decoding="async" className="poster" style={{ filter: 'grayscale(0.4)' }} />
                       )}
                       <span className="badge">Concluded</span>
                       <h2 style={{ margin: 0, fontSize: '1.15rem' }}>{ev.title}</h2>

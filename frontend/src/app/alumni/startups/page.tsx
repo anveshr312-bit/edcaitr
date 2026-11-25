@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from 'react';
 import { createClient } from '../../../lib/supabase/client';
+import { CardGridSkeleton } from '../../../components/ui/Skeleton';
 
 interface Startup {
   id: string;
@@ -30,11 +31,22 @@ export default function AlumniStartupsPage() {
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!supabase) return;
-    supabase.from('startups').select('*').order('created_at', { ascending: false })
-      .then(({ data }) => { if (data) setStartups(data as Startup[]); });
+    if (!supabase) {
+      setLoading(false);
+      return;
+    }
+    supabase
+      .from('startups')
+      .select('id, name, description, stage, team_summary, website_url, pitch_deck_url, status')
+      .order('created_at', { ascending: false })
+      .limit(20)
+      .then(({ data }) => {
+        if (data) setStartups(data as Startup[]);
+        setLoading(false);
+      });
   }, [supabase]);
 
   async function submit(e: FormEvent<HTMLFormElement>) {
@@ -128,7 +140,9 @@ export default function AlumniStartupsPage() {
       )}
 
       {/* Startups grid */}
-      {startups.length === 0 ? (
+      {loading ? (
+        <CardGridSkeleton count={4} />
+      ) : startups.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '48px 24px' }}>
           <p className="card-meta" style={{ margin: 0 }}>No startups showcased yet. Be the first!</p>
         </div>

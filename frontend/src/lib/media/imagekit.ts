@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 
-export function getImageKitUrl(ref?: string | null): string | null {
+export function getImageKitUrl(ref?: string | null, width?: number): string | null {
   if (!ref) return null;
   const trimmed = ref.trim();
   if (!trimmed) return null;
@@ -10,7 +10,8 @@ export function getImageKitUrl(ref?: string | null): string | null {
   if (!endpoint || endpoint.includes('your_imagekit_id')) return null;
 
   const normalizedPath = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
-  return `${endpoint}${normalizedPath}?tr=f-webp,q-85`;
+  const widthParam = width && width > 0 ? `,w-${Math.round(width)}` : '';
+  return `${endpoint}${normalizedPath}?tr=f-auto,q-80${widthParam}`;
 }
 
 export interface ImageKitSignature {

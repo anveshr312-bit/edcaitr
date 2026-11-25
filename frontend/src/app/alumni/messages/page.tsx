@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { createClient } from '../../../lib/supabase/client';
+import { CardGridSkeleton } from '../../../components/ui/Skeleton';
 
 interface Conversation {
   id: string;
@@ -33,6 +34,7 @@ export default function AlumniMessagesPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [reply, setReply] = useState('');
   const [note, setNote] = useState('');
+  const [loading, setLoading] = useState(true);
 
   async function loadInbox() {
     if (!supabase) return;
@@ -44,17 +46,21 @@ export default function AlumniMessagesPage() {
   }
 
   useEffect(() => {
-    if (!supabase) return;
+    if (!supabase) {
+      setLoading(false);
+      return;
+    }
     supabase.auth.getUser().then(async ({ data }) => {
       if (data.user) {
         setUserId(data.user.id);
         await loadInbox();
         const { data: msgs } = await supabase
           .from('alumni_messages')
-          .select('*')
+          .select('id, conversation_id, sender_id, body, created_at')
           .order('created_at', { ascending: true });
         if (msgs) setMessages(msgs as Message[]);
       }
+      setLoading(false);
     });
   }, [supabase]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -76,18 +82,31 @@ export default function AlumniMessagesPage() {
 
   async function sendReply() {
     if (!selectedId || !reply.trim()) return;
+    const text = reply.trim();
+    const tempId = `temp-${Date.now()}`;
+    const optimisticMsg: Message = {
+      id: tempId,
+      conversation_id: selectedId,
+      sender_id: userId ?? '',
+      body: text,
+      created_at: new Date().toISOString(),
+    };
     setNote('');
+    setReply('');
+    setMessages(prev => [...prev, optimisticMsg]);
+
     const res = await fetch('/api/alumni/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ conversation_id: selectedId, body: reply.trim() }),
+      body: JSON.stringify({ conversation_id: selectedId, body: text }),
     });
     const data = await res.json();
     if (!res.ok) {
+      setMessages(prev => prev.filter(m => m.id !== tempId));
+      setReply(text);
       setNote(data.error ?? 'Could not send message.');
     } else {
-      setMessages(prev => [...prev, data.message]);
-      setReply('');
+      setMessages(prev => prev.map(m => (m.id === tempId ? data.message : m)));
     }
   }
 
@@ -111,7 +130,9 @@ export default function AlumniMessagesPage() {
 
       {note && <p role="status" aria-live="polite" style={{ margin: 0, color: 'var(--accent-ink)', fontWeight: 500 }}>{note}</p>}
 
-      {conversations.length === 0 ? (
+      {loading ? (
+        <CardGridSkeleton count={3} />
+      ) : conversations.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '56px 24px' }}>
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--border-hairline)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', margin: '0 auto 16px' }}>
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>

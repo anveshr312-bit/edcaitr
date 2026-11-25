@@ -65,8 +65,11 @@ export default function TicketPrinterClient({
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/edc-logo-dark.png"
+                src="/edc-logo-dark.webp"
                 alt="EDC Logo"
+                width={59}
+                height={20}
+                decoding="async"
                 style={{ height: 20, width: 'auto', objectFit: 'contain' }}
               />
               <span style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.08em', color: '#fbf9f5' }}>

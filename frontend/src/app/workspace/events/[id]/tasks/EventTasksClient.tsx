@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useMemo, useState, type FormEvent } from 'react';
 
 interface TeamDef {
   code: string;
@@ -88,8 +88,21 @@ export default function EventTasksClient({
     taskId: string,
     payload: { status?: string; submission_url?: string; blocker_note?: string | null }
   ) {
-    setBusy(true);
     setMessage('');
+    const previousTasks = tasks;
+    // Optimistic update: reflect status/submission/blocker immediately
+    setTasks((prev) =>
+      prev.map((t) =>
+        t.id === taskId
+          ? {
+              ...t,
+              ...(payload.status !== undefined ? { status: payload.status } : {}),
+              ...(payload.submission_url !== undefined ? { submission_url: payload.submission_url } : {}),
+              ...(payload.blocker_note !== undefined ? { blocker_note: payload.blocker_note } : {}),
+            }
+          : t
+      )
+    );
     try {
       const res = await fetch(`/api/tasks/${taskId}`, {
         method: 'PATCH',
@@ -100,13 +113,15 @@ export default function EventTasksClient({
       if (!res.ok) throw new Error(data.error ?? 'Failed to update task.');
       setTasks((prev) => prev.map((t) => (t.id === taskId ? data.task : t)));
     } catch (err) {
+      setTasks(previousTasks);
       setMessage(err instanceof Error ? err.message : 'Update failed.');
-    } finally {
-      setBusy(false);
     }
   }
 
-  const visibleTasks = tasks.filter((t) => filterTeam === 'ALL' || t.team_code === filterTeam);
+  const visibleTasks = useMemo(
+    () => tasks.filter((t) => filterTeam === 'ALL' || t.team_code === filterTeam),
+    [tasks, filterTeam]
+  );
 
   return (
     <div style={{ display: 'grid', gap: 28 }}>

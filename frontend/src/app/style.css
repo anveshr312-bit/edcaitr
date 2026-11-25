@@ -841,4 +841,46 @@ button:disabled {
   content: attr(data-liquid-text);
 }
 
+/* ─── Skeleton Loading Screens ─── */
+@keyframes edc-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface-subtle) 25%,
+    #ebe5da 50%,
+    var(--surface-subtle) 75%
+  );
+  background-size: 200% 100%;
+  animation: edc-shimmer 1.4s ease-in-out infinite;
+  border-radius: 6px;
+}
+
+.skeleton-dark {
+  background: linear-gradient(
+    90deg,
+    rgba(251, 249, 245, 0.08) 25%,
+    rgba(251, 249, 245, 0.16) 50%,
+    rgba(251, 249, 245, 0.08) 75%
+  );
+  background-size: 200% 100%;
+  animation: edc-shimmer 1.4s ease-in-out infinite;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton,
+  .skeleton-dark {
+    animation: none;
+  }
+}
+
+
 

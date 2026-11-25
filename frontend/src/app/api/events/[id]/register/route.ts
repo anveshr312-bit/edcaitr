@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { after, NextResponse } from 'next/server';
 import { createAdminClient, getUserContext, requireRole } from '../../../../../lib/auth/authorization';
 import { sendTicketEmail } from '../../../../../lib/tickets/email';
 
@@ -40,30 +40,42 @@ export async function POST(
     return NextResponse.json({ error: error.message }, { status });
   }
 
-  let emailResult: { sent: boolean; reason?: string } = { sent: false };
   if (data?.status === 'confirmed' && data?.ticket_id && ctx!.email) {
-    const [{ data: ev }, { data: prof }] = await Promise.all([
-      admin.from('events').select('title, venue, starts_at').eq('id', eventId).single(),
-      admin.from('profiles').select('full_name').eq('id', ctx!.id).single(),
-    ]);
+    const ticketId = data.ticket_id as string;
+    const ticketCode = data.ticket_code as string;
+    const qrToken = data.qr_token as string;
+    const recipientEmail = ctx!.email;
+    const userId = ctx!.id;
+    const category = body.participant_category ?? 'student';
 
-    emailResult = await sendTicketEmail({
-      ticketId: data.ticket_id,
-      ticketCode: data.ticket_code,
-      qrToken: data.qr_token,
-      recipientEmail: ctx!.email,
-      recipientName: prof?.full_name || ctx!.email,
-      eventTitle: ev?.title ?? 'E-Cell AITR Event',
-      eventVenue: ev?.venue ?? null,
-      eventStartsAt: ev?.starts_at ?? null,
-      category: body.participant_category ?? 'student',
+    // Dispatch ticket email after sending HTTP response so registration feels instant
+    after(async () => {
+      try {
+        const [{ data: ev }, { data: prof }] = await Promise.all([
+          admin.from('events').select('title, venue, starts_at').eq('id', eventId).single(),
+          admin.from('profiles').select('full_name').eq('id', userId).single(),
+        ]);
+
+        await sendTicketEmail({
+          ticketId,
+          ticketCode,
+          qrToken,
+          recipientEmail,
+          recipientName: prof?.full_name || recipientEmail,
+          eventTitle: ev?.title ?? 'EDC AITR Event',
+          eventVenue: ev?.venue ?? null,
+          eventStartsAt: ev?.starts_at ?? null,
+          category,
+        });
+      } catch (err) {
+        console.error('[register] background ticket email failed:', err);
+      }
     });
   }
 
   return NextResponse.json({
     ok: true,
     ...data,
-    email_sent: emailResult.sent,
-    email_note: emailResult.reason ?? null,
+    email_sent: data?.status === 'confirmed' ? 'queued' : false,
   });
 }

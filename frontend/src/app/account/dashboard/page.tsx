@@ -46,14 +46,26 @@ export default async function DashboardPage() {
   } = await supabase.auth.getUser();
   if (error || !user) redirect('/account');
 
-  // Fetch profile, role, and MFA status in parallel
-  const [profileResult, role, mfaResult] = await Promise.all([
-    supabase.from('profiles').select('*').eq('id', user.id).single(),
+  // Fetch profile, role, MFA status, and active membership in parallel
+  const [profileResult, role, mfaResult, membershipResult] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('full_name, avatar_ref, designation, college, bio, linkedin_url, is_public')
+      .eq('id', user.id)
+      .single(),
     getUserRole(user.id),
     supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
+    supabase
+      .from('org_memberships')
+      .select('role, status, effective_from')
+      .eq('user_id', user.id)
+      .eq('status', 'approved')
+      .is('effective_until', null)
+      .maybeSingle(),
   ]);
 
   const profile = profileResult.data;
+  const membership = membershipResult.data;
   const hasMfa = mfaResult.data?.currentLevel === 'aal2';
   const isMfaEnrolled = mfaResult.data?.nextLevel === 'aal2' || hasMfa;
   const isDirector = role === 'director';
@@ -64,20 +76,11 @@ export default async function DashboardPage() {
   if (role === 'advisor' || role === 'director') {
     const { count } = await supabase
       .from('applications')
-      .select('*', { count: 'exact', head: true })
+      .select('id', { count: 'exact', head: true })
       .eq('status', 'pending')
       .is('reviewed_at', null);
     pendingCount = count ?? 0;
   }
-
-  // Fetch own active membership
-  const { data: membership } = await supabase
-    .from('org_memberships')
-    .select('role, status, effective_from')
-    .eq('user_id', user.id)
-    .eq('status', 'approved')
-    .is('effective_until', null)
-    .maybeSingle();
 
   const roleMeta = ROLE_CONFIG[role as AppRole] || ROLE_CONFIG.participant;
   const displayName = profile?.full_name || user.email?.split('@')[0] || 'User';

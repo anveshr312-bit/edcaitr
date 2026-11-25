@@ -2,7 +2,7 @@ import { getPublicPastTeams, getPublicTeamProfiles } from '../../lib/events/even
 import { getImageKitUrl } from '../../lib/media/imagekit';
 import LiquidButton from '../../components/ui/liquid-button';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 const ROLE_TITLES: Record<'director' | 'advisor' | 'core_team', string> = {
   director: 'Director',
@@ -53,13 +53,13 @@ export default async function TeamPage() {
                 </h2>
                 <div className="grid">
                   {members.map((member) => {
-                    const avatarUrl = getImageKitUrl(member.avatar_ref);
+                    const avatarUrl = getImageKitUrl(member.avatar_ref, 128);
                     return (
                       <article key={member.id} className="card">
                         <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 12 }}>
                           {avatarUrl ? (
                             // eslint-disable-next-line @next/next/no-img-element
-                            <img src={avatarUrl} alt={member.full_name} className="avatar" />
+                            <img src={avatarUrl} alt={member.full_name} width={48} height={48} loading="lazy" decoding="async" className="avatar" />
                           ) : (
                             <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--accent-tint)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', fontWeight: 700, color: 'var(--color-3-accent-personality)', flexShrink: 0 }}>
                               {(member.full_name || 'E').charAt(0).toUpperCase()}

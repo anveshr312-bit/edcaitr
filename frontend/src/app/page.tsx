@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { getPublicEvents, getPublicTeamProfiles } from '../lib/events/events';
 import LiquidButton from '../components/ui/liquid-button';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 export default async function HomePage() {
   const [events, team] = await Promise.all([

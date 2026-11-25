@@ -141,25 +141,33 @@ export async function sendTicketEmail(
       </div>
     `;
 
-    const res = await fetch('https://api.brevo.com/v3/smtp/email', {
-      method: 'POST',
-      headers: {
-        'api-key': apiKey,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        sender: { name: senderName, email: senderEmail },
-        to: [{ email: payload.recipientEmail, name: payload.recipientName }],
-        subject: `Your Ticket: ${payload.eventTitle} (${payload.ticketCode})`,
-        htmlContent,
-        attachment: [
-          {
-            name: 'ticket-qr.png',
-            content: base64Png,
-          },
-        ],
-      }),
-    });
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 10_000);
+    let res: Response;
+    try {
+      res = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        signal: controller.signal,
+        headers: {
+          'api-key': apiKey,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sender: { name: senderName, email: senderEmail },
+          to: [{ email: payload.recipientEmail, name: payload.recipientName }],
+          subject: `Your Ticket: ${payload.eventTitle} (${payload.ticketCode})`,
+          htmlContent,
+          attachment: [
+            {
+              name: 'ticket-qr.png',
+              content: base64Png,
+            },
+          ],
+        }),
+      });
+    } finally {
+      clearTimeout(timer);
+    }
 
     if (!res.ok) {
       const errText = await res.text();

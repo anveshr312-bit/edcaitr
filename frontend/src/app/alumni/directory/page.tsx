@@ -1,8 +1,10 @@
 'use client';
 
-import { useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { getImageKitUrl } from '../../../lib/media/imagekit';
+import { CardGridSkeleton } from '../../../components/ui/Skeleton';
+import { fetchWithTimeout } from '../../../lib/net/fetchWithDedupe';
 
 interface DirectoryMember {
   user_id: string;
@@ -28,30 +30,71 @@ export default function AlumniDirectoryPage() {
   const [city, setCity] = useState('');
   const [industry, setIndustry] = useState('');
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
   const [messageDrafts, setMessageDrafts] = useState<Record<string, string>>({});
   const [statusNote, setStatusNote] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
-  async function fetchDirectory() {
-    setLoading(true);
-    const params = new URLSearchParams();
-    if (q) params.set('q', q);
-    if (memberType !== 'all') params.set('member_type', memberType);
-    if (city) params.set('city', city);
-    if (industry) params.set('industry', industry);
-    const res = await fetch(`/api/alumni/directory?${params.toString()}`);
-    if (res.ok) {
-      const data = await res.json();
-      setMembers(data.members ?? []);
-    }
-    setLoading(false);
-  }
+  const fetchDirectory = useCallback(
+    async (targetPage: number) => {
+      abortRef.current?.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
 
-  useEffect(() => { void fetchDirectory(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+      setLoading(true);
+      const params = new URLSearchParams();
+      if (q) params.set('q', q);
+      if (memberType !== 'all') params.set('member_type', memberType);
+      if (city) params.set('city', city);
+      if (industry) params.set('industry', industry);
+      params.set('page', String(targetPage));
+
+      try {
+        const res = await fetchWithTimeout(`/api/alumni/directory?${params.toString()}`, {
+          signal: controller.signal,
+          timeoutMs: 10_000,
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setMembers(data.members ?? []);
+          setTotal(data.total ?? 0);
+        }
+      } catch (err) {
+        if ((err as Error).name !== 'AbortError') {
+          setStatusNote('Failed to load directory. Please retry.');
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
+      }
+    },
+    [q, memberType, city, industry]
+  );
+
+  // 300ms debounce when filters change
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPage(1);
+      void fetchDirectory(1);
+    }, 300);
+    return () => {
+      clearTimeout(timer);
+      abortRef.current?.abort();
+    };
+  }, [fetchDirectory]);
 
   function handleSearch(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    void fetchDirectory();
+    setPage(1);
+    void fetchDirectory(1);
+  }
+
+  function goToPage(nextPage: number) {
+    setPage(nextPage);
+    void fetchDirectory(nextPage);
   }
 
   async function sendContactRequest(recipientId: string) {
@@ -120,12 +163,7 @@ export default function AlumniDirectoryPage() {
 
       {/* Results */}
       {loading ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '32px 0', color: 'var(--text-muted)' }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 12a9 9 0 11-6.219-8.56"/>
-          </svg>
-          Loading verified directory…
-        </div>
+        <CardGridSkeleton count={6} />
       ) : members.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '48px 24px' }}>
           <p className="card-meta" style={{ margin: 0 }}>No verified members match your filters.</p>
@@ -133,14 +171,14 @@ export default function AlumniDirectoryPage() {
       ) : (
         <div className="grid">
           {members.map((m) => {
-            const avatarUrl = getImageKitUrl(m.avatar_ref);
+            const avatarUrl = getImageKitUrl(m.avatar_ref, 128);
             const isExpanded = expandedId === m.user_id;
             return (
               <article key={m.user_id} className="card">
                 <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
                   {avatarUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={avatarUrl} alt={m.full_name} className="avatar" />
+                    <img src={avatarUrl} alt={m.full_name} width={48} height={48} loading="lazy" decoding="async" className="avatar" />
                   ) : (
                     <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--accent-tint)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', fontWeight: 700, color: 'var(--color-3-accent-personality)', flexShrink: 0 }}>
                       {(m.full_name || 'E').charAt(0).toUpperCase()}
@@ -199,6 +237,31 @@ export default function AlumniDirectoryPage() {
               </article>
             );
           })}
+        </div>
+      )}
+
+      {/* Pagination (max 20 per page) */}
+      {total > 20 && (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, paddingTop: 8 }}>
+          <button
+            type="button"
+            className="btn"
+            disabled={page <= 1 || loading}
+            onClick={() => goToPage(page - 1)}
+          >
+            ← Previous
+          </button>
+          <span className="mono-meta">
+            Page {page} of {Math.ceil(total / 20)} ({total} members)
+          </span>
+          <button
+            type="button"
+            className="btn"
+            disabled={page * 20 >= total || loading}
+            onClick={() => goToPage(page + 1)}
+          >
+            Next →
+          </button>
         </div>
       )}
     </div>
