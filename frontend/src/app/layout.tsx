@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google';
 import WebVitals from '../components/WebVitals';
+import LogoParticleLoader from '../components/LogoParticleLoader';
 import './style.css';
 
 const sans = Plus_Jakarta_Sans({
@@ -29,6 +30,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={`${sans.variable} ${mono.variable}`}>
       <body>
+        <LogoParticleLoader />
         <WebVitals />
         <header className="site-header">
           <Link href="/" className="brand-link" style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
