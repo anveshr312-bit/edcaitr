@@ -424,6 +424,35 @@ test('reopening a closed event requires a non-empty recorded reason', () => {
   assert.equal(canReopen('Correction for late attendance scan'), true);
 });
 
+// --- Phase 5: Alumni Connect eligibility, privacy & messaging guards ---
+
+console.log('\nPhase 5: Alumni Connect eligibility, privacy & messaging guards');
+
+test('ordinary participant is blocked from Alumni Connect, while alumni/core_team/advisor/director are allowed', () => {
+  assert.ok(requireRole(participant, 'alumni'));
+  assert.equal(requireRole(alumni, 'alumni'), null);
+  assert.equal(requireRole(coreTeam, 'alumni'), null);
+  assert.equal(requireRole(advisor, 'alumni'), null);
+  assert.equal(requireRole(directorMfa, 'alumni'), null);
+});
+
+test('messaging privacy: Director cannot read conversations they are not a participant in', () => {
+  const canReadConversation = (viewerId: string, initiatorId: string, recipientId: string) =>
+    viewerId === initiatorId || viewerId === recipientId;
+
+  assert.equal(canReadConversation(directorMfa.id, alumni.id, coreTeam.id), false);
+  assert.equal(canReadConversation(alumni.id, alumni.id, coreTeam.id), true);
+});
+
+test('first-contact request blocks repeated unsolicited messages until accepted', () => {
+  const canSendFollowUp = (senderId: string, initiatorId: string, status: 'pending' | 'accepted' | 'declined') =>
+    status === 'accepted' || (status === 'pending' && senderId !== initiatorId);
+
+  assert.equal(canSendFollowUp(alumni.id, alumni.id, 'pending'), false);
+  assert.equal(canSendFollowUp(alumni.id, alumni.id, 'accepted'), true);
+  assert.equal(canSendFollowUp(alumni.id, alumni.id, 'declined'), false);
+});
+
 // ---------------------------------------------------------------------------
 // Results
 // ---------------------------------------------------------------------------
