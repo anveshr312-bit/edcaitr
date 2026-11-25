@@ -16,7 +16,6 @@ export default function MfaPage() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
 
-  // On load: check current MFA assurance level
   useEffect(() => {
     if (!supabase) return;
     supabase.auth.mfa.getAuthenticatorAssuranceLevel().then(({ data }) => {
@@ -24,9 +23,7 @@ export default function MfaPage() {
         setStep('done');
         setMessage('MFA is already verified for this session.');
       } else if (data?.nextLevel === 'aal2') {
-        // Enrolled but not verified this session
         setStep('verify');
-        // Start a challenge immediately
         startChallenge();
       } else {
         setStep('enroll');
@@ -41,7 +38,7 @@ export default function MfaPage() {
     try {
       const { data, error } = await supabase.auth.mfa.enroll({
         factorType: 'totp',
-        issuer: 'E-Cell AITR',
+        issuer: 'EDC AITR',
         friendlyName: 'Director TOTP',
       });
       if (error) throw error;
@@ -60,13 +57,12 @@ export default function MfaPage() {
   async function startChallenge(fid?: string) {
     if (!supabase) return;
     try {
-      // Find existing enrolled factor if not passed
       let id = fid ?? factorId;
       if (!id) {
         const { data: factors } = await supabase.auth.mfa.listFactors();
-        const totp = factors?.totp?.[0];
-        if (!totp) return;
-        id = totp.id;
+        const totpFactor = factors?.totp?.[0];
+        if (!totpFactor) return;
+        id = totpFactor.id;
         setFactorId(id);
       }
       const { data, error } = await supabase.auth.mfa.challenge({ factorId: id });
@@ -81,11 +77,7 @@ export default function MfaPage() {
     if (!supabase || !factorId || !challengeId || totp.length !== 6) return;
     setBusy(true); setMessage('');
     try {
-      const { error } = await supabase.auth.mfa.verify({
-        factorId,
-        challengeId,
-        code: totp,
-      });
+      const { error } = await supabase.auth.mfa.verify({ factorId, challengeId, code: totp });
       if (error) throw error;
       setStep('done');
       setMessage('MFA verified. Director-gated actions are now available for this session.');
@@ -93,7 +85,6 @@ export default function MfaPage() {
     } catch (err) {
       setMessage(err instanceof Error ? err.message : 'Verification failed. Check the code and try again.');
       setTotp('');
-      // Refresh challenge
       await startChallenge();
     } finally {
       setBusy(false);
@@ -101,76 +92,110 @@ export default function MfaPage() {
   }
 
   return (
-    <>
-      <h1>Authenticator MFA</h1>
+    <div style={{ display: 'grid', gap: 32 }}>
+      {/* Dark header */}
+      <div style={{ background: 'var(--color-2-mood)', color: 'var(--color-1-mood)', padding: '40px 36px', marginLeft: -24, marginRight: -24, marginTop: -24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 8 }}>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-3-accent-personality)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <h1 style={{ margin: 0, fontSize: 'clamp(1.4rem,2.5vw,2rem)', fontWeight: 700 }}>
+            Authenticator MFA
+          </h1>
+        </div>
+        <p style={{ margin: 0, color: 'rgba(251,249,245,0.65)', fontSize: 15, maxWidth: 520 }}>
+          Director-gated actions require two-factor authentication via a TOTP authenticator app.
+        </p>
+      </div>
+
+      {step === 'check' && (
+        <div className="card" style={{ display: 'flex', alignItems: 'center', gap: 12, color: 'var(--text-muted)' }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 12a9 9 0 11-6.219-8.56"/>
+          </svg>
+          Checking MFA status…
+        </div>
+      )}
 
       {step === 'enroll' && (
-        <>
-          <p>
-            Director-gated actions require an authenticator app (TOTP).
+        <div className="card" style={{ maxWidth: 480 }}>
+          <h2 style={{ margin: '0 0 12px', fontSize: '1.1rem' }}>Set up your authenticator</h2>
+          <p style={{ margin: '0 0 20px', color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.6 }}>
             Install <strong>Google Authenticator</strong>, <strong>Authy</strong>, or any TOTP app,
             then click the button below to get your setup QR code.
           </p>
-          <button onClick={startEnroll} disabled={busy}>
+          <button className="btn btn-primary" onClick={startEnroll} disabled={busy}>
             {busy ? 'Generating…' : 'Set up authenticator app'}
           </button>
-        </>
+        </div>
       )}
 
       {step === 'verify' && (
-        <>
+        <div style={{ display: 'grid', gap: 24 }}>
           {qrCode && (
-            <>
-              <p><strong>Step 1:</strong> Scan this QR code with your authenticator app.</p>
+            <div className="card" style={{ maxWidth: 480 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--color-2-mood)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, flexShrink: 0 }}>1</div>
+                <strong>Scan this QR code with your authenticator app</strong>
+              </div>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={qrCode} alt="TOTP QR code" width={200} height={200} style={{ display: 'block', margin: '16px 0', border: '1px solid #ccd2da' }} />
-              <p style={{ fontSize: 13, color: '#555' }}>
-                Can&apos;t scan? Enter this key manually: <code style={{ background: '#f0f0f0', padding: '2px 6px', borderRadius: 4 }}>{secret}</code>
-              </p>
-              <hr style={{ margin: '20px 0' }} />
-              <p><strong>Step 2:</strong> Enter the 6-digit code from your app to confirm setup.</p>
-            </>
+              <img src={qrCode} alt="TOTP QR code" width={180} height={180} style={{ display: 'block', margin: '0 0 16px', border: '2px solid var(--border-hairline)', borderRadius: 8, padding: 8, background: '#fff' }} />
+              <div style={{ padding: '10px 14px', background: 'var(--surface-subtle)', borderRadius: 6, fontSize: 13, color: 'var(--text-secondary)' }}>
+                Can&apos;t scan? Enter this key manually:
+                <code style={{ display: 'block', marginTop: 6, fontFamily: 'var(--font-mono)', fontSize: 12, background: 'var(--color-2-mood)', color: '#fff', padding: '6px 10px', borderRadius: 4, letterSpacing: '0.08em', wordBreak: 'break-all' }}>{secret}</code>
+              </div>
+            </div>
           )}
 
-          {!qrCode && (
-            <p>Enter the 6-digit code from your authenticator app to verify this session.</p>
-          )}
-
-          <label>
-            6-digit code
-            <input
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]{6}"
-              maxLength={6}
-              value={totp}
-              onChange={e => setTotp(e.target.value.replace(/\D/g, ''))}
-              autoComplete="one-time-code"
-              placeholder="000000"
-              style={{ letterSpacing: 6, fontSize: 20, maxWidth: 160 }}
-            />
-          </label>
-          <button onClick={verify} disabled={busy || totp.length !== 6}>
-            {busy ? 'Verifying…' : (qrCode ? 'Confirm & enable MFA' : 'Verify')}
-          </button>
-        </>
+          <div className="card" style={{ maxWidth: 480 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+              <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--color-2-mood)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, flexShrink: 0 }}>{qrCode ? '2' : '1'}</div>
+              <strong>Enter the 6-digit code from your app</strong>
+            </div>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={6}
+                value={totp}
+                onChange={e => setTotp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                placeholder="000000"
+                autoComplete="one-time-code"
+                style={{ fontFamily: 'var(--font-mono)', fontSize: '1.5rem', letterSpacing: '0.3em', textAlign: 'center', width: 160, padding: '10px 14px', border: '2px solid var(--border-hairline)', borderRadius: 6 }}
+              />
+              <button className="btn btn-primary" onClick={verify} disabled={busy || totp.length !== 6} style={{ marginTop: 4 }}>
+                {busy ? 'Verifying…' : 'Verify'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {step === 'done' && (
-        <p style={{ color: 'var(--success)' }}>
-          MFA is active and verified for this session. Director-gated actions are available.
-        </p>
+        <div className="card" style={{ maxWidth: 480, borderLeft: '4px solid var(--success)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--success)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <strong style={{ color: 'var(--success)' }}>MFA Active</strong>
+          </div>
+          <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 14 }}>{message}</p>
+        </div>
       )}
 
-      {message && (
-        <p role="status" aria-live="polite" style={{ color: step === 'done' ? '#2e7d32' : '#c62828', marginTop: 12 }}>
+      {message && step !== 'done' && (
+        <p role="status" aria-live="polite" style={{ margin: 0, color: 'var(--danger)', fontWeight: 500 }}>
           {message}
         </p>
       )}
 
-      <p style={{ marginTop: 24 }}>
-        <a href="/account/dashboard">← Back to dashboard</a>
+      <p>
+        <a href="/account/dashboard" style={{ color: 'var(--text-muted)', fontSize: 14, textDecoration: 'none' }}>
+          ← Back to dashboard
+        </a>
       </p>
-    </>
+    </div>
   );
 }

@@ -27,51 +27,75 @@ export default async function ParticipantPortalPage() {
     getPublicEvents(false),
   ]);
 
+  const confirmedRegs = (registrations ?? []).filter(r => r.status === 'confirmed').length;
+
   return (
     <>
-      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-        <div>
-          <h1 style={{ marginBottom: 4 }}>Participant Portal</h1>
-          <p className="card-meta" style={{ margin: 0 }}>
-            Your event registrations, QR tickets, and announcements.
-          </p>
-        </div>
-        <div className="actions-row" style={{ marginTop: 0 }}>
-          <Link href="/portal/registrations" className="btn btn-primary">
-            Your Registrations
-          </Link>
-          <Link href="/portal/certificates" className="btn">
-            Your Certificates
-          </Link>
-          <Link href="/portal/announcements" className="btn">
-            Announcements
-          </Link>
+      {/* Dark header */}
+      <div style={{ background: 'var(--color-2-mood)', color: 'var(--color-1-mood)', padding: '40px 36px', marginLeft: -24, marginRight: -24, marginTop: -24 }}>
+        <p style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(251,249,245,0.4)', margin: '0 0 10px' }}>EDC AITR</p>
+        <h1 style={{ margin: '0 0 12px', fontSize: 'clamp(1.5rem,3vw,2.2rem)', fontWeight: 800, lineHeight: 1.1 }}>Participant Portal</h1>
+        <p style={{ margin: '0 0 24px', color: 'rgba(251,249,245,0.65)', fontSize: 15, maxWidth: 540 }}>
+          Your event registrations, QR tickets, certificates, and announcements.
+        </p>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          <Link href="/portal/registrations" className="btn btn-primary" style={{ fontSize: 14 }}>Your Registrations</Link>
+          <Link href="/portal/certificates" className="btn" style={{ fontSize: 14, background: 'rgba(251,249,245,0.1)', color: 'var(--color-1-mood)', borderColor: 'rgba(251,249,245,0.2)' }}>Certificates</Link>
+          <Link href="/portal/announcements" className="btn" style={{ fontSize: 14, background: 'rgba(251,249,245,0.1)', color: 'var(--color-1-mood)', borderColor: 'rgba(251,249,245,0.2)' }}>Announcements</Link>
         </div>
       </div>
 
-      <section>
-        <h2>Your Recent Registrations</h2>
+      {/* Quick stats */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(140px,1fr))', gap: 16, marginTop: 32 }}>
+        <div className="card" style={{ textAlign: 'center', padding: '20px 16px' }}>
+          <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--color-3-accent-personality)' }}>{(registrations ?? []).length}</div>
+          <div className="card-meta" style={{ margin: 0, fontSize: 12 }}>Total Registrations</div>
+        </div>
+        <div className="card" style={{ textAlign: 'center', padding: '20px 16px' }}>
+          <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--success)' }}>{confirmedRegs}</div>
+          <div className="card-meta" style={{ margin: 0, fontSize: 12 }}>Confirmed</div>
+        </div>
+        <div className="card" style={{ textAlign: 'center', padding: '20px 16px' }}>
+          <div style={{ fontSize: '2rem', fontWeight: 700 }}>{(announcements ?? []).length}</div>
+          <div className="card-meta" style={{ margin: 0, fontSize: 12 }}>Announcements</div>
+        </div>
+      </div>
+
+      {/* Recent registrations */}
+      <section style={{ marginTop: 40 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16, gap: 12 }}>
+          <h2 style={{ margin: 0, fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
+            Recent Registrations
+          </h2>
+          <Link href="/portal/registrations" style={{ fontSize: 13, color: 'var(--color-3-accent-personality)', textDecoration: 'none', fontWeight: 600 }}>View all →</Link>
+        </div>
         {!registrations || registrations.length === 0 ? (
-          <div className="card">
-            <p className="card-meta" style={{ margin: 0 }}>
-              You have not registered for any events yet. Browse upcoming events below to get your
-              QR pass.
-            </p>
+          <div className="card" style={{ textAlign: 'center', padding: '32px 24px' }}>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--border-hairline)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', margin: '0 auto 12px' }}>
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+            </svg>
+            <p className="card-meta" style={{ margin: 0 }}>No registrations yet. <Link href="/events">Browse events</Link> to get your QR pass.</p>
           </div>
         ) : (
           <div className="grid">
             {registrations.map((reg) => {
               const ev = Array.isArray(reg.events) ? reg.events[0] : reg.events;
+              const statusColor = reg.status === 'confirmed' ? 'var(--success)' : reg.status === 'cancelled' ? 'var(--danger)' : 'var(--accent-ink)';
               return (
                 <article key={reg.id} className="card">
-                  <span className="badge badge-accent">{reg.status.replace('_', ' ')}</span>
-                  <h3 style={{ margin: 0 }}>{ev?.title ?? 'Event'}</h3>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: statusColor }}>{reg.status.replace('_', ' ')}</span>
+                    <span className="mono-meta">{reg.payment_status.replace('_', ' ')}</span>
+                  </div>
+                  <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700 }}>{ev?.title ?? 'Event'}</h3>
                   <p className="mono-meta" style={{ margin: 0 }}>
                     {ev?.starts_at ? new Date(ev.starts_at).toLocaleDateString('en-IN') : 'Date TBA'}
                     {ev?.venue ? ` · ${ev.venue}` : ''}
                   </p>
                   <div style={{ marginTop: 'auto', paddingTop: 8 }}>
-                    <Link href={`/portal/registrations/${reg.id}`}>View ticket / details</Link>
+                    <Link href={`/portal/registrations/${reg.id}`} style={{ fontSize: 14, color: 'var(--color-3-accent-personality)', textDecoration: 'none', fontWeight: 600 }}>
+                      View ticket →
+                    </Link>
                   </div>
                 </article>
               );
@@ -80,39 +104,56 @@ export default async function ParticipantPortalPage() {
         )}
       </section>
 
+      {/* Recent announcements */}
       {announcements && announcements.length > 0 && (
-        <section>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12 }}>
-            <h2 style={{ margin: 0 }}>Recent Announcements</h2>
-            <Link href="/portal/announcements">All announcements</Link>
+        <section style={{ marginTop: 40 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16, gap: 12 }}>
+            <h2 style={{ margin: 0, fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
+              Recent Announcements
+            </h2>
+            <Link href="/portal/announcements" style={{ fontSize: 13, color: 'var(--color-3-accent-personality)', textDecoration: 'none', fontWeight: 600 }}>All →</Link>
           </div>
-          <div className="grid">
-            {announcements.map((a) => (
-              <article key={a.id} className="card">
-                <h3 style={{ margin: 0 }}>{a.title}</h3>
-                <p className="card-meta" style={{ margin: 0 }}>{a.body}</p>
-                <span className="mono-meta">{new Date(a.created_at).toLocaleDateString('en-IN')}</span>
+          <div style={{ display: 'grid', gap: 12 }}>
+            {announcements.map(a => (
+              <article key={a.id} className="card" style={{ padding: '16px 20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+                  <div>
+                    <h3 style={{ margin: '0 0 6px', fontSize: '1rem', fontWeight: 700 }}>{a.title}</h3>
+                    <p style={{ margin: 0, fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.5 }}>{a.body}</p>
+                  </div>
+                  <span className="mono-meta" style={{ flexShrink: 0 }}>{new Date(a.created_at).toLocaleDateString('en-IN')}</span>
+                </div>
               </article>
             ))}
           </div>
         </section>
       )}
 
-      <section>
-        <h2>Explore Events</h2>
-        <div className="grid">
-          {events.slice(0, 3).map((ev) => (
-            <article key={ev.id} className="card">
-              <span className="badge">{ev.is_paid && ev.fee_amount ? `₹${ev.fee_amount}` : 'Free'}</span>
-              <h3 style={{ margin: 0 }}>{ev.title}</h3>
-              {ev.summary && <p className="card-meta" style={{ margin: 0 }}>{ev.summary}</p>}
-              <div style={{ marginTop: 'auto', paddingTop: 8 }}>
-                <Link href={`/events/${ev.slug}`}>Open &amp; register</Link>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
+      {/* Explore upcoming */}
+      {events.length > 0 && (
+        <section style={{ marginTop: 40 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16, gap: 12 }}>
+            <h2 style={{ margin: 0, fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)', borderLeft: '3px solid var(--border-hairline)', paddingLeft: 12 }}>
+              Explore Events
+            </h2>
+            <Link href="/events" style={{ fontSize: 13, color: 'var(--text-muted)', textDecoration: 'none' }}>All events →</Link>
+          </div>
+          <div className="grid">
+            {events.slice(0, 3).map(ev => (
+              <article key={ev.id} className="card">
+                <span className="badge">{ev.is_paid && ev.fee_amount ? `₹${ev.fee_amount}` : 'Free'}</span>
+                <h3 style={{ margin: 0, fontSize: '1.05rem' }}>{ev.title}</h3>
+                {ev.summary && <p className="card-meta" style={{ margin: 0 }}>{ev.summary}</p>}
+                <div style={{ marginTop: 'auto', paddingTop: 8 }}>
+                  <Link href={`/events/${ev.slug}`} style={{ fontSize: 14, color: 'var(--color-3-accent-personality)', textDecoration: 'none', fontWeight: 600 }}>
+                    Open &amp; Register →
+                  </Link>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
     </>
   );
 }

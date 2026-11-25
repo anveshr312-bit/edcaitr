@@ -60,7 +60,6 @@ export default function ProfilePage() {
     if (!supabase || !userId) return;
     setBusy(true); setMessage(''); setIsError(false);
     try {
-      // Validate LinkedIn URL
       if (profile.linkedin_url && !/^https?:\/\//i.test(profile.linkedin_url)) {
         throw new Error('LinkedIn URL must start with https://');
       }
@@ -77,10 +76,7 @@ export default function ProfilePage() {
         payload.designation = profile.designation.trim() || null;
         payload.is_public = profile.is_public;
       }
-      const { error } = await supabase
-        .from('profiles')
-        .update(payload)
-        .eq('id', userId);
+      const { error } = await supabase.from('profiles').update(payload).eq('id', userId);
       if (error) throw error;
       setMessage('Profile saved successfully.');
     } catch (err) {
@@ -91,113 +87,135 @@ export default function ProfilePage() {
     }
   }
 
-  if (loading) return <p>Loading profile…</p>;
-  if (!userId) return <p>Please <a href="/account">sign in</a> to edit your profile.</p>;
+  if (loading) return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '48px 0', color: 'var(--text-muted)' }}>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 12a9 9 0 11-6.219-8.56"/>
+      </svg>
+      Loading profile…
+    </div>
+  );
+  if (!userId) return (
+    <div className="card" style={{ maxWidth: 400, margin: '48px auto', textAlign: 'center' }}>
+      <p style={{ margin: 0 }}>Please <a href="/account">sign in</a> to edit your profile.</p>
+    </div>
+  );
 
   return (
-    <>
-      <h1>Edit Profile</h1>
-      <p style={{ color: '#555', marginBottom: 24 }}>
-        Your profile is used in the internal member directory and, when{' '}
-        <strong>Show on public Team page</strong> is on, the public Team page.
-        Administrative roles are managed separately.
-      </p>
-      <form onSubmit={save}>
-        <label>
-          Full name *
-          <input
-            type="text" required maxLength={120}
-            value={profile.full_name} onChange={field('full_name')}
-            autoComplete="name"
-          />
-        </label>
+    <div style={{ display: 'grid', gap: 32 }}>
+      {/* Dark header */}
+      <div style={{ background: 'var(--color-2-mood)', color: 'var(--color-1-mood)', padding: '40px 36px', marginLeft: -24, marginRight: -24, marginTop: -24 }}>
+        <p style={{ fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(251,249,245,0.5)', margin: '0 0 8px' }}>
+          Account
+        </p>
+        <h1 style={{ margin: 0, fontSize: 'clamp(1.4rem,2.5vw,2rem)', fontWeight: 700 }}>
+          Edit Profile
+        </h1>
+        <p style={{ margin: '12px 0 0', color: 'rgba(251,249,245,0.65)', fontSize: 15, maxWidth: 560 }}>
+          Used in the internal member directory. When{' '}
+          <strong style={{ color: '#fff' }}>Show on public Team page</strong> is on,
+          your info appears on the public Team page.
+        </p>
+      </div>
 
-        <label>
-          Phone
-          <input
-            type="tel" maxLength={20}
-            value={profile.phone} onChange={field('phone')}
-            autoComplete="tel" placeholder="Optional"
-          />
-        </label>
+      <form onSubmit={save} style={{ display: 'grid', gap: 20, maxWidth: 600 }}>
+        {/* Identity section */}
+        <div>
+          <h2 style={{ fontSize: '0.8rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)', margin: '0 0 14px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 10 }}>
+            Identity
+          </h2>
+          <div style={{ display: 'grid', gap: 14 }}>
+            <label style={{ display: 'grid', gap: 6 }}>
+              <span style={{ fontWeight: 600, fontSize: 14 }}>Full name *</span>
+              <input type="text" required maxLength={120} value={profile.full_name} onChange={field('full_name')} autoComplete="name" />
+            </label>
+            <label style={{ display: 'grid', gap: 6 }}>
+              <span style={{ fontWeight: 600, fontSize: 14 }}>College / Organisation</span>
+              <input type="text" maxLength={200} value={profile.college} onChange={field('college')} placeholder="Optional" />
+            </label>
+            <label style={{ display: 'grid', gap: 6 }}>
+              <span style={{ fontWeight: 600, fontSize: 14 }}>Enrollment number</span>
+              <input type="text" maxLength={40} value={profile.enrollment_no} onChange={field('enrollment_no')} placeholder="Optional — not required for external participants" />
+            </label>
+          </div>
+        </div>
 
-        <label>
-          College / Organisation
-          <input
-            type="text" maxLength={200}
-            value={profile.college} onChange={field('college')}
-            placeholder="Optional"
-          />
-        </label>
+        {/* Contact section */}
+        <div>
+          <h2 style={{ fontSize: '0.8rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)', margin: '0 0 14px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 10 }}>
+            Contact
+          </h2>
+          <div style={{ display: 'grid', gap: 14 }}>
+            <label style={{ display: 'grid', gap: 6 }}>
+              <span style={{ fontWeight: 600, fontSize: 14 }}>Phone</span>
+              <input type="tel" maxLength={20} value={profile.phone} onChange={field('phone')} autoComplete="tel" placeholder="Optional" />
+            </label>
+            <label style={{ display: 'grid', gap: 6 }}>
+              <span style={{ fontWeight: 600, fontSize: 14 }}>LinkedIn / Social profile URL</span>
+              <input type="url" maxLength={300} value={profile.linkedin_url} onChange={field('linkedin_url')} placeholder="https://linkedin.com/in/yourprofile" />
+            </label>
+          </div>
+        </div>
 
-        <label>
-          Enrollment number
-          <input
-            type="text" maxLength={40}
-            value={profile.enrollment_no} onChange={field('enrollment_no')}
-            placeholder="Optional — not required for external participants"
-          />
-        </label>
+        {/* Profile section */}
+        <div>
+          <h2 style={{ fontSize: '0.8rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)', margin: '0 0 14px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 10 }}>
+            Public Profile
+          </h2>
+          <div style={{ display: 'grid', gap: 14 }}>
+            {canManageDisplay && (
+              <label style={{ display: 'grid', gap: 6 }}>
+                <span style={{ fontWeight: 600, fontSize: 14 }}>Designation</span>
+                <input type="text" maxLength={100} value={profile.designation} onChange={field('designation')} placeholder="e.g. Frontend Lead, Event Head" />
+              </label>
+            )}
+            <ImageUploadField
+              label="Profile Photo"
+              folder="avatars"
+              value={profile.avatar_ref ?? ''}
+              onChange={(val) => setProfile(prev => ({ ...prev, avatar_ref: val }))}
+            />
+            <label style={{ display: 'grid', gap: 6 }}>
+              <span style={{ fontWeight: 600, fontSize: 14 }}>Short bio</span>
+              <textarea
+                maxLength={500}
+                rows={4}
+                value={profile.bio}
+                onChange={field('bio')}
+                placeholder="A short description shown on the Team page (optional)"
+                style={{ font: 'inherit', padding: '10px 14px', resize: 'vertical', border: '1.5px solid var(--border-hairline)', borderRadius: 6 }}
+              />
+            </label>
+            <label style={{ flexDirection: 'row', alignItems: 'center', gap: 10, display: 'flex', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={profile.is_public}
+                onChange={e => setProfile(prev => ({ ...prev, is_public: e.target.checked }))}
+                style={{ width: 'auto', padding: 0, accentColor: 'var(--color-3-accent-personality)' }}
+              />
+              <span style={{ fontSize: 14 }}>Show on public Team page</span>
+            </label>
+          </div>
+        </div>
 
-        <label>
-          Designation
-          <input
-            type="text" maxLength={100}
-            value={profile.designation} onChange={field('designation')}
-            placeholder="e.g. Frontend Lead, Event Head"
-          />
-        </label>
-
-        <label>
-          LinkedIn / Social profile URL
-          <input
-            type="url" maxLength={300}
-            value={profile.linkedin_url} onChange={field('linkedin_url')}
-            placeholder="https://linkedin.com/in/yourprofile"
-          />
-        </label>
-
-        <ImageUploadField
-          label="Profile Photo"
-          folder="avatars"
-          value={profile.avatar_ref ?? ''}
-          onChange={(val) => setProfile(prev => ({ ...prev, avatar_ref: val }))}
-        />
-
-        <label>
-          Short bio
-          <textarea
-            maxLength={500} rows={4}
-            value={profile.bio} onChange={field('bio')}
-            placeholder="A short description shown on the Team page (optional)"
-            style={{ font: 'inherit', padding: 10, resize: 'vertical' }}
-          />
-        </label>
-
-        <label style={{ flexDirection: 'row', alignItems: 'center', gap: 10, display: 'flex' }}>
-          <input
-            type="checkbox"
-            checked={profile.is_public}
-            onChange={e => setProfile(prev => ({ ...prev, is_public: e.target.checked }))}
-            style={{ width: 'auto', padding: 0 }}
-          />
-          Show on public Team page
-        </label>
-
-        <button type="submit" disabled={busy}>
-          {busy ? 'Saving…' : 'Save profile'}
-        </button>
+        <div>
+          <button type="submit" className="btn btn-primary" disabled={busy} style={{ minWidth: 160 }}>
+            {busy ? 'Saving…' : 'Save Profile'}
+          </button>
+        </div>
       </form>
 
       {message && (
-        <p role="status" aria-live="polite" style={{ color: isError ? '#c62828' : '#2e7d32', marginTop: 12 }}>
+        <p role="status" aria-live="polite" style={{ margin: 0, color: isError ? 'var(--danger)' : 'var(--success)', fontWeight: 500 }}>
           {message}
         </p>
       )}
 
-      <p style={{ marginTop: 24 }}>
-        <a href="/account/dashboard">← Back to dashboard</a>
+      <p>
+        <a href="/account/dashboard" style={{ color: 'var(--text-muted)', fontSize: 14, textDecoration: 'none' }}>
+          ← Back to dashboard
+        </a>
       </p>
-    </>
+    </div>
   );
 }

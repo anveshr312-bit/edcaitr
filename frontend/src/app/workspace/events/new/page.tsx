@@ -22,18 +22,24 @@ export default async function NewEventPage() {
 
   return (
     <>
-      <p style={{ marginBottom: 16 }}>
-        <Link href="/workspace/events">← Back to Event Management</Link>
-      </p>
-      <h1>Create Event</h1>
-      <p style={{ color: 'var(--text-muted)', marginBottom: 24 }}>
-        Configure event details, registration capacity, free/paid settings, and select one or more
-        approved Event Leads (SPOCs).
-      </p>
-      <NewEventClient
-        candidates={(candidates as { id: string; full_name: string; designation: string | null; role: string }[]) ?? []}
-        currentUserId={user.id}
-      />
+      {/* Header */}
+      <div style={{ background: 'var(--color-2-mood)', color: 'var(--color-1-mood)', padding: '40px 36px', marginLeft: -24, marginRight: -24, marginTop: -24 }}>
+        <p style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(251,249,245,0.4)', margin: '0 0 8px' }}>
+          <Link href="/workspace/events" style={{ color: 'inherit', textDecoration: 'none' }}>Event Management</Link> / New
+        </p>
+        <h1 style={{ margin: '0 0 10px', fontSize: 'clamp(1.4rem,2.5vw,2rem)', fontWeight: 700 }}>Create Event</h1>
+        <p style={{ margin: 0, color: 'rgba(251,249,245,0.65)', fontSize: 15, maxWidth: 560 }}>
+          Configure event details, registration capacity, free/paid settings, and select one or more
+          approved Event Leads (SPOCs).
+        </p>
+      </div>
+
+      <div style={{ marginTop: 32, maxWidth: 680 }}>
+        <NewEventClient
+          candidates={(candidates as { id: string; full_name: string; designation: string | null; role: string }[]) ?? []}
+          currentUserId={user.id}
+        />
+      </div>
     </>
   );
 }

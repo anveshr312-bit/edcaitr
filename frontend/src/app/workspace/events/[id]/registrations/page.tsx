@@ -62,33 +62,51 @@ export default async function EventRegistrationsAdminPage({
 
   const confirmedCount = normalized.filter((r) => r.status === 'confirmed').length;
   const checkedInCount = normalized.filter((r) => Boolean(r.checked_in_at)).length;
+  const pendingPayment = normalized.filter(r => r.payment_status === 'pending_verification').length;
 
   return (
     <>
-      <p style={{ marginBottom: 16 }}>
-        <Link href={`/workspace/events/${id}`}>← Event overview</Link> ·{' '}
-        <Link href={`/workspace/events/${id}/checkin`}>QR Check-in Scanner</Link>
-      </p>
-      <h1>Registrations: {event.title}</h1>
-      <div className="hero-ledger" style={{ gridTemplateColumns: 'repeat(3, 1fr)', marginBottom: 28 }}>
-        <div>
-          <div className="ledger-label">Total records</div>
-          <div className="ledger-value">{normalized.length}</div>
-        </div>
-        <div>
-          <div className="ledger-label">Confirmed</div>
-          <div className="ledger-value">{confirmedCount}</div>
-        </div>
-        <div>
-          <div className="ledger-label">Checked in</div>
-          <div className="ledger-value">{checkedInCount}</div>
+      {/* Header */}
+      <div style={{ background: 'var(--color-2-mood)', color: 'var(--color-1-mood)', padding: '40px 36px', marginLeft: -24, marginRight: -24, marginTop: -24 }}>
+        <p style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(251,249,245,0.4)', margin: '0 0 8px' }}>
+          <Link href={`/workspace/events/${id}`} style={{ color: 'inherit', textDecoration: 'none' }}>{event.title}</Link> / Registrations
+        </p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap' }}>
+          <h1 style={{ margin: 0, fontSize: 'clamp(1.3rem,2.5vw,1.9rem)', fontWeight: 700 }}>Registrations</h1>
+          <Link href={`/workspace/events/${id}/checkin`} style={{ padding: '8px 16px', background: 'var(--color-3-accent-personality)', color: '#fff', textDecoration: 'none', borderRadius: 6, fontSize: 13, fontWeight: 600 }}>
+            QR Check-in →
+          </Link>
         </div>
       </div>
 
-      <RegistrationsAdminClient
-        registrations={normalized}
-        canVerifyPayments={Boolean(canManage)}
-      />
+      {/* Stats */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(120px,1fr))', gap: 16, marginTop: 24 }}>
+        <div className="card" style={{ textAlign: 'center', padding: '18px 12px' }}>
+          <div style={{ fontSize: '1.8rem', fontWeight: 700 }}>{normalized.length}</div>
+          <div className="card-meta" style={{ margin: 0, fontSize: 11 }}>Total</div>
+        </div>
+        <div className="card" style={{ textAlign: 'center', padding: '18px 12px' }}>
+          <div style={{ fontSize: '1.8rem', fontWeight: 700, color: 'var(--success)' }}>{confirmedCount}</div>
+          <div className="card-meta" style={{ margin: 0, fontSize: 11 }}>Confirmed</div>
+        </div>
+        <div className="card" style={{ textAlign: 'center', padding: '18px 12px' }}>
+          <div style={{ fontSize: '1.8rem', fontWeight: 700 }}>{checkedInCount}</div>
+          <div className="card-meta" style={{ margin: 0, fontSize: 11 }}>Checked In</div>
+        </div>
+        {event.is_paid && (
+          <div className="card" style={{ textAlign: 'center', padding: '18px 12px', borderLeft: pendingPayment > 0 ? '3px solid var(--accent-ink)' : undefined }}>
+            <div style={{ fontSize: '1.8rem', fontWeight: 700, color: pendingPayment > 0 ? 'var(--accent-ink)' : 'var(--text-muted)' }}>{pendingPayment}</div>
+            <div className="card-meta" style={{ margin: 0, fontSize: 11 }}>Pending Payment</div>
+          </div>
+        )}
+      </div>
+
+      <div style={{ marginTop: 32 }}>
+        <RegistrationsAdminClient
+          registrations={normalized}
+          canVerifyPayments={Boolean(canManage)}
+        />
+      </div>
     </>
   );
 }

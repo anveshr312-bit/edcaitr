@@ -45,17 +45,50 @@ export default async function EventClosurePage({
 
   return (
     <>
-      <p style={{ marginBottom: 16 }}>
-        <Link href={`/workspace/events/${id}`}>← Event overview</Link> ·{' '}
-        <Link href={`/events/${event.slug}`}>Public page</Link>
-      </p>
-      <h1>Highlights, Manuals, Exports &amp; Closure: {event.title}</h1>
-      <ClosureExportsClient
-        event={event}
-        initialHighlights={highlights ?? []}
-        initialManuals={manuals ?? []}
-        initialCertCount={certCount ?? 0}
-      />
+      {/* Header */}
+      <div style={{ background: 'var(--color-2-mood)', color: 'var(--color-1-mood)', padding: '40px 36px', marginLeft: -24, marginRight: -24, marginTop: -24 }}>
+        <p style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(251,249,245,0.4)', margin: '0 0 8px' }}>
+          <Link href={`/workspace/events/${id}`} style={{ color: 'inherit', textDecoration: 'none' }}>{event.title}</Link> / Highlights &amp; Closure
+        </p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap' }}>
+          <div>
+            <h1 style={{ margin: '0 0 8px', fontSize: 'clamp(1.3rem,2.5vw,1.9rem)', fontWeight: 700 }}>Highlights, Manuals, Exports &amp; Closure</h1>
+            <p style={{ margin: 0, color: 'rgba(251,249,245,0.65)', fontSize: 15 }}>
+              Upload event highlights, participant manuals, and manage exports &amp; lifecycle.
+            </p>
+          </div>
+          {event.status !== 'draft' && (
+            <Link href={`/events/${event.slug}`} style={{ padding: '8px 16px', background: 'rgba(251,249,245,0.12)', color: 'var(--color-1-mood)', textDecoration: 'none', borderRadius: 6, fontSize: 13, border: '1px solid rgba(251,249,245,0.2)' }}>
+              Public page →
+            </Link>
+          )}
+        </div>
+
+        {/* Summary badges */}
+        <div style={{ display: 'flex', gap: 16, marginTop: 20, flexWrap: 'wrap' }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '1.5rem', fontWeight: 800 }}>{(highlights ?? []).length}</div>
+            <div style={{ fontSize: 11, color: 'rgba(251,249,245,0.5)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Highlights</div>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '1.5rem', fontWeight: 800 }}>{(manuals ?? []).length}</div>
+            <div style={{ fontSize: 11, color: 'rgba(251,249,245,0.5)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Manuals</div>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '1.5rem', fontWeight: 800 }}>{certCount ?? 0}</div>
+            <div style={{ fontSize: 11, color: 'rgba(251,249,245,0.5)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Certificates</div>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ marginTop: 32 }}>
+        <ClosureExportsClient
+          event={event}
+          initialHighlights={highlights ?? []}
+          initialManuals={manuals ?? []}
+          initialCertCount={certCount ?? 0}
+        />
+      </div>
     </>
   );
 }

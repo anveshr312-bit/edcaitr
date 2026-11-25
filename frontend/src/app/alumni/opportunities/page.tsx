@@ -28,50 +28,32 @@ export default function AlumniOpportunitiesPage() {
   const [location, setLocation] = useState('');
   const [compensation, setCompensation] = useState('');
   const [applicationMethod, setApplicationMethod] = useState('');
+  const [deadline, setDeadline] = useState('');
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState('');
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
     if (!supabase) return;
-    supabase
-      .from('opportunities')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .then(({ data }) => {
-        if (data) setItems(data as Opportunity[]);
-      });
+    supabase.from('opportunities').select('*').eq('status', 'active').order('created_at', { ascending: false })
+      .then(({ data }) => { if (data) setItems(data as Opportunity[]); });
   }, [supabase]);
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setBusy(true);
-    setNote('');
+    setBusy(true); setNote('');
     try {
       const res = await fetch('/api/alumni/opportunities', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title,
-          listing_type: listingType,
-          startup_name: startupName,
-          description,
-          skills,
-          location,
-          compensation,
-          application_method: applicationMethod,
-        }),
+        body: JSON.stringify({ title, listing_type: listingType, startup_name: startupName, description, skills, location, compensation, application_method: applicationMethod, deadline: deadline || null }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'Failed to post opportunity.');
-      setItems((prev) => [data.opportunity, ...prev]);
-      setTitle('');
-      setStartupName('');
-      setDescription('');
-      setSkills('');
-      setLocation('');
-      setCompensation('');
-      setApplicationMethod('');
-      setNote('Opportunity posted.');
+      setItems(prev => [data.opportunity, ...prev]);
+      setTitle(''); setStartupName(''); setDescription(''); setSkills(''); setLocation(''); setCompensation(''); setApplicationMethod(''); setDeadline('');
+      setNote('Opportunity posted successfully.');
+      setShowForm(false);
     } catch (err) {
       setNote(err instanceof Error ? err.message : 'Error.');
     } finally {
@@ -79,75 +61,123 @@ export default function AlumniOpportunitiesPage() {
     }
   }
 
-  return (
-    <div style={{ display: 'grid', gap: 28 }}>
-      <section className="card" style={{ maxWidth: 560 }}>
-        <h2>Post an Opportunity</h2>
-        <form onSubmit={submit} style={{ maxWidth: '100%' }}>
-          <label>
-            Title *
-            <input type="text" required value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Founding Frontend Engineer" />
-          </label>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <label>
-              Type
-              <select value={listingType} onChange={(e) => setListingType(e.target.value)}>
-                <option value="internship">Internship</option>
-                <option value="full_time">Full-time Role</option>
-                <option value="cofounder">Co-Founder</option>
-              </select>
-            </label>
-            <label>
-              Startup / Organization
-              <input type="text" value={startupName} onChange={(e) => setStartupName(e.target.value)} />
-            </label>
-          </div>
-          <label>
-            Description *
-            <textarea rows={3} required value={description} onChange={(e) => setDescription(e.target.value)} />
-          </label>
-          <label>
-            Skills
-            <input type="text" value={skills} onChange={(e) => setSkills(e.target.value)} />
-          </label>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <label>
-              Location / Remote
-              <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} />
-            </label>
-            <label>
-              Compensation / Equity
-              <input type="text" value={compensation} onChange={(e) => setCompensation(e.target.value)} />
-            </label>
-          </div>
-          <label>
-            How to Apply *
-            <input type="text" required value={applicationMethod} onChange={(e) => setApplicationMethod(e.target.value)} placeholder="Email or application link" />
-          </label>
-          <button type="submit" disabled={busy}>Post Opportunity</button>
-        </form>
-        {note && <p role="status" aria-live="polite" style={{ color: 'var(--accent-ink)', margin: 0 }}>{note}</p>}
-      </section>
+  const TYPE_COLOR: Record<string, string> = {
+    internship: 'var(--success)',
+    job: 'var(--color-3-accent-personality)',
+    mentorship: 'var(--accent-ink)',
+    collab: 'var(--text-muted)',
+  };
 
-      <section className="grid">
-        {items.map((o) => (
-          <article key={o.id} className="card">
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span className="badge badge-accent">{o.listing_type.replace('_', ' ')}</span>
-              <span className="mono-meta">{o.status}</span>
+  return (
+    <div style={{ display: 'grid', gap: 32 }}>
+      {/* Header */}
+      <div style={{ background: 'var(--color-2-mood)', color: 'var(--color-1-mood)', padding: '40px 36px', marginLeft: -24, marginRight: -24, marginTop: -24 }}>
+        <p style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(251,249,245,0.4)', margin: '0 0 8px' }}>Alumni Connect</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap', marginBottom: 20 }}>
+          <div>
+            <h1 style={{ margin: '0 0 8px', fontSize: 'clamp(1.4rem,2.5vw,2rem)', fontWeight: 700 }}>Opportunities</h1>
+            <p style={{ margin: 0, color: 'rgba(251,249,245,0.65)', fontSize: 15 }}>Internships, jobs, and mentorships from the alumni network.</p>
+          </div>
+          <button className="btn btn-primary" style={{ fontSize: 14 }} onClick={() => setShowForm(f => !f)}>
+            {showForm ? 'Cancel' : '+ Post Opportunity'}
+          </button>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {[{ label: 'Directory', href: '/alumni/directory' }, { label: 'Startups', href: '/alumni/startups' }, { label: 'Opportunities', href: '/alumni/opportunities' }, { label: 'Messages', href: '/alumni/messages' }].map(({ label, href }) => (
+            <a key={href} href={href} style={{ padding: '6px 14px', borderRadius: 4, background: href === '/alumni/opportunities' ? 'var(--color-3-accent-personality)' : 'rgba(251,249,245,0.1)', color: href === '/alumni/opportunities' ? '#fff' : 'rgba(251,249,245,0.8)', textDecoration: 'none', fontSize: 13, fontWeight: 500 }}>
+              {label}
+            </a>
+          ))}
+        </div>
+      </div>
+
+      {note && <p role="status" aria-live="polite" style={{ margin: 0, color: 'var(--accent-ink)', fontWeight: 500 }}>{note}</p>}
+
+      {/* Post form */}
+      {showForm && (
+        <section className="card" style={{ maxWidth: 580, padding: '28px' }}>
+          <h2 style={{ margin: '0 0 20px', fontSize: '1.1rem', fontWeight: 700 }}>Post an Opportunity</h2>
+          <form onSubmit={submit} style={{ display: 'grid', gap: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+              <label style={{ display: 'grid', gap: 6 }}>
+                <span style={{ fontWeight: 600, fontSize: 13 }}>Title *</span>
+                <input type="text" required value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Frontend Intern" />
+              </label>
+              <label style={{ display: 'grid', gap: 6 }}>
+                <span style={{ fontWeight: 600, fontSize: 13 }}>Type</span>
+                <select value={listingType} onChange={e => setListingType(e.target.value)}>
+                  <option value="internship">Internship</option><option value="job">Job</option>
+                  <option value="mentorship">Mentorship</option><option value="collab">Collaboration</option>
+                </select>
+              </label>
             </div>
-            <h3 style={{ margin: 0 }}>{o.title}</h3>
-            {o.startup_name && <p className="card-meta" style={{ margin: 0 }}>{o.startup_name}</p>}
-            <p className="card-meta" style={{ margin: 0 }}>{o.description}</p>
-            <p className="mono-meta" style={{ margin: 0 }}>
-              {[o.location, o.compensation].filter(Boolean).join(' · ')}
-            </p>
-            <p style={{ margin: 0, fontSize: '0.88rem' }}>
-              <strong>Apply:</strong> {o.application_method}
-            </p>
-          </article>
-        ))}
-      </section>
+            <label style={{ display: 'grid', gap: 6 }}>
+              <span style={{ fontWeight: 600, fontSize: 13 }}>Startup / Company Name</span>
+              <input type="text" value={startupName} onChange={e => setStartupName(e.target.value)} />
+            </label>
+            <label style={{ display: 'grid', gap: 6 }}>
+              <span style={{ fontWeight: 600, fontSize: 13 }}>Description *</span>
+              <textarea rows={3} required value={description} onChange={e => setDescription(e.target.value)} style={{ font: 'inherit', padding: '8px 12px', resize: 'vertical', border: '1.5px solid var(--border-hairline)', borderRadius: 6 }} />
+            </label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+              <label style={{ display: 'grid', gap: 6 }}>
+                <span style={{ fontWeight: 600, fontSize: 13 }}>Skills / Requirements</span>
+                <input type="text" value={skills} onChange={e => setSkills(e.target.value)} placeholder="e.g. React, Python" />
+              </label>
+              <label style={{ display: 'grid', gap: 6 }}>
+                <span style={{ fontWeight: 600, fontSize: 13 }}>Location</span>
+                <input type="text" value={location} onChange={e => setLocation(e.target.value)} placeholder="Remote / Indore" />
+              </label>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+              <label style={{ display: 'grid', gap: 6 }}>
+                <span style={{ fontWeight: 600, fontSize: 13 }}>Compensation</span>
+                <input type="text" value={compensation} onChange={e => setCompensation(e.target.value)} placeholder="e.g. ₹8,000/mo" />
+              </label>
+              <label style={{ display: 'grid', gap: 6 }}>
+                <span style={{ fontWeight: 600, fontSize: 13 }}>Deadline</span>
+                <input type="date" value={deadline} onChange={e => setDeadline(e.target.value)} />
+              </label>
+            </div>
+            <label style={{ display: 'grid', gap: 6 }}>
+              <span style={{ fontWeight: 600, fontSize: 13 }}>How to Apply *</span>
+              <input type="text" required value={applicationMethod} onChange={e => setApplicationMethod(e.target.value)} placeholder="Email hr@startup.in or use contact form" />
+            </label>
+            <button type="submit" className="btn btn-primary" disabled={busy} style={{ width: 'fit-content' }}>
+              {busy ? 'Posting…' : 'Post Opportunity'}
+            </button>
+          </form>
+        </section>
+      )}
+
+      {/* Opportunities list */}
+      {items.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '48px 24px' }}>
+          <p className="card-meta" style={{ margin: 0 }}>No active opportunities posted yet.</p>
+        </div>
+      ) : (
+        <div className="grid">
+          {items.map(o => (
+            <article key={o.id} className="card">
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: TYPE_COLOR[o.listing_type] ?? 'var(--text-muted)' }}>{o.listing_type}</span>
+                {o.startup_name && <span className="badge">{o.startup_name}</span>}
+              </div>
+              <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700 }}>{o.title}</h3>
+              <p className="card-meta" style={{ margin: 0 }}>{o.description}</p>
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                {o.location && <span className="mono-meta">{o.location}</span>}
+                {o.compensation && <span className="mono-meta">{o.compensation}</span>}
+                {o.deadline && <span className="mono-meta">Deadline: {new Date(o.deadline).toLocaleDateString('en-IN')}</span>}
+              </div>
+              {o.skills && <p style={{ margin: 0, fontSize: 13, color: 'var(--text-secondary)' }}>Skills: {o.skills}</p>}
+              <div style={{ marginTop: 'auto', paddingTop: 10 }}>
+                <p style={{ margin: 0, fontSize: 13, color: 'var(--text-secondary)', fontStyle: 'italic' }}>How to apply: {o.application_method}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -42,23 +42,27 @@ export default async function RegistrationDetailPage({
   const qrDataUrl = ticket?.qr_token ? await generateQrDataUrl(ticket.qr_token) : null;
 
   return (
-    <>
-      <p style={{ marginBottom: 16 }}>
-        <Link href="/portal/registrations">← Your registrations</Link>
-      </p>
-
-      <h1>{ev?.title ?? 'Event Registration'}</h1>
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 24 }}>
-        <span className="badge badge-accent">Status: {reg.status.replace('_', ' ')}</span>
-        <span className="badge">Payment: {reg.payment_status.replace('_', ' ')}</span>
-        <span className="badge">
-          Attendance: {att ? `Checked in (${new Date(att.checked_in_at).toLocaleTimeString('en-IN')})` : 'Not checked in'}
-        </span>
+    <div style={{ display: 'grid', gap: 28 }}>
+      {/* Header */}
+      <div style={{ background: 'var(--color-2-mood)', color: 'var(--color-1-mood)', padding: '40px 36px', marginLeft: -24, marginRight: -24, marginTop: -24 }}>
+        <p style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(251,249,245,0.4)', margin: '0 0 8px' }}>
+          <Link href="/portal/registrations" style={{ color: 'inherit', textDecoration: 'none' }}>Your registrations</Link> / Ticket Pass
+        </p>
+        <h1 style={{ margin: '0 0 16px', fontSize: 'clamp(1.4rem,2.5vw,2rem)', fontWeight: 700 }}>
+          {ev?.title ?? 'Event Registration'}
+        </h1>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <span className="badge badge-accent">Status: {reg.status.replace('_', ' ')}</span>
+          <span className="badge" style={{ background: 'rgba(251,249,245,0.1)', color: 'var(--color-1-mood)' }}>Payment: {reg.payment_status.replace('_', ' ')}</span>
+          <span className="badge" style={{ background: 'rgba(251,249,245,0.1)', color: 'var(--color-1-mood)' }}>
+            Attendance: {att ? `Checked in (${new Date(att.checked_in_at).toLocaleTimeString('en-IN')})` : 'Not checked in'}
+          </span>
+        </div>
       </div>
 
       {ticket && qrDataUrl ? (
         <TicketPrinterClient
-          eventTitle={ev?.title ?? 'E-Cell AITR Event'}
+          eventTitle={ev?.title ?? 'EDC AITR Event'}
           eventVenue={ev?.venue ?? null}
           eventStartsAt={ev?.starts_at ?? null}
           attendeeName={profile?.full_name || user.email || 'Participant'}
@@ -69,7 +73,7 @@ export default async function RegistrationDetailPage({
         />
       ) : (
         <div className="card">
-          <h2 style={{ margin: 0 }}>Ticket Pending</h2>
+          <h2 style={{ margin: '0 0 8px', fontSize: '1.2rem', fontWeight: 700 }}>Ticket Pending</h2>
           <p className="card-meta" style={{ margin: 0 }}>
             {reg.payment_status === 'pending_verification'
               ? `Your payment reference (${reg.payment_ref}) is awaiting verification by the Event Lead. Your QR ticket will be issued and emailed once verified.`
@@ -77,6 +81,6 @@ export default async function RegistrationDetailPage({
           </p>
         </div>
       )}
-    </>
+    </div>
   );
 }

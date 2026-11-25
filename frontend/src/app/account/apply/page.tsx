@@ -10,7 +10,7 @@ const APP_OPTIONS: { type: AppType; label: string; description: string; required
   {
     type: 'core_team_application',
     label: 'Core Team membership',
-    description: 'Apply to become an approved E-Cell Core Team member. Reviewed by an Advisor.',
+    description: 'Apply to become an approved EDC Core Team member. Reviewed by an Advisor.',
     requiredRole: 'participant',
   },
   {
@@ -22,7 +22,7 @@ const APP_OPTIONS: { type: AppType; label: string; description: string; required
   {
     type: 'alumni_verification',
     label: 'Alumni Connect access',
-    description: 'Verify your former E-Cell membership to gain Alumni Connect access.',
+    description: 'Verify your former EDC membership to gain Alumni Connect access.',
     requiredRole: 'participant',
   },
 ];
@@ -34,6 +34,20 @@ interface OwnApplication {
   created_at: string;
   review_note: string | null;
 }
+
+const STATUS_COLOR: Record<string, string> = {
+  pending: 'var(--accent-ink)',
+  approved: 'var(--success)',
+  rejected: 'var(--danger)',
+  suspended: 'var(--danger)',
+};
+
+const STATUS_BG: Record<string, string> = {
+  pending: 'rgba(224,72,38,0.08)',
+  approved: 'rgba(21,128,61,0.08)',
+  rejected: 'rgba(185,28,28,0.08)',
+  suspended: 'rgba(185,28,28,0.08)',
+};
 
 export default function ApplyPage() {
   const [supabase] = useState(() => createClient());
@@ -73,95 +87,110 @@ export default function ApplyPage() {
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!supabase || !selected || !userId) return;
+    if (!supabase || !userId || !selected || statement.length < 20) return;
     setBusy(true); setMessage(''); setIsError(false);
     try {
       const { error } = await supabase.from('applications').insert({
         applicant_id: userId,
         application_type: selected,
-        status: 'pending',
         statement: statement.trim(),
+        status: 'pending',
       });
       if (error) throw error;
-      setMessage('Application submitted. You will be notified when it is reviewed.');
-      setStatement('');
+      setMessage('Application submitted successfully. You will be notified of the decision.');
       setSelected(null);
-      // Refresh own applications
-      const { data: updated } = await supabase
+      setStatement('');
+      const { data } = await supabase
         .from('applications')
         .select('id, application_type, status, created_at, review_note')
         .eq('applicant_id', userId)
         .order('created_at', { ascending: false });
-      if (updated) setOwnApplications(updated as OwnApplication[]);
+      if (data) setOwnApplications(data as OwnApplication[]);
     } catch (err) {
       setIsError(true);
-      setMessage(err instanceof Error ? err.message : 'Submission failed. Please try again.');
+      setMessage(err instanceof Error ? err.message : 'Submission failed.');
     } finally {
       setBusy(false);
     }
   }
 
-  if (loading) return <p>Loading…</p>;
-  if (!userId) return <p>Please <a href="/account">sign in</a> to apply.</p>;
-
-  const statusColor: Record<string, string> = {
-    pending: '#e65100', approved: '#2e7d32', rejected: '#c62828', suspended: '#c62828',
-  };
+  if (loading) return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '48px 24px', color: 'var(--text-muted)' }}>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'spin 1s linear infinite' }}>
+        <path d="M21 12a9 9 0 11-6.219-8.56"/>
+      </svg>
+      Loading…
+    </div>
+  );
+  if (!userId) return (
+    <div className="card" style={{ maxWidth: 400, margin: '48px auto', textAlign: 'center' }}>
+      <p style={{ margin: 0 }}>Please <a href="/account">sign in</a> to apply.</p>
+    </div>
+  );
 
   return (
-    <>
-      <h1>Apply for a role</h1>
-      <p style={{ color: '#555', marginBottom: 24 }}>
-        Current role: <strong>{currentRole}</strong>. Administrative roles require approval and do not change your participant access.
-      </p>
+    <div style={{ display: 'grid', gap: 32 }}>
+      {/* Dark header band */}
+      <div style={{ background: 'var(--color-2-mood)', color: 'var(--color-1-mood)', padding: '40px 36px', marginLeft: -24, marginRight: -24, marginTop: -24 }}>
+        <p style={{ fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(251,249,245,0.5)', margin: '0 0 8px' }}>
+          Account
+        </p>
+        <h1 style={{ margin: 0, fontSize: 'clamp(1.5rem,3vw,2.25rem)', fontWeight: 700, lineHeight: 1.1 }}>
+          Apply for a Role
+        </h1>
+        <p style={{ margin: '12px 0 0', color: 'rgba(251,249,245,0.65)', fontSize: 15, maxWidth: 560 }}>
+          Current role: <strong style={{ color: '#fff' }}>{currentRole.replace('_', ' ')}</strong>.
+          Administrative roles require approval and do not change your participant access.
+        </p>
+      </div>
 
       {/* Existing applications */}
       {ownApplications.length > 0 && (
         <section>
-          <h2>Your applications</h2>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-            <thead>
-              <tr style={{ borderBottom: '2px solid #ccd2da' }}>
-                <th style={{ textAlign: 'left', padding: '8px 12px' }}>Type</th>
-                <th style={{ textAlign: 'left', padding: '8px 12px' }}>Status</th>
-                <th style={{ textAlign: 'left', padding: '8px 12px' }}>Submitted</th>
-                <th style={{ textAlign: 'left', padding: '8px 12px' }}>Note</th>
-              </tr>
-            </thead>
-            <tbody>
-              {ownApplications.map(app => (
-                <tr key={app.id} style={{ borderBottom: '1px solid #e0e0e0' }}>
-                  <td style={{ padding: '8px 12px' }}>{app.application_type.replace(/_/g, ' ')}</td>
-                  <td style={{ padding: '8px 12px', color: statusColor[app.status] ?? '#333', fontWeight: 600 }}>
-                    {app.status}
-                  </td>
-                  <td style={{ padding: '8px 12px' }}>
-                    {new Date(app.created_at).toLocaleDateString('en-IN')}
-                  </td>
-                  <td style={{ padding: '8px 12px', color: '#555' }}>{app.review_note ?? '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <h2 style={{ fontSize: '1rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', margin: '0 0 16px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
+            Your Applications
+          </h2>
+          <div style={{ display: 'grid', gap: 12 }}>
+            {ownApplications.map(app => (
+              <div key={app.id} className="card" style={{ padding: '16px 20px', display: 'grid', gridTemplateColumns: '1fr auto', gap: 16, alignItems: 'start' }}>
+                <div>
+                  <div style={{ fontWeight: 600, marginBottom: 4 }}>{app.application_type.replace(/_/g, ' ')}</div>
+                  <div className="mono-meta" style={{ margin: 0 }}>{new Date(app.created_at).toLocaleDateString('en-IN')}</div>
+                  {app.review_note && (
+                    <div style={{ marginTop: 8, fontSize: 13, color: 'var(--text-secondary)', fontStyle: 'italic' }}>
+                      Note: {app.review_note}
+                    </div>
+                  )}
+                </div>
+                <span style={{ background: STATUS_BG[app.status] ?? 'var(--surface-subtle)', color: STATUS_COLOR[app.status] ?? 'var(--text-primary)', padding: '4px 10px', borderRadius: 4, fontSize: 12, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                  {app.status}
+                </span>
+              </div>
+            ))}
+          </div>
         </section>
       )}
 
       {/* Application form */}
-      <section style={{ marginTop: 32 }}>
-        <h2>Submit a new application</h2>
-        <form onSubmit={submit}>
-          <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
-            <legend style={{ fontWeight: 600, marginBottom: 12 }}>Select application type</legend>
+      <section>
+        <h2 style={{ fontSize: '1rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', margin: '0 0 16px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
+          Submit a New Application
+        </h2>
+        <form onSubmit={submit} style={{ display: 'grid', gap: 16 }}>
+          <div style={{ display: 'grid', gap: 10 }}>
             {APP_OPTIONS.map(opt => {
               const pending = hasPending(opt.type);
+              const isSelected = selected === opt.type;
               return (
                 <label
                   key={opt.type}
                   style={{
-                    display: 'flex', alignItems: 'flex-start', gap: 12,
-                    padding: '12px 16px', border: `2px solid ${selected === opt.type ? '#174bba' : '#ccd2da'}`,
-                    borderRadius: 6, marginBottom: 8, cursor: pending ? 'not-allowed' : 'pointer',
-                    opacity: pending ? 0.6 : 1,
+                    display: 'flex', alignItems: 'flex-start', gap: 14,
+                    padding: '16px 18px',
+                    border: `2px solid ${isSelected ? 'var(--color-3-accent-personality)' : 'var(--border-hairline)'}`,
+                    background: isSelected ? 'var(--accent-tint)' : 'var(--surface)',
+                    borderRadius: 6, cursor: pending ? 'not-allowed' : 'pointer',
+                    opacity: pending ? 0.6 : 1, transition: 'border-color 0.15s, background 0.15s',
                   }}
                 >
                   <input
@@ -169,24 +198,23 @@ export default function ApplyPage() {
                     name="type"
                     value={opt.type}
                     disabled={pending}
-                    checked={selected === opt.type}
+                    checked={isSelected}
                     onChange={() => setSelected(opt.type)}
-                    style={{ marginTop: 2 }}
+                    style={{ marginTop: 3, accentColor: 'var(--color-3-accent-personality)' }}
                   />
                   <span>
-                    <strong>{opt.label}</strong>
-                    {pending && <span style={{ color: '#e65100', marginLeft: 8, fontSize: 12 }}>(pending)</span>}
-                    <br />
-                    <span style={{ fontSize: 13, color: '#555' }}>{opt.description}</span>
+                    <strong style={{ display: 'block', marginBottom: 4 }}>{opt.label}</strong>
+                    {pending && <span style={{ color: 'var(--accent-ink)', marginRight: 8, fontSize: 11, fontWeight: 700, textTransform: 'uppercase' }}>Pending</span>}
+                    <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{opt.description}</span>
                   </span>
                 </label>
               );
             })}
-          </fieldset>
+          </div>
 
           {selected && (
-            <label style={{ marginTop: 16 }}>
-              Supporting statement
+            <label style={{ display: 'grid', gap: 6 }}>
+              <span style={{ fontWeight: 600, fontSize: 14 }}>Supporting statement</span>
               <textarea
                 required
                 minLength={20}
@@ -195,27 +223,36 @@ export default function ApplyPage() {
                 value={statement}
                 onChange={e => setStatement(e.target.value)}
                 placeholder="Briefly explain your background and motivation (minimum 20 characters)."
-                style={{ font: 'inherit', padding: 10, resize: 'vertical' }}
+                style={{ font: 'inherit', padding: '10px 14px', resize: 'vertical', border: '1.5px solid var(--border-hairline)', borderRadius: 6, background: 'var(--surface)' }}
               />
-              <span style={{ fontSize: 12, color: '#777' }}>{statement.length}/2000</span>
+              <span style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'right' }}>{statement.length}/2000</span>
             </label>
           )}
 
-          <button type="submit" disabled={!selected || busy || statement.length < 20}>
-            {busy ? 'Submitting…' : 'Submit application'}
-          </button>
+          <div>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={!selected || busy || statement.length < 20}
+              style={{ minWidth: 180 }}
+            >
+              {busy ? 'Submitting…' : 'Submit Application'}
+            </button>
+          </div>
         </form>
       </section>
 
       {message && (
-        <p role="status" aria-live="polite" style={{ color: isError ? '#c62828' : '#2e7d32', marginTop: 12 }}>
+        <p role="status" aria-live="polite" style={{ color: isError ? 'var(--danger)' : 'var(--success)', margin: 0, fontWeight: 500 }}>
           {message}
         </p>
       )}
 
-      <p style={{ marginTop: 24 }}>
-        <a href="/account/dashboard">← Back to dashboard</a>
+      <p>
+        <a href="/account/dashboard" style={{ color: 'var(--text-muted)', fontSize: 14, textDecoration: 'none' }}>
+          ← Back to dashboard
+        </a>
       </p>
-    </>
+    </div>
   );
 }

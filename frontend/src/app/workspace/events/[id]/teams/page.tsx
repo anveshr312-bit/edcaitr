@@ -51,21 +51,34 @@ export default async function EventTeamsPage({
 
   return (
     <>
-      <p style={{ marginBottom: 16 }}>
-        <Link href={`/workspace/events/${id}`}>← Event overview</Link> ·{' '}
-        <Link href={`/workspace/events/${id}/tasks`}>Task board</Link>
-      </p>
-      <h1>Operational Teams: {event.title}</h1>
-      <p style={{ color: 'var(--text-secondary)', marginBottom: 24 }}>
-        Members grouped across the 12 confirmed operational teams.
-      </p>
-      <EventTeamsClient
-        eventId={id}
-        teams={teams ?? []}
-        initialMembers={normalizedMembers}
-        candidates={(candidates as { id: string; full_name: string; designation: string | null; role: string }[]) ?? []}
-        canManage={Boolean(canManage)}
-      />
+      {/* Header */}
+      <div style={{ background: 'var(--color-2-mood)', color: 'var(--color-1-mood)', padding: '40px 36px', marginLeft: -24, marginRight: -24, marginTop: -24 }}>
+        <p style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(251,249,245,0.4)', margin: '0 0 8px' }}>
+          <Link href={`/workspace/events/${id}`} style={{ color: 'inherit', textDecoration: 'none' }}>{event.title}</Link> / Operational Teams
+        </p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap' }}>
+          <div>
+            <h1 style={{ margin: '0 0 8px', fontSize: 'clamp(1.3rem,2.5vw,1.9rem)', fontWeight: 700 }}>Operational Teams</h1>
+            <p style={{ margin: 0, color: 'rgba(251,249,245,0.65)', fontSize: 15 }}>
+              {normalizedMembers.length} member{normalizedMembers.length !== 1 ? 's' : ''} across 12 confirmed teams.
+            </p>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+          <Link href={`/workspace/events/${id}`} style={{ padding: '6px 14px', borderRadius: 4, background: 'rgba(251,249,245,0.1)', color: 'rgba(251,249,245,0.8)', textDecoration: 'none', fontSize: 13 }}>Overview</Link>
+          <Link href={`/workspace/events/${id}/tasks`} style={{ padding: '6px 14px', borderRadius: 4, background: 'rgba(251,249,245,0.1)', color: 'rgba(251,249,245,0.8)', textDecoration: 'none', fontSize: 13 }}>Task Board</Link>
+        </div>
+      </div>
+
+      <div style={{ marginTop: 32 }}>
+        <EventTeamsClient
+          eventId={id}
+          teams={teams ?? []}
+          initialMembers={normalizedMembers}
+          candidates={(candidates as { id: string; full_name: string; designation: string | null; role: string }[]) ?? []}
+          canManage={Boolean(canManage)}
+        />
+      </div>
     </>
   );
 }
