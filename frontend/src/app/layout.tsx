@@ -30,7 +30,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             <img
               src="/edc-logo-light.png"
               alt="EDC AITR — Entrepreneurship Development Cell"
-              style={{ height: 38, width: 'auto', objectFit: 'contain', display: 'block' }}
+              style={{ height: 48, width: 'auto', objectFit: 'contain', display: 'block' }}
             />
           </Link>
           <nav aria-label="Main navigation">
@@ -39,7 +39,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             <Link href="/team">Team</Link>
             <Link href="/about">About</Link>
             <Link href="/contact">Contact</Link>
-            <Link href="/account" className="nav-cta">
+            <Link href="/account/dashboard" className="nav-cta">
               Account
             </Link>
           </nav>
