@@ -1,8 +1,25 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import { getPublicEvents } from '../../lib/events/events';
 import { getImageKitUrl } from '../../lib/media/imagekit';
+import { createPageMetadata } from '../../lib/seo';
+import { BreadcrumbStructuredData } from '../../components/StructuredData';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = createPageMetadata({
+  title: 'Events & Summits — E-Summit, Hackathons & Conclaves',
+  description: 'Explore upcoming entrepreneurship summits, Kriyeta hackathons, PitchBiz investor arenas, and masterclasses hosted by EDC AITR in Indore.',
+  path: '/events',
+  keywords: [
+    'EDC AITR events',
+    'Startup events in Indore',
+    'Entrepreneurship workshops in Indore',
+    'FOKUS X E-Summit 2026',
+    'Kriyeta Hackathon',
+    'PitchBiz Acropolis',
+  ],
+});
 
 export default async function EventsPage() {
   const events = await getPublicEvents(false);
@@ -90,6 +107,12 @@ export default async function EventsPage() {
 
   return (
     <div style={{ display: 'grid', gap: 56 }}>
+      <BreadcrumbStructuredData
+        items={[
+          { name: 'Home', path: '/' },
+          { name: 'Events & Summits', path: '/events' },
+        ]}
+      />
       {/* Light Header Band */}
       <section className="card" style={{ background: 'var(--surface)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--radius-panel)', padding: 'clamp(32px, 4vw, 48px)', margin: 0 }}>
         <div style={{ maxWidth: 1100 }}>

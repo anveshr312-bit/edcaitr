@@ -1,5 +1,7 @@
 import type { NextConfig } from 'next';
 
+const isPreview = process.env.VERCEL_ENV === 'preview';
+
 const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
@@ -13,7 +15,7 @@ const nextConfig: NextConfig = {
     ],
   },
   async headers() {
-    return [
+    const headersList = [
       {
         source: '/:all*(webp|avif|png|jpg|jpeg|svg|ico)',
         headers: [
@@ -24,6 +26,21 @@ const nextConfig: NextConfig = {
         ],
       },
     ];
+
+    // Strictly protect Vercel preview deployments from indexing
+    if (isPreview) {
+      headersList.push({
+        source: '/:path*',
+        headers: [
+          {
+            key: 'X-Robots-Tag',
+            value: 'noindex, nofollow, noarchive, nosnippet',
+          },
+        ],
+      });
+    }
+
+    return headersList;
   },
 };
 

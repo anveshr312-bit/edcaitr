@@ -1,8 +1,24 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import { getPublicPastTeams, getPublicTeamProfiles } from '../../lib/events/events';
 import { getImageKitUrl } from '../../lib/media/imagekit';
+import { createPageMetadata } from '../../lib/seo';
+import { BreadcrumbStructuredData } from '../../components/StructuredData';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = createPageMetadata({
+  title: 'Leadership & Teams — Faculty Advisors & Student Leads',
+  description: 'Meet the Director, faculty advisors, and the 12 operational student teams driving the Entrepreneurship Development Cell at Acropolis Institute, Indore.',
+  path: '/team',
+  keywords: [
+    'EDC AITR team',
+    'Acropolis E-Cell leadership',
+    'Student coordinators EDC Indore',
+    'AIIH Foundation mentors',
+    'Faculty advisors AITR',
+  ],
+});
 
 const ROLE_TITLES: Record<'director' | 'advisor' | 'core_team', string> = {
   director: 'Director',
@@ -62,6 +78,12 @@ export default async function TeamPage() {
 
   return (
     <div style={{ display: 'grid', gap: 56 }}>
+      <BreadcrumbStructuredData
+        items={[
+          { name: 'Home', path: '/' },
+          { name: 'Leadership & Team', path: '/team' },
+        ]}
+      />
       {/* Light Header Band */}
       <section className="card" style={{ background: 'var(--surface)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--radius-panel)', padding: 'clamp(32px, 4vw, 48px)', margin: 0 }}>
         <div style={{ maxWidth: 1100 }}>

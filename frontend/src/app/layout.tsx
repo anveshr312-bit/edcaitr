@@ -1,8 +1,11 @@
 import type { ReactNode } from 'react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google';
 import WebVitals from '../components/WebVitals';
 import LogoParticleLoader from '../components/LogoParticleLoader';
+import { GlobalStructuredData } from '../components/StructuredData';
+import { getBaseUrl, SITE_CONFIG, isProductionDeployment } from '../lib/seo';
 import './style.css';
 
 const sans = Plus_Jakarta_Sans({
@@ -21,17 +24,84 @@ const mono = JetBrains_Mono({
   variable: '--font-mono',
 });
 
-export const metadata = {
-  title: 'EDC AITR — Entrepreneurship Development Cell | Acropolis Institute',
-  description: 'Official portal of Entrepreneurship Development Cell (EDC) & AIIH Foundation at Acropolis Institute of Technology and Research (AITR), Indore.',
+const baseUrl = getBaseUrl();
+const isProd = isProductionDeployment();
+
+export const metadata: Metadata = {
+  metadataBase: new URL(baseUrl),
+  title: {
+    default: SITE_CONFIG.defaultTitle,
+    template: SITE_CONFIG.titleTemplate,
+  },
+  description: SITE_CONFIG.shortDescription,
+  applicationName: SITE_CONFIG.name,
+  authors: [{ name: SITE_CONFIG.name, url: baseUrl }],
+  generator: 'Next.js',
+  keywords: SITE_CONFIG.keywords,
+  referrer: 'origin-when-cross-origin',
+  creator: SITE_CONFIG.name,
+  publisher: SITE_CONFIG.legalName,
+  formatDetection: {
+    email: false,
+    address: true,
+    telephone: false,
+  },
+  alternates: {
+    canonical: baseUrl,
+  },
+  robots: isProd
+    ? {
+        index: true,
+        follow: true,
+        nocache: false,
+        googleBot: {
+          index: true,
+          follow: true,
+          'max-video-preview': -1,
+          'max-image-preview': 'large',
+          'max-snippet': -1,
+        },
+      }
+    : {
+        index: false,
+        follow: false,
+        noarchive: true,
+        nosnippet: true,
+      },
   icons: {
     icon: [
-      { url: '/favicon.ico' },
-      { url: '/icon.png', type: 'image/png' },
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icon.png', type: 'image/png', sizes: '512x512' },
     ],
     apple: [
-      { url: '/apple-icon.png' },
+      { url: '/apple-icon.png', sizes: '180x180', type: 'image/png' },
     ],
+  },
+  openGraph: {
+    title: SITE_CONFIG.defaultTitle,
+    description: SITE_CONFIG.shortDescription,
+    url: baseUrl,
+    siteName: SITE_CONFIG.name,
+    locale: 'en_IN',
+    type: 'website',
+    images: [
+      {
+        url: `${baseUrl}/og-image.png`,
+        width: 1200,
+        height: 630,
+        alt: `${SITE_CONFIG.name} — ${SITE_CONFIG.legalName}`,
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: SITE_CONFIG.defaultTitle,
+    description: SITE_CONFIG.shortDescription,
+    images: [`${baseUrl}/og-image.png`],
+    creator: SITE_CONFIG.social.instagramHandle,
+  },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
   },
 };
 
@@ -39,6 +109,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={`${sans.variable} ${mono.variable}`}>
       <head>
+        <GlobalStructuredData />
         {/* Critical synchronous preloader initialization to eliminate initial homepage flash (P0) */}
         <script
           dangerouslySetInnerHTML={{
@@ -113,6 +184,8 @@ export default function Layout({ children }: { children: ReactNode }) {
                 alt="EDC AITR"
                 width={140}
                 height={48}
+                loading="lazy"
+                decoding="async"
                 style={{ height: 36, width: 'auto', objectFit: 'contain', display: 'block', marginBottom: 16 }}
               />
               <p style={{ margin: '0 0 12px', fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.65 }}>

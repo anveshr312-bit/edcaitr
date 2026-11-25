@@ -1,10 +1,13 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import nextDynamic from 'next/dynamic';
 import { notFound } from 'next/navigation';
 import { getPublicEventBySlug } from '../../../lib/events/events';
 import { getImageKitUrl } from '../../../lib/media/imagekit';
 import { createClient } from '../../../lib/supabase/server';
 import { SkeletonBox } from '../../../components/ui/Skeleton';
+import { createPageMetadata, SITE_CONFIG } from '../../../lib/seo';
+import { EventStructuredData, BreadcrumbStructuredData } from '../../../components/StructuredData';
 
 const EventRegisterForm = nextDynamic(
   () => import('../../../components/EventRegisterForm'),
@@ -13,6 +16,45 @@ const EventRegisterForm = nextDynamic(
 import LiquidButton from '../../../components/ui/liquid-button';
 
 export const revalidate = 60;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const { event } = await getPublicEventBySlug(slug);
+
+  if (!event) {
+    return {
+      title: 'Event Not Found | EDC AITR',
+      robots: { index: false, follow: false },
+    };
+  }
+
+  const posterUrl = getImageKitUrl(event.poster_ref);
+  const cleanSummary =
+    event.summary ||
+    (event.description ? event.description.slice(0, 160) : null) ||
+    `Official event registrations and details for ${event.title} hosted by EDC AITR in Indore.`;
+
+  return createPageMetadata({
+    title: `${event.title} — Events`,
+    description: cleanSummary,
+    path: `/events/${event.slug}`,
+    ogImage: posterUrl || '/og-image.png',
+    ogType: 'article',
+    publishedTime: event.starts_at || undefined,
+    modifiedTime: event.ends_at || undefined,
+    keywords: [
+      event.title,
+      'EDC AITR event',
+      'Student entrepreneurship conclave',
+      'Acropolis Indore event registration',
+      event.venue || 'Acropolis Indore',
+    ],
+  });
+}
 
 /** Reusable section heading with 2px vermilion left border */
 function SectionHeading({ children }: { children: React.ReactNode }) {
@@ -90,6 +132,29 @@ export default async function EventDetailPage({
 
   return (
     <>
+      <EventStructuredData
+        event={{
+          id: event.id,
+          title: event.title,
+          slug: event.slug,
+          summary: event.summary,
+          description: event.description,
+          startsAt: event.starts_at,
+          endsAt: event.ends_at,
+          venue: event.venue,
+          isPaid: event.is_paid,
+          feeAmount: event.fee_amount,
+          bannerUrl: posterUrl,
+          status: event.status,
+        }}
+      />
+      <BreadcrumbStructuredData
+        items={[
+          { name: 'Home', path: '/' },
+          { name: 'Events', path: '/events' },
+          { name: event.title, path: `/events/${event.slug}` },
+        ]}
+      />
       {/* ── BREADCRUMB ── */}
       <p style={{ marginBottom: 24, fontSize: '0.9rem' }}>
         <Link

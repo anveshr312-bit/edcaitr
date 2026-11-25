@@ -1,4 +1,20 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
+import { createPageMetadata } from '../../lib/seo';
+import { BreadcrumbStructuredData } from '../../components/StructuredData';
+
+export const metadata: Metadata = createPageMetadata({
+  title: 'About Us — Mission, Leadership & Incubation Hub',
+  description: 'Learn about EDC AITR and the AIIH Foundation at Acropolis Institute of Technology & Research, empowering student founders through mentorship, venture grants, and startup acceleration.',
+  path: '/about',
+  keywords: [
+    'About EDC AITR',
+    'AIIH Foundation Acropolis',
+    'Acropolis Incubation Hub',
+    'Student entrepreneurship mission Indore',
+    'E-Cell objectives Acropolis',
+  ],
+});
 
 export default function AboutPage() {
   const OBJECTIVES = [
@@ -38,6 +54,12 @@ export default function AboutPage() {
 
   return (
     <div style={{ display: 'grid', gap: 56 }}>
+      <BreadcrumbStructuredData
+        items={[
+          { name: 'Home', path: '/' },
+          { name: 'About EDC & AIIH', path: '/about' },
+        ]}
+      />
       {/* Light Header Band */}
       <section className="card" style={{ background: 'var(--surface)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--radius-panel)', padding: 'clamp(32px, 4vw, 48px)', margin: 0 }}>
         <div style={{ maxWidth: 1100 }}>
