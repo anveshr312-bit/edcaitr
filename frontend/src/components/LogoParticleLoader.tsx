@@ -62,14 +62,14 @@ export default function LogoParticleLoader() {
     ctx.scale(dpr, dpr);
 
     const img = new Image();
-    img.src = '/edc-logo-light.webp';
+    img.src = '/edc-mark.webp';
     img.crossOrigin = 'anonymous';
 
     img.onload = () => {
       if (isCleanedUp) return;
 
-      // Desired logo display size in center
-      const maxW = Math.min(width * 0.7, 340);
+      // Desired emblem display size in center
+      const maxW = Math.min(width * 0.55, 260);
       const aspect = img.height / img.width;
       const logoW = maxW;
       const logoH = maxW * aspect;
