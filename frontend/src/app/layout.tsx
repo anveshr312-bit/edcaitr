@@ -24,6 +24,15 @@ const mono = JetBrains_Mono({
 export const metadata = {
   title: 'EDC AITR — Entrepreneurship Development Cell | Acropolis Institute',
   description: 'Official portal of Entrepreneurship Development Cell (EDC) & AIIH Foundation at Acropolis Institute of Technology and Research (AITR), Indore.',
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/icon.png', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-icon.png' },
+    ],
+  },
 };
 
 export default function Layout({ children }: { children: ReactNode }) {
