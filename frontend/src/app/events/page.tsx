@@ -10,8 +10,8 @@ export default async function EventsPage() {
   return (
     <>
       <h1>Events</h1>
-      <p style={{ color: 'var(--text-muted)', marginBottom: 28 }}>
-        Browse upcoming and concluded public events organized by E-Cell AITR.
+      <p style={{ color: 'var(--text-secondary)', marginBottom: 28 }}>
+        Upcoming and concluded public events organized by E-Cell AITR.
       </p>
 
       {events.length === 0 ? (
@@ -30,15 +30,17 @@ export default async function EventsPage() {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={posterUrl} alt={event.title} className="poster" />
                 )}
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  <span className="badge badge-accent">{event.status.replace('_', ' ')}</span>
-                  <span className="badge">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                  <span className="badge badge-accent">
+                    {event.status === 'closed' ? 'Concluded' : event.status.replace('_', ' ')}
+                  </span>
+                  <span className="mono-meta">
                     {event.is_paid && event.fee_amount ? `₹${event.fee_amount}` : 'Free'}
                   </span>
                 </div>
                 <h2 style={{ margin: 0, fontSize: '1.2rem' }}>{event.title}</h2>
                 {event.summary && <p className="card-meta" style={{ margin: 0 }}>{event.summary}</p>}
-                <p className="card-meta" style={{ margin: 0 }}>
+                <p className="mono-meta" style={{ margin: 0 }}>
                   {event.starts_at
                     ? new Date(event.starts_at).toLocaleString('en-IN', {
                         dateStyle: 'medium',
@@ -48,7 +50,7 @@ export default async function EventsPage() {
                   {event.venue ? ` · ${event.venue}` : ''}
                 </p>
                 <div style={{ marginTop: 'auto', paddingTop: 8 }}>
-                  <Link href={`/events/${event.slug}`}>Open event details →</Link>
+                  <Link href={`/events/${event.slug}`}>Open event details</Link>
                 </div>
               </article>
             );

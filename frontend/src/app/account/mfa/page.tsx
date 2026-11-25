@@ -157,8 +157,8 @@ export default function MfaPage() {
       )}
 
       {step === 'done' && (
-        <p style={{ color: '#2e7d32' }}>
-          ✓ MFA is active and verified for this session. Director-gated actions are available.
+        <p style={{ color: 'var(--success)' }}>
+          MFA is active and verified for this session. Director-gated actions are available.
         </p>
       )}
 

@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { getPublicPastTeams, getPublicTeamProfiles } from '../../lib/events/events';
 import { getImageKitUrl } from '../../lib/media/imagekit';
 
@@ -19,9 +20,9 @@ export default async function TeamPage() {
 
   return (
     <>
-      <h1>Our Team</h1>
-      <p style={{ color: 'var(--text-muted)', marginBottom: 28 }}>
-        Approved E-Cell AITR leadership and Core Team members who have opted into public visibility.
+      <h1>Team</h1>
+      <p style={{ color: 'var(--text-secondary)', marginBottom: 28 }}>
+        Approved E-Cell AITR leadership and Core Team members with public visibility enabled.
       </p>
 
       {currentTeam.length === 0 ? (
@@ -61,7 +62,7 @@ export default async function TeamPage() {
                       {member.bio && <p className="card-meta" style={{ margin: 0 }}>{member.bio}</p>}
                       {member.linkedin_url && (
                         <a href={member.linkedin_url} target="_blank" rel="noopener noreferrer">
-                          LinkedIn →
+                          LinkedIn
                         </a>
                       )}
                     </article>
@@ -83,12 +84,12 @@ export default async function TeamPage() {
                 <p className="card-meta" style={{ margin: 0 }}>
                   {member.designation || member.role.replace('_', ' ')}
                 </p>
-                <p className="card-meta" style={{ margin: 0 }}>
+                <p className="mono-meta" style={{ margin: 0 }}>
                   {member.effective_from ?? ''} – {member.effective_until ?? 'Present'}
                 </p>
                 {member.linkedin_url && (
                   <a href={member.linkedin_url} target="_blank" rel="noopener noreferrer">
-                    LinkedIn →
+                    LinkedIn
                   </a>
                 )}
               </article>
@@ -96,6 +97,10 @@ export default async function TeamPage() {
           </div>
         </section>
       )}
+
+      <p style={{ marginTop: 32 }}>
+        <Link href="/account">Member sign in</Link>
+      </p>
     </>
   );
 }

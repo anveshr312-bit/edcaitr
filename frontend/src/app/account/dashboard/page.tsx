@@ -67,12 +67,12 @@ export default async function DashboardPage() {
 
       {/* MFA Warning for Director */}
       {needsMfaSetup && (
-        <section style={{ background: '#fff3cd', border: '1px solid #ffc107', borderRadius: 6, padding: '16px 20px', marginBottom: 24 }}>
-          <strong>⚠️ Authenticator MFA required</strong>
+        <section className="card" style={{ borderColor: 'var(--color-3-accent-personality)', marginBottom: 24 }}>
+          <strong>Authenticator MFA required</strong>
           <p style={{ margin: '8px 0 12px' }}>
             Director-gated actions require an authenticator app (TOTP) to be enrolled and verified each session.
           </p>
-          <Link href="/account/mfa">Set up authenticator app →</Link>
+          <Link href="/account/mfa">Set up authenticator app</Link>
         </section>
       )}
 
@@ -83,8 +83,8 @@ export default async function DashboardPage() {
         </p>
         <p>
           Role: <strong>{ROLE_LABELS[role as AppRole]}</strong>
-          {isDirector && hasMfa && <span style={{ marginLeft: 8, color: '#2e7d32', fontSize: 13 }}>✓ MFA verified</span>}
-          {isDirector && !hasMfa && isMfaEnrolled && <span style={{ marginLeft: 8, color: '#e65100', fontSize: 13 }}>⚠ MFA enrolled but not verified this session — <Link href="/account/mfa">verify</Link></span>}
+          {isDirector && hasMfa && <span style={{ marginLeft: 8, color: 'var(--success)', fontSize: 13 }}>MFA verified</span>}
+          {isDirector && !hasMfa && isMfaEnrolled && <span style={{ marginLeft: 8, color: 'var(--accent-ink)', fontSize: 13 }}>MFA enrolled, verify this session — <Link href="/account/mfa">verify</Link></span>}
         </p>
         <p style={{ color: '#555', fontSize: 14 }}>{ROLE_DESCRIPTIONS[role as AppRole]}</p>
         {membership && (
