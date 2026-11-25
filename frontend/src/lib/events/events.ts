@@ -50,6 +50,23 @@ export interface PublicEventGuest {
   display_order: number;
 }
 
+export interface PublicEventHighlight {
+  id: string;
+  title: string;
+  caption: string | null;
+  media_type: 'image' | 'video';
+  media_ref: string;
+  display_order: number;
+}
+
+export interface PublicEventManual {
+  id: string;
+  title: string;
+  description: string | null;
+  file_ref: string;
+  file_size_kb: number | null;
+}
+
 export async function getPublicTeamProfiles(): Promise<PublicTeamMember[]> {
   const supabase = await createClient();
   if (!supabase) return [];
@@ -85,9 +102,11 @@ export async function getPublicEvents(includeArchived = false): Promise<PublicEv
 export async function getPublicEventBySlug(slug: string): Promise<{
   event: PublicEvent | null;
   guests: PublicEventGuest[];
+  highlights: PublicEventHighlight[];
+  manuals: PublicEventManual[];
 }> {
   const supabase = await createClient();
-  if (!supabase) return { event: null, guests: [] };
+  if (!supabase) return { event: null, guests: [], highlights: [], manuals: [] };
 
   const { data: event } = await supabase
     .from('events')
@@ -97,14 +116,18 @@ export async function getPublicEventBySlug(slug: string): Promise<{
     .in('status', ['published', 'ongoing', 'wrap_up', 'closed', 'archived'])
     .maybeSingle();
 
-  if (!event) return { event: null, guests: [] };
+  if (!event) return { event: null, guests: [], highlights: [], manuals: [] };
 
-  const { data: guests } = await supabase.rpc('get_public_event_guests', {
-    p_event_id: event.id,
-  });
+  const [{ data: guests }, { data: highlights }, { data: manuals }] = await Promise.all([
+    supabase.rpc('get_public_event_guests', { p_event_id: event.id }),
+    supabase.rpc('get_public_event_highlights', { p_event_id: event.id }),
+    supabase.rpc('get_public_event_manuals', { p_event_id: event.id }),
+  ]);
 
   return {
     event: event as PublicEvent,
     guests: (guests as PublicEventGuest[]) ?? [],
+    highlights: (highlights as PublicEventHighlight[]) ?? [],
+    manuals: (manuals as PublicEventManual[]) ?? [],
   };
 }

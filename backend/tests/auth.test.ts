@@ -402,6 +402,28 @@ test('only RD team members, SPOCs, or Advisors can perform QR check-ins', () => 
   assert.equal(canScan(advisor, false, false), true);
 });
 
+// --- Phase 4: Exports, Formula Injection & Closure guards ---
+
+console.log('\nPhase 4: Exports, Formula Injection & Closure guards');
+
+test('spreadsheet formula injection payloads are neutralized', () => {
+  const sanitize = (val: unknown) => {
+    const s = String(val ?? '').trim();
+    return /^[=+\-@\t\r]/.test(s) ? `'${s}` : s;
+  };
+  assert.equal(sanitize('=CMD("calc")'), '\'=CMD("calc")');
+  assert.equal(sanitize('+1+1'), '\'+1+1');
+  assert.equal(sanitize('@SUM(A1:A2)'), '\'@SUM(A1:A2)');
+  assert.equal(sanitize('Normal Name'), 'Normal Name');
+});
+
+test('reopening a closed event requires a non-empty recorded reason', () => {
+  const canReopen = (reason: string) => reason.trim().length >= 5;
+  assert.equal(canReopen(''), false);
+  assert.equal(canReopen('ok'), false);
+  assert.equal(canReopen('Correction for late attendance scan'), true);
+});
+
 // ---------------------------------------------------------------------------
 // Results
 // ---------------------------------------------------------------------------

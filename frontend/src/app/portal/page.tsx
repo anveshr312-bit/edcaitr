@@ -40,6 +40,9 @@ export default async function ParticipantPortalPage() {
           <Link href="/portal/registrations" className="btn btn-primary">
             Your Registrations
           </Link>
+          <Link href="/portal/certificates" className="btn">
+            Your Certificates
+          </Link>
           <Link href="/portal/announcements" className="btn">
             Announcements
           </Link>

@@ -13,7 +13,7 @@ export default async function EventDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const { event, guests } = await getPublicEventBySlug(slug);
+  const { event, guests, highlights, manuals } = await getPublicEventBySlug(slug);
 
   if (!event) {
     notFound();
@@ -118,6 +118,55 @@ export default async function EventDetailPage({
           </div>
         )}
       </article>
+
+      {manuals.length > 0 && (
+        <section>
+          <h2>Event Manuals &amp; Documents</h2>
+          <div className="grid">
+            {manuals.map((m) => {
+              const docUrl = getImageKitUrl(m.file_ref) ?? m.file_ref;
+              return (
+                <article key={m.id} className="card">
+                  <h3 style={{ margin: 0, fontSize: '1.05rem' }}>{m.title}</h3>
+                  {m.description && <p className="card-meta" style={{ margin: 0 }}>{m.description}</p>}
+                  {m.file_size_kb && (
+                    <span className="mono-meta">{m.file_size_kb} KB</span>
+                  )}
+                  <a href={docUrl} target="_blank" rel="noopener noreferrer" className="btn">
+                    Open Manual / Document
+                  </a>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {highlights.length > 0 && (
+        <section>
+          <h2>Event Highlights</h2>
+          <div className="grid">
+            {highlights.map((h) => {
+              const mediaUrl = getImageKitUrl(h.media_ref) ?? h.media_ref;
+              return (
+                <article key={h.id} className="card">
+                  {h.media_type === 'image' && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={mediaUrl} alt={h.title} className="poster" />
+                  )}
+                  <h3 style={{ margin: 0, fontSize: '1.05rem' }}>{h.title}</h3>
+                  {h.caption && <p className="card-meta" style={{ margin: 0 }}>{h.caption}</p>}
+                  {h.media_type === 'video' && (
+                    <a href={mediaUrl} target="_blank" rel="noopener noreferrer" className="btn">
+                      Watch Highlight Video
+                    </a>
+                  )}
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {guests.length > 0 && (
         <section>

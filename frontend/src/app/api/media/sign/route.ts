@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getUserContext, requireRole } from '../../../../lib/auth/authorization';
 import { createImageKitUploadSignature } from '../../../../lib/media/imagekit';
 
-const ALLOWED_FOLDERS = ['avatars', 'events', 'guests'] as const;
+const ALLOWED_FOLDERS = ['avatars', 'events', 'guests', 'highlights', 'manuals'] as const;
 
 export async function POST(request: Request) {
   const ctx = await getUserContext();

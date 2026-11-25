@@ -52,7 +52,8 @@ export default async function ManageEventPage({
         <Link href={`/workspace/events/${id}/teams`}>Operational Teams</Link> ·{' '}
         <Link href={`/workspace/events/${id}/tasks`}>Task Board</Link> ·{' '}
         <Link href={`/workspace/events/${id}/registrations`}>Registrations</Link> ·{' '}
-        <Link href={`/workspace/events/${id}/checkin`}>QR Check-in</Link>
+        <Link href={`/workspace/events/${id}/checkin`}>QR Check-in</Link> ·{' '}
+        <Link href={`/workspace/events/${id}/closure`}>Highlights, Manuals, Exports &amp; Closure</Link>
         {event.status !== 'draft' && (
           <>
             {' · '}

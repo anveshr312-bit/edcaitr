@@ -39,6 +39,7 @@ export default function ManageEventClient({
     status: string;
     venue: string | null;
     summary: string | null;
+    poster_ref?: string | null;
   };
   initialSpocs: Spoc[];
   initialGuests: Guest[];
@@ -47,6 +48,7 @@ export default function ManageEventClient({
   const [status, setStatus] = useState(event.status);
   const [venue, setVenue] = useState(event.venue ?? '');
   const [summary, setSummary] = useState(event.summary ?? '');
+  const [posterRef, setPosterRef] = useState(event.poster_ref ?? '');
   const [spocs, setSpocs] = useState<Spoc[]>(initialSpocs);
   const [guests, setGuests] = useState<Guest[]>(initialGuests);
   const [spocSearch, setSpocSearch] = useState('');
@@ -66,7 +68,7 @@ export default function ManageEventClient({
       const res = await fetch(`/api/events/${event.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status, venue, summary }),
+        body: JSON.stringify({ status, venue, summary, poster_ref: posterRef || null }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'Update failed.');
@@ -196,6 +198,7 @@ export default function ManageEventClient({
             Venue
             <input type="text" value={venue} onChange={(e) => setVenue(e.target.value)} />
           </label>
+          <ImageUploadField label="Event Thumbnail / Poster" folder="events" value={posterRef} onChange={setPosterRef} />
           <button type="submit" disabled={busy}>
             Save Changes
           </button>

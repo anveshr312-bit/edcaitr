@@ -10,7 +10,7 @@ export function getImageKitUrl(ref?: string | null): string | null {
   if (!endpoint || endpoint.includes('your_imagekit_id')) return null;
 
   const normalizedPath = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
-  return `${endpoint}${normalizedPath}`;
+  return `${endpoint}${normalizedPath}?tr=f-webp,q-85`;
 }
 
 export interface ImageKitSignature {
