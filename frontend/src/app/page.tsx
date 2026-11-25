@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { getPublicEvents, getPublicTeamProfiles } from '../lib/events/events';
+import LiquidButton from '../components/ui/liquid-button';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,10 +30,10 @@ export default async function HomePage() {
               EDC AITR connects students, early-stage founders, and alumni through campus summits,
               practical workshops, and structured operational teams.
             </p>
-            <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
-              <Link href="/events" className="btn btn-primary" style={{ fontSize: 15, padding: '12px 28px' }}>
+            <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'center' }}>
+              <LiquidButton href="/events" variant="dark" size="lg">
                 Explore Events
-              </Link>
+              </LiquidButton>
               <Link href="/account" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 15, color: 'rgba(251,249,245,0.8)', textDecoration: 'none', padding: '12px 0', borderBottom: '1px solid rgba(251,249,245,0.25)' }}>
                 Sign in or register
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -127,9 +128,9 @@ export default async function HomePage() {
           Create an account, register for events, and apply to join the Core Team.
           Every verified member gets a permanent record of their contributions.
         </p>
-        <Link href="/account" className="btn btn-primary" style={{ fontSize: 15, padding: '13px 32px' }}>
+        <LiquidButton href="/account" variant="dark" size="lg">
           Create Account
-        </Link>
+        </LiquidButton>
       </section>
     </>
   );

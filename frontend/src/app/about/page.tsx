@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import LiquidButton from '../../components/ui/liquid-button';
 
 export default function AboutPage() {
   return (
@@ -79,9 +79,9 @@ export default function AboutPage() {
 
         {/* CTA row */}
         <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
-          <Link href="/team" className="btn btn-primary">Meet the Team</Link>
-          <Link href="/contact" className="btn">Contact Us</Link>
-          <Link href="/events" className="btn">Browse Events</Link>
+          <LiquidButton href="/team" variant="accent">Meet the Team</LiquidButton>
+          <LiquidButton href="/contact" variant="default">Contact Us</LiquidButton>
+          <LiquidButton href="/events" variant="default">Browse Events</LiquidButton>
         </div>
       </div>
     </>

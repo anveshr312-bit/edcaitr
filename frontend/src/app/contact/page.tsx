@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
+import LiquidButton from '../../components/ui/liquid-button';
 
 export default function ContactPage() {
   const [name, setName] = useState('');
@@ -80,9 +81,9 @@ export default function ContactPage() {
               {status && isError && (
                 <p role="status" aria-live="polite" style={{ margin: 0, color: 'var(--danger)', fontSize: 14 }}>{status}</p>
               )}
-              <button type="submit" className="btn btn-primary" disabled={busy} style={{ width: 'fit-content' }}>
+              <LiquidButton type="submit" variant="accent" disabled={busy} style={{ width: 'fit-content' }}>
                 {busy ? 'Sending…' : 'Send Message'}
-              </button>
+              </LiquidButton>
             </form>
           )}
         </div>

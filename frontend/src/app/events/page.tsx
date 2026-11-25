@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { getPublicEvents } from '../../lib/events/events';
 import { getImageKitUrl } from '../../lib/media/imagekit';
+import LiquidButton from '../../components/ui/liquid-button';
 
 export const dynamic = 'force-dynamic';
 
@@ -57,9 +58,9 @@ export default async function EventsPage() {
                         {ev.venue ? ` · ${ev.venue}` : ''}
                       </p>
                       <div style={{ marginTop: 'auto', paddingTop: 12 }}>
-                        <Link href={`/events/${ev.slug}`} className="btn btn-primary" style={{ fontSize: 14 }}>
+                        <LiquidButton href={`/events/${ev.slug}`} variant="accent" size="sm">
                           Open &amp; Register
-                        </Link>
+                        </LiquidButton>
                       </div>
                     </article>
                   );

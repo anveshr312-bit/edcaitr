@@ -4,6 +4,7 @@ import { getPublicEventBySlug } from '../../../lib/events/events';
 import { getImageKitUrl } from '../../../lib/media/imagekit';
 import { createClient } from '../../../lib/supabase/server';
 import EventRegisterForm from '../../../components/EventRegisterForm';
+import LiquidButton from '../../../components/ui/liquid-button';
 
 export const dynamic = 'force-dynamic';
 
@@ -452,9 +453,9 @@ export default async function EventDetailPage({
                   <p style={{ margin: '0 0 16px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
                     Sign in to your account to register for this event.
                   </p>
-                  <Link href="/account" className="btn btn-primary" style={{ display: 'block', textAlign: 'center' }}>
+                  <LiquidButton href="/account" variant="accent" style={{ width: '100%' }}>
                     Sign in to register
-                  </Link>
+                  </LiquidButton>
                 </div>
               )}
             </div>

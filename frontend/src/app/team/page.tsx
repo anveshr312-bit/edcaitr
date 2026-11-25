@@ -1,6 +1,6 @@
-import Link from 'next/link';
 import { getPublicPastTeams, getPublicTeamProfiles } from '../../lib/events/events';
 import { getImageKitUrl } from '../../lib/media/imagekit';
+import LiquidButton from '../../components/ui/liquid-button';
 
 export const dynamic = 'force-dynamic';
 
@@ -106,8 +106,8 @@ export default async function TeamPage() {
         )}
 
         <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-          <Link href="/about" className="btn">About EDC AITR</Link>
-          <Link href="/contact" className="btn">Contact Us</Link>
+          <LiquidButton href="/about" variant="default">About EDC AITR</LiquidButton>
+          <LiquidButton href="/contact" variant="accent">Contact Us</LiquidButton>
         </div>
       </div>
     </>
