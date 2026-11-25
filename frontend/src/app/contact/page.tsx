@@ -26,7 +26,7 @@ export default function ContactPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'Failed to send inquiry.');
 
-      setStatus('Thank you! Your inquiry has been received by E-Cell AITR.');
+      setStatus('Thank you! Your inquiry has been received by EDC AITR.');
       setName('');
       setEmail('');
       setSubject('');
@@ -43,7 +43,7 @@ export default function ContactPage() {
     <>
       <h1>Contact Us</h1>
       <p style={{ color: 'var(--text-muted)', marginBottom: 24 }}>
-        Have a question about E-Cell AITR events, collaborations, or speaking opportunities? Send us a
+        Have a question about EDC AITR events, collaborations, or speaking opportunities? Send us a
         message below.
       </p>
 

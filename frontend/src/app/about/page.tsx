@@ -3,16 +3,16 @@ import Link from 'next/link';
 export default function AboutPage() {
   return (
     <>
-      <h1>About E-Cell AITR</h1>
+      <h1>About EDC AITR</h1>
       <section className="card">
         <h2>Our Purpose</h2>
         <p>
-          The Entrepreneurship Development Cell at Acropolis Institute of Technology &amp; Research
-          (E-Cell AITR) empowers students to explore startup building, product thinking, and leadership
+          The Entrepreneurship Development Cell (EDC) at Acropolis Institute of Technology &amp; Research
+          (AITR) empowers students to explore startup building, product thinking, and leadership
           through real-world execution.
         </p>
         <p>
-          Unlike one-off campus clubs, E-Cell AITR welcomes students, external founders, startup
+          Unlike one-off campus clubs, EDC AITR welcomes students, external founders, startup
           representatives, and alumni into structured events, mentorship sessions, and operational
           teams.
         </p>

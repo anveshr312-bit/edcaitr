@@ -22,7 +22,7 @@ export default async function TeamPage() {
     <>
       <h1>Team</h1>
       <p style={{ color: 'var(--text-secondary)', marginBottom: 28 }}>
-        Approved E-Cell AITR leadership and Core Team members with public visibility enabled.
+        Approved EDC AITR leadership and Core Team members with public visibility enabled.
       </p>
 
       {currentTeam.length === 0 ? (
@@ -52,7 +52,7 @@ export default async function TeamPage() {
                         )}
                         <div>
                           <h3 style={{ margin: 0, fontSize: '1.05rem' }}>
-                            {member.full_name || 'E-Cell Member'}
+                            {member.full_name || 'EDC Member'}
                           </h3>
                           <p className="card-meta" style={{ margin: 0 }}>
                             {member.designation || ROLE_TITLES[roleKey]}

@@ -31,6 +31,7 @@ export async function PATCH(
   const fields = [
     'title', 'summary', 'description', 'venue', 'starts_at', 'ends_at',
     'status', 'is_paid', 'fee_amount', 'upi_id', 'upi_qr_ref', 'poster_ref', 'max_capacity',
+    'google_sheet_id',
   ];
   for (const f of fields) {
     if (f in body) allowedUpdates[f] = body[f];

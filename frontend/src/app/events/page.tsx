@@ -11,7 +11,7 @@ export default async function EventsPage() {
     <>
       <h1>Events</h1>
       <p style={{ color: 'var(--text-secondary)', marginBottom: 28 }}>
-        Upcoming and concluded public events organized by E-Cell AITR.
+        Upcoming and concluded public events organized by EDC AITR.
       </p>
 
       {events.length === 0 ? (

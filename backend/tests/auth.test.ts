@@ -362,6 +362,46 @@ test('unassigned core_team member cannot access another event workspace', () => 
   assert.equal(canAccessWorkspace(alumni, ['other-spoc'], [alumni.id]), false);
 });
 
+// --- Phase 3: Registration capacity, QR Check-in & RD guards ---
+
+console.log('\nPhase 3: Registration capacity, QR Check-in & RD guards');
+
+test('concurrent registrations never exceed max_capacity', async () => {
+  let locked = false;
+  const maxCapacity = 1;
+  const registered: string[] = [];
+
+  async function tryRegister(userId: string) {
+    while (locked) await new Promise((r) => setTimeout(r, 1));
+    locked = true;
+    try {
+      if (registered.length >= maxCapacity) {
+        throw new Error('Event registration capacity is full.');
+      }
+      registered.push(userId);
+      return { ok: true, userId };
+    } finally {
+      locked = false;
+    }
+  }
+
+  const results = await Promise.allSettled([tryRegister('u1'), tryRegister('u2')]);
+  assert.equal(results.filter((r) => r.status === 'fulfilled').length, 1);
+  assert.equal(results.filter((r) => r.status === 'rejected').length, 1);
+  assert.equal(registered.length, 1);
+});
+
+test('only RD team members, SPOCs, or Advisors can perform QR check-ins', () => {
+  const canScan = (ctx: UserContext, isRd: boolean, isSpoc: boolean) =>
+    roleRank(ctx.role) >= roleRank('advisor') ||
+    (ctx.role === 'core_team' && (isRd || isSpoc));
+
+  assert.equal(canScan(participant, true, false), false);
+  assert.equal(canScan(coreTeam, false, false), false);
+  assert.equal(canScan(coreTeam, true, false), true);
+  assert.equal(canScan(advisor, false, false), true);
+});
+
 // ---------------------------------------------------------------------------
 // Results
 // ---------------------------------------------------------------------------

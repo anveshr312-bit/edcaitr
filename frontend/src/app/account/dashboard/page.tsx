@@ -106,6 +106,7 @@ export default async function DashboardPage() {
       <section>
         <h2>Quick links</h2>
         <nav style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))' }}>
+          <Link href="/portal">Participant Portal</Link>
           <Link href="/account/profile">Edit profile</Link>
           {['core_team', 'advisor', 'director'].includes(role) && (
             <>

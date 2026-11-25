@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getPublicEventBySlug } from '../../../lib/events/events';
 import { getImageKitUrl } from '../../../lib/media/imagekit';
+import { createClient } from '../../../lib/supabase/server';
+import EventRegisterForm from '../../../components/EventRegisterForm';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,8 +19,38 @@ export default async function EventDetailPage({
     notFound();
   }
 
+  const supabase = await createClient();
+  let userId: string | null = null;
+  let existingReg: { id: string; status: string } | null = null;
+  let upiDetails: { upi_id: string | null; upi_qr_ref: string | null } = { upi_id: null, upi_qr_ref: null };
+
+  if (supabase) {
+    const { data: auth } = await supabase.auth.getUser();
+    userId = auth.user?.id ?? null;
+
+    if (userId) {
+      const [{ data: reg }, { data: evPay }] = await Promise.all([
+        supabase
+          .from('registrations')
+          .select('id, status')
+          .eq('event_id', event.id)
+          .eq('user_id', userId)
+          .maybeSingle(),
+        supabase
+          .from('events')
+          .select('upi_id, upi_qr_ref')
+          .eq('id', event.id)
+          .maybeSingle(),
+      ]);
+      existingReg = reg;
+      if (evPay) upiDetails = evPay;
+    }
+  }
+
   const posterUrl = getImageKitUrl(event.poster_ref);
+  const upiQrUrl = getImageKitUrl(upiDetails.upi_qr_ref);
   const isConcluded = event.status === 'closed' || event.status === 'archived';
+  const canRegister = event.status === 'published' || event.status === 'ongoing';
 
   return (
     <>
@@ -66,11 +98,23 @@ export default async function EventDetailPage({
         {event.summary && <p style={{ fontWeight: 500 }}>{event.summary}</p>}
         <div style={{ whiteSpace: 'pre-wrap' }}>{event.description}</div>
 
-        {!isConcluded && (
-          <div className="actions-row">
-            <Link href="/account" className="btn btn-primary">
-              Sign in to Register (Phase 3)
-            </Link>
+        {canRegister && (
+          <div style={{ marginTop: 20 }}>
+            {userId ? (
+              <EventRegisterForm
+                eventId={event.id}
+                isPaid={event.is_paid}
+                feeAmount={event.fee_amount}
+                upiId={upiDetails.upi_id}
+                upiQrUrl={upiQrUrl}
+                existingRegistrationId={existingReg?.id ?? null}
+                existingStatus={existingReg?.status ?? null}
+              />
+            ) : (
+              <Link href="/account" className="btn btn-primary">
+                Sign in to register
+              </Link>
+            )}
           </div>
         )}
       </article>
@@ -96,7 +140,7 @@ export default async function EventDetailPage({
                   {guest.bio && <p className="card-meta" style={{ margin: 0 }}>{guest.bio}</p>}
                   {guest.linkedin_url && (
                     <a href={guest.linkedin_url} target="_blank" rel="noopener noreferrer">
-                      LinkedIn Profile →
+                      LinkedIn Profile
                     </a>
                   )}
                 </article>

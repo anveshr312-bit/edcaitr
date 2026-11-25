@@ -23,7 +23,7 @@ export default async function HomePage() {
           </span>
           <h1 style={{ marginTop: 16 }}>Student-led entrepreneurship and venture building</h1>
           <p>
-            E-Cell AITR connects students, early-stage founders, and alumni through campus summits,
+            EDC AITR connects students, early-stage founders, and alumni through campus summits,
             practical workshops, and structured operational teams.
           </p>
           <div className="actions-row">
@@ -57,7 +57,7 @@ export default async function HomePage() {
       </section>
 
       <section>
-        <h2>How E-Cell AITR operates</h2>
+        <h2>How EDC AITR operates</h2>
         <div className="grid">
           <article className="card">
             <h3>Flagship summits &amp; sessions</h3>

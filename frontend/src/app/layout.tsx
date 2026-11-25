@@ -16,8 +16,8 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata = {
-  title: 'E-Cell AITR',
-  description: 'Entrepreneurship Development Cell, Acropolis Institute of Technology and Research',
+  title: 'EDC AITR — Entrepreneurship Development Cell',
+  description: 'Entrepreneurship Development Cell (EDC) at Acropolis Institute of Technology and Research (AITR)',
 };
 
 export default function Layout({ children }: { children: ReactNode }) {
@@ -27,8 +27,8 @@ export default function Layout({ children }: { children: ReactNode }) {
         <header className="site-header">
           <Link href="/" className="brand-link">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/ecell-logo.svg" alt="E-Cell AITR logo" width={32} height={32} />
-            <span>E-Cell AITR</span>
+            <img src="/ecell-logo.svg" alt="EDC AITR logo" width={32} height={32} />
+            <span>EDC AITR</span>
           </Link>
           <nav aria-label="Main navigation">
             <Link href="/">Home</Link>
@@ -46,7 +46,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/ecell-logo.svg" alt="" width={20} height={20} />
-            <span>E-Cell AITR, Acropolis Institute of Technology &amp; Research</span>
+            <span>Entrepreneurship Development Cell (EDC), Acropolis Institute of Technology &amp; Research (AITR)</span>
           </div>
           <div>
             <Link href="/events">Events</Link> · <Link href="/team">Team</Link> ·{' '}
