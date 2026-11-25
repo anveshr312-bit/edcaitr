@@ -1,23 +1,23 @@
 /*
- * MOOD: Warm Studio Cream (#FBF9F5) + Obsidian Ink (#111318)
- * ACCENT: Signal Vermilion (#E04826)
+ * MOOD: Clean Studio Alabaster (#FAFAFC) + Obsidian Ink (#111318)
+ * ACCENT: EDC Logo Crimson (#C01E30)
  */
 :root {
-  --color-1-mood: #fbf9f5;
+  --color-1-mood: #fafafc;
   --color-2-mood: #111318;
-  --color-3-accent-personality: #e04826;
+  --color-3-accent-personality: #c01e30;
 
   --surface: #ffffff;
-  --surface-subtle: #f3efe7;
+  --surface-subtle: #f3f4f8;
   --text-primary: #111318;
   --text-secondary: #3f4451;
   --text-muted: #686d7a;
   --border-hairline: rgba(17, 19, 24, 0.1);
   --border-strong: rgba(17, 19, 24, 0.22);
 
-  --accent-hover: #c53a1b;
-  --accent-ink: #b93314;
-  --accent-tint: rgba(224, 72, 38, 0.08);
+  --accent-hover: #a31828;
+  --accent-ink: #8b1422;
+  --accent-tint: rgba(192, 30, 48, 0.08);
 
   --success: #15803d;
   --danger: #b91c1c;
@@ -532,7 +532,7 @@ button:disabled {
 .pvr-admit-badge {
   display: inline-block;
   background-color: #111318;
-  color: #fbf9f5;
+  color: #fafafc;
   font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -617,7 +617,7 @@ button:disabled {
   flex-direction: column;
   align-items: center;
   padding: 10px;
-  background: #fbf9f5;
+  background: #fafafc;
   border: 1px solid rgba(17, 19, 24, 0.1);
   border-radius: 8px;
   margin-top: 4px;
@@ -856,7 +856,7 @@ button:disabled {
   background: linear-gradient(
     90deg,
     var(--surface-subtle) 25%,
-    #ebe5da 50%,
+    #e6e8ee 50%,
     var(--surface-subtle) 75%
   );
   background-size: 200% 100%;

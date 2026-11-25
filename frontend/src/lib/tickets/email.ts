@@ -19,7 +19,7 @@ export async function generateQrDataUrl(qrToken: string): Promise<string> {
     margin: 2,
     color: {
       dark: '#111318',
-      light: '#FBF9F5',
+      light: '#FAFAFC',
     },
   });
 }
@@ -64,20 +64,20 @@ export async function sendTicketEmail(
       : 'Schedule TBA';
 
     const htmlContent = `
-      <div style="background:#FBF9F5;padding:32px 16px;font-family:system-ui,-apple-system,sans-serif;color:#111318;">
+      <div style="background:#FAFAFC;padding:32px 16px;font-family:system-ui,-apple-system,sans-serif;color:#111318;">
         <div style="max-width:440px;margin:0 auto;background:#FFFFFF;border:1px solid #E2DDD4;border-radius:12px;overflow:hidden;box-shadow:0 4px 16px rgba(17,19,24,0.06);">
           <!-- PVR Ticket Header -->
-          <div style="background:#111318;color:#FBF9F5;padding:24px 20px;text-align:center;">
-            <div style="font-size:11px;letter-spacing:0.12em;color:#E04826;font-weight:700;text-transform:uppercase;">
+          <div style="background:#111318;color:#FAFAFC;padding:24px 20px;text-align:center;">
+            <div style="font-size:11px;letter-spacing:0.12em;color:#C01E30;font-weight:700;text-transform:uppercase;">
               ENTREPRENEURSHIP DEVELOPMENT CELL (EDC)
             </div>
             <div style="font-size:10px;color:#A0A6B2;letter-spacing:0.06em;margin-top:2px;text-transform:uppercase;">
               Acropolis Institute of Technology &amp; Research
             </div>
-            <div style="display:inline-block;background:#E04826;color:#FFFFFF;font-size:10px;font-weight:700;letter-spacing:0.14em;padding:4px 12px;border-radius:4px;margin-top:12px;text-transform:uppercase;">
+            <div style="display:inline-block;background:#C01E30;color:#FFFFFF;font-size:10px;font-weight:700;letter-spacing:0.14em;padding:4px 12px;border-radius:4px;margin-top:12px;text-transform:uppercase;">
               ★ OFFICIAL ADMISSION PASS ★
             </div>
-            <h1 style="margin:12px 0 4px;font-size:20px;line-height:1.25;font-weight:700;color:#FBF9F5;">
+            <h1 style="margin:12px 0 4px;font-size:20px;line-height:1.25;font-weight:700;color:#FAFAFC;">
               ${escapeHtml(payload.eventTitle)}
             </h1>
             <div style="font-size:11px;color:#A0A6B2;font-family:monospace;">
@@ -102,7 +102,7 @@ export async function sendTicketEmail(
               </tr>
               <tr>
                 <td style="padding:6px 0;color:#686D7A;text-transform:uppercase;font-size:11px;font-weight:600;">Category</td>
-                <td style="padding:6px 0;text-align:right;font-weight:600;color:#E04826;">${escapeHtml(payload.category.toUpperCase())}</td>
+                <td style="padding:6px 0;text-align:right;font-weight:600;color:#C01E30;">${escapeHtml(payload.category.toUpperCase())}</td>
               </tr>
               <tr>
                 <td style="padding:6px 0;color:#686D7A;text-transform:uppercase;font-size:11px;font-weight:600;">Admit</td>
@@ -118,7 +118,7 @@ export async function sendTicketEmail(
             </div>
 
             <!-- QR Verification Pass -->
-            <div style="text-align:center;padding:12px;background:#FBF9F5;border:1px solid #E2DDD4;border-radius:8px;">
+            <div style="text-align:center;padding:12px;background:#FAFAFC;border:1px solid #E2DDD4;border-radius:8px;">
               <div style="font-size:11px;font-weight:700;color:#111318;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px;">
                 Scan for Admission
               </div>

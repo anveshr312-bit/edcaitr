@@ -33,7 +33,7 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
           display: 'inline-block',
           width: 3,
           height: '1.2em',
-          background: '#E04826',
+          background: '#C01E30',
           borderRadius: 2,
           flexShrink: 0,
         }}
@@ -312,7 +312,7 @@ export default async function EventDetailPage({
                             href={guest.linkedin_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            style={{ color: '#E04826', fontSize: '0.82rem', fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}
+                            style={{ color: '#C01E30', fontSize: '0.82rem', fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}
                           >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                               <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
@@ -431,7 +431,7 @@ export default async function EventDetailPage({
                     <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: 2 }}>
                       Registration fee
                     </span>
-                    <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#E04826' }}>
+                    <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#C01E30' }}>
                       ₹{event.fee_amount}
                     </span>
                   </div>

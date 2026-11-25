@@ -72,7 +72,7 @@ export default async function HomePage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(260px, 1fr)', gap: 40, alignItems: 'center' }}>
           <div>
             {/* Institutional Cell Pill */}
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 12px', borderRadius: 32, background: 'var(--accent-tint)', border: '1px solid rgba(224,72,38,0.2)', marginBottom: 18 }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 12px', borderRadius: 32, background: 'var(--accent-tint)', border: '1px solid rgba(192,30,48,0.2)', marginBottom: 18 }}>
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-3-accent-personality)', display: 'inline-block' }} />
               <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.02em', color: 'var(--color-3-accent-personality)' }}>
                 Entrepreneurship Development Cell · Acropolis Indore

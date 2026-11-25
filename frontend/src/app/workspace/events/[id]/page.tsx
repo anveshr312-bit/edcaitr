@@ -56,7 +56,7 @@ export default async function ManageEventPage({
     <>
       {/* Light header card */}
       <div className="card" style={{ background: 'var(--surface)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--radius-panel)', padding: 'clamp(24px, 3.5vw, 36px)', margin: 0 }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 10px', borderRadius: 'var(--radius-control)', background: 'var(--accent-tint)', border: '1px solid rgba(224,72,38,0.2)', marginBottom: 10 }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 10px', borderRadius: 'var(--radius-control)', background: 'var(--accent-tint)', border: '1px solid rgba(192,30,48,0.2)', marginBottom: 10 }}>
           <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-3-accent-personality)' }} />
           <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-3-accent-personality)' }}>
             <Link href="/workspace/events" style={{ color: 'inherit', textDecoration: 'none' }}>Events</Link> / Manage
@@ -83,7 +83,7 @@ export default async function ManageEventPage({
             </Link>
           ))}
           {event.status !== 'draft' && (
-            <Link href={`/events/${event.slug}`} style={{ padding: '6px 14px', borderRadius: 'var(--radius-control)', background: 'var(--surface)', color: 'var(--color-3-accent-personality)', border: '1px solid rgba(224,72,38,0.3)', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>
+            <Link href={`/events/${event.slug}`} style={{ padding: '6px 14px', borderRadius: 'var(--radius-control)', background: 'var(--surface)', color: 'var(--color-3-accent-personality)', border: '1px solid rgba(192,30,48,0.3)', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>
               Public page →
             </Link>
           )}

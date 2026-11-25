@@ -272,7 +272,7 @@ export default function Account() {
                   <button
                     type="button"
                     onClick={() => { setMode('forgot_password'); setMessage(''); }}
-                    style={{ background: 'none', border: 'none', color: '#E04826', fontSize: '0.75rem', cursor: 'pointer', padding: 0 }}
+                    style={{ background: 'none', border: 'none', color: '#C01E30', fontSize: '0.75rem', cursor: 'pointer', padding: 0 }}
                   >
                     Forgot password?
                   </button>

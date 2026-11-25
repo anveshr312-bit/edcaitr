@@ -65,7 +65,7 @@ export default async function TeamPage() {
       {/* Light Header Band */}
       <section className="card" style={{ background: 'var(--surface)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--radius-panel)', padding: 'clamp(32px, 4vw, 48px)', margin: 0 }}>
         <div style={{ maxWidth: 1100 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 10px', borderRadius: 4, background: 'var(--accent-tint)', border: '1px solid rgba(224,72,38,0.2)', marginBottom: 12 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 10px', borderRadius: 4, background: 'var(--accent-tint)', border: '1px solid rgba(192,30,48,0.2)', marginBottom: 12 }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-3-accent-personality)' }} />
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.02em', color: 'var(--color-3-accent-personality)' }}>
               EDC AITR &amp; AIIH Foundation
@@ -94,7 +94,7 @@ export default async function TeamPage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20 }}>
           {SUMMIT_COORDINATORS.map((c) => (
             <article key={c.name} className="card" style={{ padding: '24px' }}>
-              <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--accent-tint)', color: 'var(--color-3-accent-personality)', border: '1px solid rgba(224,72,38,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '1.2rem', marginBottom: 14 }}>
+              <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--accent-tint)', color: 'var(--color-3-accent-personality)', border: '1px solid rgba(192,30,48,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '1.2rem', marginBottom: 14 }}>
                 {c.name.charAt(0)}
               </div>
               <h3 style={{ margin: '0 0 4px', fontSize: '1.1rem', fontWeight: 700 }}>{c.name}</h3>

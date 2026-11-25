@@ -190,7 +190,7 @@ function StatusIndicator({
             initial={{ opacity: animate ? 0 : 1, transform: move ? 'scale(0.94)' : 'scale(1)' }}
             key="working"
             transition={{ duration: animate ? 0.16 : 0, ease: easeOut }}
-            style={{ color: '#e04826', display: 'grid', placeItems: 'center' }}
+            style={{ color: '#c01e30', display: 'grid', placeItems: 'center' }}
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className={animate ? 'rp-spin' : ''}>
               <circle cx="8" cy="8" r="6" stroke="currentColor" strokeOpacity="0.3" strokeWidth="2" />

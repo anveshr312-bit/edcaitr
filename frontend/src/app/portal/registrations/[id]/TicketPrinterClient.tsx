@@ -72,11 +72,11 @@ export default function TicketPrinterClient({
                 decoding="async"
                 style={{ height: 20, width: 'auto', objectFit: 'contain' }}
               />
-              <span style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.08em', color: '#fbf9f5' }}>
+              <span style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.08em', color: '#fafafc' }}>
                 PASS DISPENSER
               </span>
             </div>
-            <span className="mono-meta" style={{ color: '#e04826', fontWeight: 700, fontSize: '0.72rem' }}>
+            <span className="mono-meta" style={{ color: '#c01e30', fontWeight: 700, fontSize: '0.72rem' }}>
               #EDC-TKT
             </span>
           </ReceiptPrinter.Header>
@@ -109,7 +109,7 @@ export default function TicketPrinterClient({
 
             {/* Event Name & Screen / Venue */}
             <div style={{ textAlign: 'center', marginBottom: 12 }}>
-              <div style={{ fontSize: '0.6875rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#e04826', fontWeight: 700 }}>
+              <div style={{ fontSize: '0.6875rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#c01e30', fontWeight: 700 }}>
                 {category.toUpperCase()} ACCESS
               </div>
               <h2 className="pvr-title">
@@ -135,7 +135,7 @@ export default function TicketPrinterClient({
               </div>
               <div>
                 <div className="pvr-label">ADMIT</div>
-                <div className="pvr-value" style={{ color: '#e04826' }}>01 PERSON</div>
+                <div className="pvr-value" style={{ color: '#c01e30' }}>01 PERSON</div>
               </div>
               <div style={{ gridColumn: 'span 2' }}>
                 <div className="pvr-label">TICKET HOLDER</div>

@@ -110,9 +110,9 @@ export default async function DashboardPage() {
                     fontSize: '0.75rem',
                     padding: '2px 8px',
                     borderRadius: 'var(--radius-control)',
-                    background: hasMfa ? 'rgba(34,197,94,0.1)' : 'rgba(224,72,38,0.1)',
+                    background: hasMfa ? 'rgba(34,197,94,0.1)' : 'rgba(192,30,48,0.1)',
                     color: hasMfa ? 'var(--success)' : 'var(--color-3-accent-personality)',
-                    border: `1px solid ${hasMfa ? 'rgba(34,197,94,0.25)' : 'rgba(224,72,38,0.25)'}`,
+                    border: `1px solid ${hasMfa ? 'rgba(34,197,94,0.25)' : 'rgba(192,30,48,0.25)'}`,
                     fontWeight: 600,
                   }}
                 >
@@ -157,7 +157,7 @@ export default async function DashboardPage() {
         <section
           className="card"
           style={{
-            borderColor: 'rgba(224,72,38,0.25)',
+            borderColor: 'rgba(192,30,48,0.25)',
             background: 'var(--accent-tint)',
             padding: '18px 24px',
             margin: 0,
