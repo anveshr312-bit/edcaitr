@@ -38,6 +38,7 @@ export default function robots(): MetadataRoute.Robots {
           '/*.webp',
           '/*.svg',
           '/*.ico',
+          '/google*.html',
         ],
         disallow: [
           '/account',

@@ -101,7 +101,7 @@ export const metadata: Metadata = {
     creator: SITE_CONFIG.social.instagramHandle,
   },
   verification: {
-    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || 'googlea45780b984ee2d34',
   },
 };
 
