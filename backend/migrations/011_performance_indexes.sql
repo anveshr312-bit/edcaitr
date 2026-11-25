@@ -18,12 +18,12 @@ CREATE INDEX IF NOT EXISTS idx_registrations_event_user
 CREATE INDEX IF NOT EXISTS idx_registrations_user_created
   ON public.registrations (user_id, created_at DESC);
 
-CREATE INDEX IF NOT EXISTS idx_event_tasks_event_team_status
-  ON public.event_tasks (event_id, team_code, status);
+CREATE INDEX IF NOT EXISTS idx_tasks_event_team_status
+  ON public.tasks (event_id, team_code, status);
 
-CREATE INDEX IF NOT EXISTS idx_alumni_messages_conv_created
-  ON public.alumni_messages (conversation_id, created_at ASC);
+CREATE INDEX IF NOT EXISTS idx_messages_conv_created
+  ON public.messages (conversation_id, created_at ASC);
 
-CREATE INDEX IF NOT EXISTS idx_opportunities_active_created
+CREATE INDEX IF NOT EXISTS idx_opportunities_open_created
   ON public.opportunities (status, created_at DESC)
-  WHERE status = 'active';
+  WHERE status = 'open';
