@@ -502,10 +502,12 @@ button:disabled {
 .rp-paper {
   background-color: #ffffff;
   color: var(--text-primary);
-  padding: 26px 20px 30px;
-  font-family: var(--font-mono), ui-monospace, monospace;
-  border-left: 1px solid var(--border-hairline);
-  border-right: 1px solid var(--border-hairline);
+  padding: 24px 20px 28px;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  border-left: 1px solid rgba(17, 19, 24, 0.12);
+  border-right: 1px solid rgba(17, 19, 24, 0.12);
+  position: relative;
+  box-shadow: 0 4px 18px rgba(17, 19, 24, 0.08);
 }
 
 @keyframes rp-rotate {
@@ -516,5 +518,173 @@ button:disabled {
 
 .rp-spin {
   animation: rp-rotate 0.9s linear infinite;
+}
+
+/* PVR Cinema Pass Design */
+.pvr-ticket-header {
+  text-align: center;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  border-bottom: 1px dashed rgba(17, 19, 24, 0.2);
+}
+
+.pvr-admit-badge {
+  display: inline-block;
+  background-color: #111318;
+  color: #fbf9f5;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  padding: 3px 10px;
+  border-radius: 4px;
+  margin-top: 8px;
+  text-transform: uppercase;
+}
+
+.pvr-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #111318;
+  margin: 8px 0 4px;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.pvr-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+  font-size: 0.8125rem;
+  padding: 10px 0;
+}
+
+.pvr-label {
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #686d7a;
+  margin-bottom: 2px;
+}
+
+.pvr-value {
+  font-weight: 600;
+  color: #111318;
+}
+
+.pvr-perforation {
+  position: relative;
+  margin: 14px -20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+}
+
+.pvr-perforation::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 20px;
+  background: #111318;
+  border-top-right-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+.pvr-perforation::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 20px;
+  background: #111318;
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+}
+
+.pvr-perforation-line {
+  width: 100%;
+  height: 1px;
+  border-bottom: 1.5px dashed rgba(17, 19, 24, 0.28);
+}
+
+.pvr-qr-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  background: #fbf9f5;
+  border: 1px solid rgba(17, 19, 24, 0.1);
+  border-radius: 8px;
+  margin-top: 4px;
+}
+
+.pvr-barcode {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 34px;
+  gap: 2px;
+  margin-top: 10px;
+}
+
+.pvr-barcode-bar {
+  background-color: #111318;
+  height: 100%;
+  display: inline-block;
+}
+
+.pvr-fineprint {
+  font-size: 0.65rem;
+  color: #686d7a;
+  text-align: center;
+  margin-top: 10px;
+  line-height: 1.35;
+}
+
+/* Print Layout for clean Ticket Extraction */
+@media print {
+  .site-header,
+  .site-footer,
+  .rp-machine,
+  .print-hide,
+  nav,
+  button,
+  a.btn {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .rp-root {
+    max-width: 100% !important;
+    margin: 0 auto !important;
+  }
+
+  .rp-output {
+    margin-top: 0 !important;
+    width: 360px !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  .rp-paper {
+    border: 1px solid #111318 !important;
+    box-shadow: none !important;
+    clip-path: none !important;
+  }
+
+  .pvr-perforation::before,
+  .pvr-perforation::after {
+    background: #ffffff !important;
+    border: 1px solid rgba(17, 19, 24, 0.2) !important;
+  }
 }
 

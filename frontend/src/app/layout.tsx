@@ -25,10 +25,13 @@ export default function Layout({ children }: { children: ReactNode }) {
     <html lang="en" className={`${sans.variable} ${mono.variable}`}>
       <body>
         <header className="site-header">
-          <Link href="/" className="brand-link">
+          <Link href="/" className="brand-link" style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/ecell-logo.svg" alt="EDC AITR logo" width={32} height={32} />
-            <span>EDC AITR</span>
+            <img
+              src="/edc-logo-light.png"
+              alt="EDC AITR — Entrepreneurship Development Cell"
+              style={{ height: 38, width: 'auto', objectFit: 'contain', display: 'block' }}
+            />
           </Link>
           <nav aria-label="Main navigation">
             <Link href="/">Home</Link>
@@ -43,10 +46,16 @@ export default function Layout({ children }: { children: ReactNode }) {
         </header>
         <main>{children}</main>
         <footer className="site-footer">
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 12 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/ecell-logo.svg" alt="" width={20} height={20} />
-            <span>Entrepreneurship Development Cell (EDC), Acropolis Institute of Technology &amp; Research (AITR)</span>
+            <img
+              src="/edc-logo-light.png"
+              alt="EDC AITR"
+              style={{ height: 30, width: 'auto', objectFit: 'contain', display: 'block' }}
+            />
+            <span style={{ fontSize: '0.875rem', color: '#686D7A' }}>
+              Entrepreneurship Development Cell (EDC), Acropolis Institute of Technology &amp; Research (AITR)
+            </span>
           </div>
           <div>
             <Link href="/events">Events</Link> · <Link href="/team">Team</Link> ·{' '}

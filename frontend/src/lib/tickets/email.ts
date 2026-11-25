@@ -65,25 +65,77 @@ export async function sendTicketEmail(
 
     const htmlContent = `
       <div style="background:#FBF9F5;padding:32px 16px;font-family:system-ui,-apple-system,sans-serif;color:#111318;">
-        <div style="max-width:440px;margin:0 auto;background:#FFFFFF;border:1px solid #E2DDD4;border-radius:12px;overflow:hidden;">
-          <div style="background:#111318;color:#FBF9F5;padding:20px 24px;">
-            <div style="font-size:12px;letter-spacing:0.06em;color:#E04826;font-weight:700;">EDC AITR · OFFICIAL PASS</div>
-            <h1 style="margin:6px 0 0;font-size:20px;line-height:1.25;">${escapeHtml(payload.eventTitle)}</h1>
-          </div>
-          <div style="padding:24px;">
-            <p style="margin:0 0 12px;font-size:14px;color:#3F4451;">
-              Present the attached QR ticket (<strong>ticket-qr.png</strong>) at the Registration &amp; Check-in (RD) desk.
-            </p>
-            <table style="width:100%;border-collapse:collapse;font-size:14px;margin:16px 0;">
-              <tr><td style="padding:6px 0;color:#686D7A;">Attendee</td><td style="padding:6px 0;text-align:right;font-weight:600;">${escapeHtml(payload.recipientName)}</td></tr>
-              <tr><td style="padding:6px 0;color:#686D7A;">Ticket ID</td><td style="padding:6px 0;text-align:right;font-family:monospace;font-weight:700;">${escapeHtml(payload.ticketCode)}</td></tr>
-              <tr><td style="padding:6px 0;color:#686D7A;">Category</td><td style="padding:6px 0;text-align:right;">${escapeHtml(payload.category)}</td></tr>
-              <tr><td style="padding:6px 0;color:#686D7A;">When</td><td style="padding:6px 0;text-align:right;">${escapeHtml(dateLabel)}</td></tr>
-              <tr><td style="padding:6px 0;color:#686D7A;">Venue</td><td style="padding:6px 0;text-align:right;">${escapeHtml(payload.eventVenue || 'TBA')}</td></tr>
-            </table>
-            <div style="margin-top:20px;padding:12px;background:#FBF9F5;border:1px dashed #CBD5E1;border-radius:8px;text-align:center;font-size:12px;color:#686D7A;">
-              QR Token: <span style="font-family:monospace;color:#111318;">${escapeHtml(payload.qrToken)}</span>
+        <div style="max-width:440px;margin:0 auto;background:#FFFFFF;border:1px solid #E2DDD4;border-radius:12px;overflow:hidden;box-shadow:0 4px 16px rgba(17,19,24,0.06);">
+          <!-- PVR Ticket Header -->
+          <div style="background:#111318;color:#FBF9F5;padding:24px 20px;text-align:center;">
+            <div style="font-size:11px;letter-spacing:0.12em;color:#E04826;font-weight:700;text-transform:uppercase;">
+              ENTREPRENEURSHIP DEVELOPMENT CELL (EDC)
             </div>
+            <div style="font-size:10px;color:#A0A6B2;letter-spacing:0.06em;margin-top:2px;text-transform:uppercase;">
+              Acropolis Institute of Technology &amp; Research
+            </div>
+            <div style="display:inline-block;background:#E04826;color:#FFFFFF;font-size:10px;font-weight:700;letter-spacing:0.14em;padding:4px 12px;border-radius:4px;margin-top:12px;text-transform:uppercase;">
+              ★ OFFICIAL ADMISSION PASS ★
+            </div>
+            <h1 style="margin:12px 0 4px;font-size:20px;line-height:1.25;font-weight:700;color:#FBF9F5;">
+              ${escapeHtml(payload.eventTitle)}
+            </h1>
+            <div style="font-size:11px;color:#A0A6B2;font-family:monospace;">
+              REF: PVR-EDC-${escapeHtml(payload.ticketCode.slice(-8))}
+            </div>
+          </div>
+
+          <!-- Ticket Details Table -->
+          <div style="padding:20px 24px;">
+            <table style="width:100%;border-collapse:collapse;font-size:13px;line-height:1.4;">
+              <tr>
+                <td style="padding:6px 0;color:#686D7A;text-transform:uppercase;font-size:11px;font-weight:600;">Audi / Venue</td>
+                <td style="padding:6px 0;text-align:right;font-weight:600;color:#111318;">${escapeHtml(payload.eventVenue || 'Campus Auditorium')}</td>
+              </tr>
+              <tr>
+                <td style="padding:6px 0;color:#686D7A;text-transform:uppercase;font-size:11px;font-weight:600;">When</td>
+                <td style="padding:6px 0;text-align:right;font-weight:600;color:#111318;">${escapeHtml(dateLabel)}</td>
+              </tr>
+              <tr>
+                <td style="padding:6px 0;color:#686D7A;text-transform:uppercase;font-size:11px;font-weight:600;">Attendee</td>
+                <td style="padding:6px 0;text-align:right;font-weight:600;color:#111318;">${escapeHtml(payload.recipientName)}</td>
+              </tr>
+              <tr>
+                <td style="padding:6px 0;color:#686D7A;text-transform:uppercase;font-size:11px;font-weight:600;">Category</td>
+                <td style="padding:6px 0;text-align:right;font-weight:600;color:#E04826;">${escapeHtml(payload.category.toUpperCase())}</td>
+              </tr>
+              <tr>
+                <td style="padding:6px 0;color:#686D7A;text-transform:uppercase;font-size:11px;font-weight:600;">Admit</td>
+                <td style="padding:6px 0;text-align:right;font-weight:600;color:#111318;">01 Person</td>
+              </tr>
+            </table>
+
+            <!-- Perforated Tear Line -->
+            <div style="margin:16px 0;border-top:1.5px dashed #CBD5E1;text-align:center;">
+              <span style="background:#FFFFFF;position:relative;top:-9px;padding:0 8px;font-size:10px;color:#A0A6B2;letter-spacing:0.08em;text-transform:uppercase;">
+                ✂ Entry Stub ✂
+              </span>
+            </div>
+
+            <!-- QR Verification Pass -->
+            <div style="text-align:center;padding:12px;background:#FBF9F5;border:1px solid #E2DDD4;border-radius:8px;">
+              <div style="font-size:11px;font-weight:700;color:#111318;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px;">
+                Scan for Admission
+              </div>
+              <img src="data:image/png;base64,${base64Png}" alt="Ticket QR Code" width="160" height="160" style="display:block;margin:0 auto;border-radius:4px;" />
+              <div style="font-size:12px;font-family:monospace;font-weight:700;color:#111318;margin-top:8px;">
+                ${escapeHtml(payload.ticketCode)}
+              </div>
+              <div style="font-size:10px;color:#686D7A;margin-top:4px;">
+                Registration &amp; Check-in (RD) Desk
+              </div>
+            </div>
+
+            <p style="margin:16px 0 0;font-size:11px;color:#686D7A;text-align:center;line-height:1.4;">
+              Present this email or the attached <strong>ticket-qr.png</strong> at the gate.
+              <br />
+              Valid with college photo ID · Acropolis Institute of Technology &amp; Research
+            </p>
           </div>
         </div>
       </div>
