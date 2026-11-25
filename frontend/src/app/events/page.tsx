@@ -96,14 +96,14 @@ export default async function EventsPage() {
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 10px', borderRadius: 4, background: 'var(--accent-tint)', border: '1px solid rgba(224,72,38,0.2)', marginBottom: 12 }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-3-accent-personality)' }} />
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--color-3-accent-personality)' }}>
-              Official Flagship Summit
+              EDC AITR Event Calendar
             </span>
           </div>
           <h1 style={{ margin: '0 0 12px', fontSize: 'clamp(1.8rem, 3.2vw, 2.6rem)', fontWeight: 800, lineHeight: 1.15, color: 'var(--text-primary)' }}>
-            E-Summit &amp; Campus Events
+            Events &amp; Summits
           </h1>
           <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 15, maxWidth: 640, lineHeight: 1.65 }}>
-            Upcoming summits, hackathons, and guest masterclasses hosted by EDC AITR and AIIH Foundation at Acropolis Institute of Technology and Research, Indore.
+            Discover upcoming summits, hackathons, founder masterclasses, and networking conclaves hosted by the Entrepreneurship Development Cell (EDC AITR) and AIIH Foundation.
           </p>
         </div>
       </section>
