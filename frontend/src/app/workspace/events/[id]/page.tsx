@@ -48,7 +48,9 @@ export default async function ManageEventPage({
   return (
     <>
       <p style={{ marginBottom: 16 }}>
-        <Link href="/workspace/events">← All managed events</Link>
+        <Link href="/workspace/events">← All managed events</Link> ·{' '}
+        <Link href={`/workspace/events/${id}/teams`}>Operational Teams</Link> ·{' '}
+        <Link href={`/workspace/events/${id}/tasks`}>Task Board</Link>
         {event.status !== 'draft' && (
           <>
             {' · '}

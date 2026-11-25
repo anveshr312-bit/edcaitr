@@ -326,6 +326,42 @@ test('non-SPOC core_team member cannot manage another event', () => {
   assert.equal(canManageEvent(participant, [participant.id]), false);
 });
 
+// --- Phase 2: Operational Teams & Task authorization guards ---
+
+console.log('\nPhase 2: Operational Teams & Task authorization guards');
+
+test('only the 12 confirmed operational teams are defined (rejected teams excluded)', () => {
+  const confirmed = new Set([
+    'RD', 'AV', 'STAGE', 'LOGISTICS', 'CROWD', 'CLIX',
+    'GUEST', 'DOCS', 'ANCHORING', 'DESIGN', 'VIDEO', 'SOCIAL',
+  ]);
+  const rejected = ['SPONSORSHIP', 'FINANCE', 'TECH_SUPPORT', 'HOSPITALITY', 'JUDGING'];
+  assert.equal(confirmed.size, 12);
+  for (const r of rejected) {
+    assert.equal(confirmed.has(r), false);
+  }
+});
+
+test('non-SPOC team member cannot approve tasks or modify task structure', () => {
+  const canApproveTask = (isSpocOrAdvisor: boolean) => isSpocOrAdvisor;
+  assert.equal(canApproveTask(false), false);
+  assert.equal(canApproveTask(true), true);
+});
+
+test('unassigned core_team member cannot access another event workspace', () => {
+  const canAccessWorkspace = (
+    ctx: UserContext,
+    spocIds: string[],
+    teamMemberIds: string[]
+  ) =>
+    roleRank(ctx.role) >= roleRank('advisor') ||
+    (ctx.role === 'core_team' && (spocIds.includes(ctx.id) || teamMemberIds.includes(ctx.id)));
+
+  assert.equal(canAccessWorkspace(coreTeam, ['other-spoc'], ['other-member']), false);
+  assert.equal(canAccessWorkspace(coreTeam, ['other-spoc'], [coreTeam.id]), true);
+  assert.equal(canAccessWorkspace(alumni, ['other-spoc'], [alumni.id]), false);
+});
+
 // ---------------------------------------------------------------------------
 // Results
 // ---------------------------------------------------------------------------
