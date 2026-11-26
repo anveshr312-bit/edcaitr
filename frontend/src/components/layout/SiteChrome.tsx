@@ -48,9 +48,9 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-x-clip bg-[var(--color-1-mood)] text-[var(--color-2-mood)] transition-colors duration-200">
-      <div className="pointer-events-none fixed inset-0 z-0 opacity-50 dark:opacity-40" aria-hidden="true">
+      <div className="pointer-events-none fixed inset-0 z-0 opacity-70 dark:opacity-50" aria-hidden="true">
         <WaveGridBackground
-          gridSize={40}
+          gridSize={48}
           colorBase={isDark ? "#121316" : "#f0f0f2"}
           colorHigh="#C01E30"
           waveAmplitude={0.4}

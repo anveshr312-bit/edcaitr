@@ -87,7 +87,13 @@ export default function ApplicationsClient({ applications: initial }: Props) {
           note,
         }),
       });
-      const payload = await res.json();
+      const rawText = await res.text();
+      let payload: { ok?: boolean; error?: string } = {};
+      try {
+        payload = rawText ? JSON.parse(rawText) : {};
+      } catch {
+        payload = { error: rawText || `Server responded with HTTP ${res.status}` };
+      }
       if (!res.ok) {
         throw new Error(payload.error ?? 'Action failed.');
       }

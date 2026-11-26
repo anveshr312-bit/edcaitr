@@ -3,11 +3,12 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { ShieldCheck, Loader2 } from 'lucide-react';
 import { createClient } from '../../lib/supabase/client';
-
 import { returnPath } from '../../lib/auth/returnPath';
 
 function destination() {
+  if (typeof window === 'undefined') return '/account/dashboard';
   return returnPath(new URLSearchParams(window.location.search).get('next'));
 }
 
@@ -23,6 +24,47 @@ export default function Account() {
   const [mode, setMode] = useState<'signin' | 'signup' | 'forgot_password'>('signin');
   const [recoverySent, setRecoverySent] = useState(false);
 
+  // Director MFA mandatory verification state
+  const [isDirectorMfa, setIsDirectorMfa] = useState(false);
+  const [mfaStep, setMfaStep] = useState<'verify' | 'enroll'>('verify');
+  const [factorId, setFactorId] = useState('');
+  const [challengeId, setChallengeId] = useState('');
+  const [totpCode, setTotpCode] = useState('');
+  const [qrCode, setQrCode] = useState('');
+  const [secret, setSecret] = useState('');
+
+  async function setupOrChallengeMfa() {
+    if (!supabase) return;
+    try {
+      const { data: factors } = await supabase.auth.mfa.listFactors();
+      const totpFactor = factors?.totp?.[0];
+      if (totpFactor) {
+        setFactorId(totpFactor.id);
+        setMfaStep('verify');
+        const { data: ch, error: chErr } = await supabase.auth.mfa.challenge({ factorId: totpFactor.id });
+        if (!chErr && ch) {
+          setChallengeId(ch.id);
+        }
+      } else {
+        const { data: enrollData, error: enrollErr } = await supabase.auth.mfa.enroll({
+          factorType: 'totp',
+          issuer: 'EDC AITR',
+          friendlyName: 'Director Authenticator',
+        });
+        if (enrollErr) throw enrollErr;
+        setFactorId(enrollData.id);
+        setQrCode(enrollData.totp.qr_code);
+        setSecret(enrollData.totp.secret);
+        setMfaStep('enroll');
+        const { data: ch } = await supabase.auth.mfa.challenge({ factorId: enrollData.id });
+        if (ch) setChallengeId(ch.id);
+      }
+    } catch (err: unknown) {
+      console.warn('MFA initialization error:', err);
+      setMessage(err instanceof Error ? err.message : 'Failed to initialize Director MFA challenge.');
+    }
+  }
+
   useEffect(() => {
     if (!supabase) {
       setMessage('Account services are not configured yet.');
@@ -36,25 +78,37 @@ export default function Account() {
       setMessage('Authentication session expired or failed. Please sign in again.');
     }
 
-    supabase.auth.getUser().then(({ data, error }) => {
+    supabase.auth.getUser().then(async ({ data, error }) => {
       if (error || !data.user) {
         setUserEmail(null);
         setCheckingSession(false);
       } else {
         setUserEmail(data.user.email ?? null);
-        // Automatically route logged-in users to the full Account Dashboard
+        try {
+          const { data: role } = await supabase.rpc('get_user_role', { user_uuid: data.user.id });
+          if (role === 'director') {
+            const { data: mfaData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+            if (mfaData?.currentLevel !== 'aal2') {
+              setIsDirectorMfa(true);
+              setCheckingSession(false);
+              await setupOrChallengeMfa();
+              return;
+            }
+          }
+        } catch {
+          // Fallback if RPC fails
+        }
         router.replace(destination());
       }
     });
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
       const currentEmail = session?.user?.email ?? null;
       setUserEmail(currentEmail);
-      if (event === 'SIGNED_IN' && session?.user) {
-        router.replace(destination());
-      } else if (event === 'SIGNED_OUT') {
+      if (event === 'SIGNED_OUT') {
         setUserEmail(null);
         setPassword('');
+        setIsDirectorMfa(false);
         setCheckingSession(false);
       } else if (event === 'PASSWORD_RECOVERY') {
         window.location.href = '/account/reset-password';
@@ -84,6 +138,7 @@ export default function Account() {
         const { error } = await supabase.auth.signOut();
         if (error) throw error;
         setUserEmail(null);
+        setIsDirectorMfa(false);
         setMessage('Signed out successfully.');
       } else if (action === 'signup') {
         const { error } = await supabase.auth.signUp({
@@ -102,16 +157,58 @@ export default function Account() {
         setRecoverySent(true);
         setMessage('Password reset link sent to your email.');
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data: signData, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
         if (error) throw error;
         setPassword('');
+
+        const userId = signData.user?.id;
+        if (userId) {
+          const { data: role } = await supabase.rpc('get_user_role', { user_uuid: userId });
+          if (role === 'director') {
+            const { data: mfaData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+            if (mfaData?.currentLevel !== 'aal2') {
+              setIsDirectorMfa(true);
+              await setupOrChallengeMfa();
+              return;
+            }
+          }
+        }
         router.replace(destination());
       }
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Action failed. Please retry.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function submitDirectorMfa(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!supabase || totpCode.length !== 6 || !factorId) return;
+    setBusy(true);
+    setMessage('');
+    try {
+      let cid = challengeId;
+      if (!cid) {
+        const { data: chData, error: chErr } = await supabase.auth.mfa.challenge({ factorId });
+        if (chErr) throw chErr;
+        cid = chData.id;
+        setChallengeId(cid);
+      }
+      const { error } = await supabase.auth.mfa.verify({ factorId, challengeId: cid, code: totpCode });
+      if (error) throw error;
+      setMessage('Authenticator code verified! Redirecting to Dashboard...');
+      router.replace(destination());
+    } catch (err: unknown) {
+      setMessage(err instanceof Error ? err.message : 'Invalid authenticator code. Please check your app and try again.');
+      setTotpCode('');
+      try {
+        const { data: newCh } = await supabase.auth.mfa.challenge({ factorId });
+        if (newCh) setChallengeId(newCh.id);
+      } catch {}
     } finally {
       setBusy(false);
     }
@@ -128,13 +225,184 @@ export default function Account() {
     }
   }
 
+  // Mandatory Director MFA Screen
+  if (isDirectorMfa) {
+    return (
+      <div style={{ maxWidth: 460, margin: '40px auto', padding: '0 16px' }}>
+        <div
+          className="card"
+          style={{
+            padding: '36px 30px',
+            border: '1px solid var(--border-hairline)',
+            borderRadius: 'var(--radius-panel)',
+            background: 'var(--surface)',
+            boxShadow: '0 12px 36px rgba(0,0,0,0.06)',
+          }}
+        >
+          <div style={{ textAlign: 'center', marginBottom: 24 }}>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '5px 14px',
+                borderRadius: 999,
+                background: 'rgba(192,30,48,0.1)',
+                color: '#C01E30',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                marginBottom: 14,
+              }}
+            >
+              <ShieldCheck style={{ width: 15, height: 15 }} />
+              <span>Director Security Verification</span>
+            </div>
+            <h1 style={{ fontSize: '1.45rem', fontWeight: 700, margin: '0 0 8px', color: 'var(--color-2-mood)' }}>
+              Write the Authenticator Code
+            </h1>
+            <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.55 }}>
+              Your account holds the <strong>Director</strong> governance role. Enter the 6-digit TOTP code from your authenticator app to authorize this session.
+            </p>
+          </div>
+
+          {mfaStep === 'enroll' && qrCode && (
+            <div
+              style={{
+                textAlign: 'center',
+                marginBottom: 20,
+                padding: 16,
+                background: 'var(--surface-subtle)',
+                borderRadius: 12,
+                border: '1px solid var(--border-hairline)',
+              }}
+            >
+              <p style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-2-mood)', marginBottom: 10 }}>
+                Scan this QR code in Google Authenticator or Microsoft Authenticator:
+              </p>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={qrCode}
+                alt="TOTP QR Code"
+                style={{ width: 160, height: 160, margin: '0 auto', borderRadius: 8, display: 'block' }}
+              />
+              {secret && (
+                <p style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: 'var(--text-muted)', marginTop: 8 }}>
+                  Manual key: <strong>{secret}</strong>
+                </p>
+              )}
+            </div>
+          )}
+
+          <form onSubmit={submitDirectorMfa} style={{ display: 'grid', gap: 18 }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-2-mood)', marginBottom: 8, textAlign: 'center' }}>
+                Enter 6-Digit Authenticator Code
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={6}
+                autoFocus
+                required
+                placeholder="000000"
+                value={totpCode}
+                onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, ''))}
+                style={{
+                  width: '100%',
+                  padding: '14px 14px',
+                  borderRadius: 10,
+                  border: '1.5px solid var(--border-strong)',
+                  fontSize: '1.75rem',
+                  textAlign: 'center',
+                  letterSpacing: '0.35em',
+                  fontFamily: 'monospace',
+                  fontWeight: 700,
+                  boxSizing: 'border-box',
+                  background: 'var(--surface-subtle)',
+                  color: 'var(--color-2-mood)',
+                }}
+              />
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center', marginTop: 8 }}>
+                Open Google Authenticator, Microsoft Authenticator, or 1Password to view your current code.
+              </p>
+            </div>
+
+            <button
+              type="submit"
+              disabled={busy || totpCode.length !== 6}
+              className="btn btn-primary"
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                fontSize: '0.95rem',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+              }}
+            >
+              {busy ? (
+                <>
+                  <Loader2 style={{ width: 16, height: 16 }} className="animate-spin" />
+                  <span>Verifying Code...</span>
+                </>
+              ) : (
+                'Verify & Enter Dashboard →'
+              )}
+            </button>
+          </form>
+
+          {message && (
+            <div
+              role="status"
+              aria-live="polite"
+              style={{
+                marginTop: 18,
+                padding: '10px 14px',
+                borderRadius: 8,
+                fontSize: '0.85rem',
+                background: message.includes('failed') || message.includes('error') || message.includes('Invalid') ? '#FEF2F2' : '#F0FDF4',
+                color: message.includes('failed') || message.includes('error') || message.includes('Invalid') ? '#991B1B' : '#166534',
+                border: `1px solid ${message.includes('failed') || message.includes('error') || message.includes('Invalid') ? '#FECACA' : '#BBF7D0'}`,
+                textAlign: 'center',
+              }}
+            >
+              {message}
+            </div>
+          )}
+
+          <div style={{ marginTop: 24, textAlign: 'center', borderTop: '1px solid var(--border-hairline)', paddingTop: 16 }}>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void act('logout')}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--text-muted)',
+                fontSize: '0.8125rem',
+                cursor: 'pointer',
+              }}
+            >
+              ← Sign in with a different account
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (checkingSession && userEmail) {
     return (
       <div style={{ maxWidth: 460, margin: '60px auto', textAlign: 'center', padding: '40px 20px' }}>
         <div style={{ marginBottom: 16 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/edc-logo-light.png"
+            src="/edc-logo-light.webp"
             alt="EDC AITR"
             style={{ height: 44, width: 'auto', margin: '0 auto', display: 'block' }}
           />

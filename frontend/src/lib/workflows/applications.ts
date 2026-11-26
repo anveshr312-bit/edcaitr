@@ -10,6 +10,7 @@ import {
   requireDirectorMfa,
   requireRole,
 } from '../auth/authorization';
+import { sendApplicationDecisionEmail, sendApplicationReceivedEmail } from '../applications/email';
 
 export type ApplicationType =
   | 'advisor_application'
@@ -55,6 +56,27 @@ export async function submitApplication(
     .single();
 
   if (error) return { ok: false, error: error.message };
+
+  try {
+    const { data: applicantProfile } = await client
+      .from('profiles')
+      .select('full_name')
+      .eq('id', ctx.id)
+      .maybeSingle();
+
+    if (ctx.email) {
+      void sendApplicationReceivedEmail({
+        recipientEmail: ctx.email,
+        recipientName: applicantProfile?.full_name || 'Applicant',
+        applicationType,
+        statement: statement.trim(),
+        applicationId: data.id,
+      }).catch((e) => console.warn('Receipt email dispatch error:', e));
+    }
+  } catch (emailErr) {
+    console.warn('Could not dispatch receipt email:', emailErr);
+  }
+
   return { ok: true, applicationId: data.id };
 }
 
@@ -105,6 +127,32 @@ export async function reviewApplication(
   });
 
   if (rpcErr) return { ok: false, error: rpcErr.message };
+
+  try {
+    const { data: applicantProfile } = await admin
+      .from('profiles')
+      .select('full_name')
+      .eq('id', app.applicant_id)
+      .maybeSingle();
+
+    const { data: userData } = await admin.auth.admin.getUserById(app.applicant_id);
+    const applicantEmail = userData?.user?.email;
+    const applicantName = applicantProfile?.full_name || userData?.user?.user_metadata?.full_name || 'Applicant';
+
+    if (applicantEmail) {
+      void sendApplicationDecisionEmail({
+        recipientEmail: applicantEmail,
+        recipientName: applicantName,
+        applicationType: app.application_type,
+        decision,
+        note: note.trim(),
+        applicationId,
+      }).catch((e) => console.warn('Decision email dispatch error:', e));
+    }
+  } catch (emailErr) {
+    console.warn('Could not dispatch decision email:', emailErr);
+  }
+
   return { ok: true };
 }
 
