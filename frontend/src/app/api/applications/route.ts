@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '../../../lib/supabase/server';
+import { sendApplicationReceivedEmail } from '../../../lib/applications/email';
 
 export async function GET() {
   const supabase = await createClient();
@@ -86,7 +87,7 @@ export async function POST(request: Request) {
   // 1. Safeguard: Ensure profile row exists in public.profiles to satisfy Foreign Key
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id')
+    .select('id, full_name')
     .eq('id', user.id)
     .maybeSingle();
 
@@ -149,6 +150,21 @@ export async function POST(request: Request) {
       msg = 'Your profile record is not yet initialized in the database. Please visit Edit Profile (/account/profile) to save your name first, or apply Migration 015 in Supabase.';
     }
     return NextResponse.json({ error: msg }, { status: 400 });
+  }
+
+  try {
+    if (user.email) {
+      const applicantName: string = profile?.full_name || user.user_metadata?.full_name || 'Applicant';
+      void sendApplicationReceivedEmail({
+        recipientEmail: user.email,
+        recipientName: applicantName,
+        applicationType,
+        statement: cleanStatement,
+        applicationId: newApp.id,
+      }).catch((e) => console.warn('Receipt email dispatch error:', e));
+    }
+  } catch (emailErr) {
+    console.warn('Could not dispatch receipt email:', emailErr);
   }
 
   return NextResponse.json({
