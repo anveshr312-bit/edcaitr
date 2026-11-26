@@ -5,15 +5,18 @@ import { getPublicTeamProfiles } from '../../../lib/events/events';
 import { getImageKitUrl } from '../../../lib/media/imagekit';
 import { getBaseUrl, SITE_CONFIG } from '../../../lib/seo';
 
+export const dynamic = 'force-dynamic';
+
 interface Props {
   params: Promise<{ id: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const memberId = decodeURIComponent(id);
+  const memberId = id;
   const user = (await getPublicTeamProfiles()).find((member) => member.id === memberId);
 
+  if (!user) notFound();
   const baseUrl = getBaseUrl();
   const title = user
     ? `${user.full_name} (${user.designation ?? user.role}) | EDC AITR Member`
@@ -41,7 +44,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function MemberPage({ params }: Props) {
   const { id } = await params;
-  const memberId = decodeURIComponent(id);
+  const memberId = id;
   const member = (await getPublicTeamProfiles()).find((profile) => profile.id === memberId);
   if (!member) notFound();
 

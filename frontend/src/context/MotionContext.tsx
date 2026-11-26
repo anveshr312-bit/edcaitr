@@ -62,10 +62,7 @@ export function markRevealedKey(key: string): void {
 }
 
 export function usePrefersReducedMotion(): boolean {
-  const [reduced, setReduced] = useState<boolean>(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return false;
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  });
+  const [reduced, setReduced] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined' || !window.matchMedia) return;
@@ -84,10 +81,7 @@ export function usePrefersReducedMotion(): boolean {
  * Keeps pointer-tracked spotlights and subtle certificate tilt off touchscreens & mobile GPUs.
  */
 export function useFinePointer(): boolean {
-  const [fine, setFine] = useState<boolean>(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return false;
-    return window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-  });
+  const [fine, setFine] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined' || !window.matchMedia) return;
@@ -237,13 +231,30 @@ export const MotionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setIntroReady(true);
   }, []);
 
-  // Guarantee introReady resolves even if preloader failsafe or unexpected unmount occurs
+  // Synchronize introReady immediately when preloader finishes or class drops
   useEffect(() => {
     if (introReady) return;
+    if (!document.documentElement.classList.contains('edc-preloader-active')) {
+      setIntroReady(true);
+      return;
+    }
+    const observer = new MutationObserver(() => {
+      if (!document.documentElement.classList.contains('edc-preloader-active')) {
+        setIntroReady(true);
+        observer.disconnect();
+      }
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
     const guard = window.setTimeout(() => {
       setIntroReady(true);
-    }, 5200);
-    return () => window.clearTimeout(guard);
+      observer.disconnect();
+    }, 4500);
+
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(guard);
+    };
   }, [introReady]);
 
   const registerOverlay = useCallback((id: string) => {

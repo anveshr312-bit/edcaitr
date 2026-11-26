@@ -159,7 +159,7 @@ export default async function TeamPage() {
                           )}
                           <div>
                             <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700 }}>
-                              {member.full_name || 'EDC Member'}
+                              <Link href={`/members/${member.id}`}>{member.full_name || 'EDC Member'}</Link>
                             </h3>
                             <p className="card-meta" style={{ margin: 0 }}>
                               {member.designation || ROLE_TITLES[roleKey]}

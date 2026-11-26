@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '../../../lib/supabase/server';
 import { getUserRole } from '../../../lib/auth/authorization';
+import { SignOutButton } from './SignOutButton';
 
 type AppRole = 'participant' | 'core_team' | 'advisor' | 'director' | 'alumni';
 
@@ -138,16 +139,7 @@ export default async function DashboardPage() {
             >
               Edit Profile
             </Link>
-            <Link
-              href="/account"
-              className="btn"
-              style={{
-                fontSize: '0.85rem',
-                color: 'var(--text-muted)',
-              }}
-            >
-              Sign Out
-            </Link>
+            <SignOutButton />
           </div>
         </div>
       </section>

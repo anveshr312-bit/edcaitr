@@ -55,11 +55,11 @@ export function GlobalStructuredData() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema).replace(/</g, '\\u003c') }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema).replace(/</g, '\\u003c') }}
       />
     </>
   );
@@ -89,7 +89,7 @@ export function BreadcrumbStructuredData({
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, '\\u003c') }}
     />
   );
 }
@@ -107,6 +107,7 @@ interface EventSchemaProps {
   feeAmount?: number | null;
   bannerUrl?: string | null;
   status?: string | null;
+  registrationOpen?: boolean;
 }
 
 /**
@@ -124,12 +125,12 @@ export function EventStructuredData({ event }: { event: EventSchemaProps }) {
     description: event.description || event.summary || event.title,
     url: eventUrl,
     image: [banner],
-    startDate: event.startsAt || new Date().toISOString(),
+    ...(event.startsAt && { startDate: event.startsAt }),
     ...(event.endsAt && { endDate: event.endsAt }),
     eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
     eventStatus:
-      event.status === 'closed'
-        ? 'https://schema.org/EventMovedOnline'
+      event.status === 'cancelled'
+        ? 'https://schema.org/EventCancelled'
         : 'https://schema.org/EventScheduled',
     location: {
       '@type': 'Place',
@@ -148,23 +149,18 @@ export function EventStructuredData({ event }: { event: EventSchemaProps }) {
       name: SITE_CONFIG.name,
       url: baseUrl,
     },
-    offers: {
+    offers: event.registrationOpen ? {
       '@type': 'Offer',
       price: event.isPaid && event.feeAmount ? event.feeAmount : '0',
       priceCurrency: 'INR',
-      availability:
-        event.status === 'closed'
-          ? 'https://schema.org/Discontinued'
-          : 'https://schema.org/InStock',
       url: eventUrl,
-      validFrom: event.startsAt || new Date().toISOString(),
-    },
+    } : undefined,
   };
 
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, '\\u003c') }}
     />
   );
 }

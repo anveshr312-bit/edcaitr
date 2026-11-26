@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import nextDynamic from 'next/dynamic';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { getPublicEventBySlug } from '../../../lib/events/events';
 import { getImageKitUrl } from '../../../lib/media/imagekit';
 import { createClient } from '../../../lib/supabase/server';
@@ -14,7 +14,7 @@ const EventRegisterForm = nextDynamic(
   { loading: () => <SkeletonBox height={180} borderRadius={8} /> }
 );
 import LiquidButton from '../../../components/ui/liquid-button';
-import { MultiTrackEventModalLauncher } from '../../../components/events/MultiTrackEventModalLauncher';
+import { eventAvailability } from '../../../lib/events/lifecycle';
 
 export const revalidate = 60;
 
@@ -87,27 +87,33 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
 }
 
 export default async function EventDetailPage({
-  params,
+  params, searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ track?: string }>;
 }) {
   const { slug } = await params;
   const { event, guests, highlights, manuals } = await getPublicEventBySlug(slug);
 
   if (!event) {
+    if (slug === 'fokus-x-e-summit-2026') redirect('/#summit-2026');
+    if (slug === 'pitchbiz-investment-arena-2026') redirect('/events#pitchbiz');
     notFound();
   }
 
   const supabase = await createClient();
+  const trackResult = supabase ? await supabase.from('event_tracks').select('id,title').eq('event_id', event.id).order('title') : null;
+  const tracks: {id: string; title: string}[] = trackResult?.data ?? [];
+  const requestedTrack = (await searchParams).track;
+  const selectedTrack = tracks.find(track => track.id === requestedTrack);
+  const back = `/events/${event.slug}${selectedTrack ? '?track=' + selectedTrack.id : ''}#registration`;
   let userId: string | null = null;
-  let userEmail: string = '';
   let existingReg: { id: string; status: string } | null = null;
   let upiDetails: { upi_id: string | null; upi_qr_ref: string | null } = { upi_id: null, upi_qr_ref: null };
 
   if (supabase) {
     const { data: auth } = await supabase.auth.getUser();
     userId = auth.user?.id ?? null;
-    userEmail = auth.user?.email ?? '';
 
     if (userId) {
       const [{ data: reg }, { data: evPay }] = await Promise.all([
@@ -130,8 +136,8 @@ export default async function EventDetailPage({
 
   const posterUrl = getImageKitUrl(event.poster_ref);
   const upiQrUrl = getImageKitUrl(upiDetails.upi_qr_ref);
-  const isConcluded = event.status === 'closed' || event.status === 'archived';
-  const canRegister = event.status === 'published' || event.status === 'ongoing';
+  const { lifecycle, open: canRegister } = eventAvailability(event);
+  const isConcluded = ['completed', 'archived'].includes(lifecycle);
 
   return (
     <>
@@ -149,6 +155,7 @@ export default async function EventDetailPage({
           feeAmount: event.fee_amount,
           bannerUrl: posterUrl,
           status: event.status,
+          registrationOpen: canRegister,
         }}
       />
       <BreadcrumbStructuredData
@@ -408,7 +415,7 @@ export default async function EventDetailPage({
           >
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
               <span className="badge badge-accent">
-                {isConcluded ? 'Event concluded' : event.status.replace('_', ' ')}
+                {isConcluded ? 'Event concluded' : lifecycle}
               </span>
               <span className="badge">
                 {event.is_paid && event.fee_amount ? `₹${event.fee_amount}` : 'Free Entry'}
@@ -510,10 +517,12 @@ export default async function EventDetailPage({
 
           {/* Register section */}
           {canRegister && (
-            <div className="card">
+            <div id="registration" className="card">
               <SectionHeading>Register</SectionHeading>
-              {userId ? (
+              {tracks.length > 0 && <nav aria-label="Select registration track">{tracks.map(track => <Link key={track.id} className="btn" aria-current={track.id === selectedTrack?.id ? 'true' : undefined} href={`/events/${event.slug}?track=${track.id}#registration`}>{track.title}</Link>)}</nav>}
+              {trackResult?.error || !trackResult ? <p>Registration options are temporarily unavailable.</p> : tracks.length > 0 && !selectedTrack ? <p>Select a track to continue.</p> : userId ? (
                 <EventRegisterForm
+                  trackId={selectedTrack?.id ?? null}
                   eventId={event.id}
                   isPaid={event.is_paid}
                   feeAmount={event.fee_amount}
@@ -527,20 +536,13 @@ export default async function EventDetailPage({
                   <p style={{ margin: '0 0 16px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
                     Sign in to your account to register for this event.
                   </p>
-                  <LiquidButton href="/account" variant="accent" style={{ width: '100%' }}>
+                  <LiquidButton href={`/account?next=${encodeURIComponent(back)}`} variant="accent" style={{ width: '100%' }}>
                     Sign in to register
                   </LiquidButton>
                 </div>
               )}
 
-              <MultiTrackEventModalLauncher
-                eventId={event.id}
-                eventTitle={event.title}
-                isPaid={event.is_paid}
-                feeAmount={event.fee_amount}
-                defaultName=""
-                defaultEmail={userEmail || ''}
-              />
+
             </div>
           )}
 

@@ -135,6 +135,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             __html: `
               (function() {
                 try {
+                  if (localStorage.getItem('edc_aitr_theme_mode') === 'dark') document.documentElement.classList.add('dark');
                   var seen = sessionStorage.getItem('edc_cinematic_intro_seen');
                   var rm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
                   if (!seen && !rm) {

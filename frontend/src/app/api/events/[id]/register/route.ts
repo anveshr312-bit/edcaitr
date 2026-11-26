@@ -14,6 +14,7 @@ export async function POST(
 
   const { id: eventId } = await context.params;
   let body: {
+    track_id?: string;
     participant_category?: string;
     organization?: string;
     payment_ref?: string;
@@ -28,6 +29,7 @@ export async function POST(
   const admin = createAdminClient();
   const { data, error } = await admin.rpc('register_for_event', {
     p_event_id: eventId,
+    p_track_id: body.track_id || null,
     p_user_id: ctx!.id,
     p_category: body.participant_category ?? 'student',
     p_organization: body.organization ?? null,

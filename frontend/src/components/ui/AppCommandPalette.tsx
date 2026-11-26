@@ -3,7 +3,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'motion/react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { ArrowRight, Search, X } from 'lucide-react';
 import { useThemeToggle } from '../../context/ThemeContext';
 import { MOTION_TRACKS, OVERLAY_Z, useFocusTrap, useMotionSystem } from '../../context/MotionContext';
@@ -63,11 +63,39 @@ export function AppCommandPalette() {
   const [mounted, setMounted] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const pathname = usePathname();
+  const [userId, setUserId] = useState<string | null | undefined>(undefined);
+  type SearchEntry = {title: string; subtitle: string; terms: string; href: string};
+  const [catalogue, setCatalogue] = useState<{path: string; user: string | null; rows: SearchEntry[]} | null>(null);
+  useEffect(() => {
+    if (!commandPaletteOpen) { setCatalogue(null); return; }
+    let active = true;
+    let unsubscribe: (() => void) | undefined;
+    void import('../../lib/supabase/client').then(({createClient}) => {
+      if (!active) return;
+      const client = createClient();
+      if (!client) { setUserId(null); return; }
+      const {data} = client.auth.onAuthStateChange((_event, session) => { if (active) setUserId(session?.user.id ?? null); });
+      unsubscribe = () => data.subscription.unsubscribe();
+    });
+    return () => { active = false; unsubscribe?.(); setUserId(undefined); };
+  }, [commandPaletteOpen]);
+  useEffect(() => {
+    if (!commandPaletteOpen || userId === undefined) return;
+    const controller = new AbortController();
+    const eventId = pathname.match(/^\/workspace\/events\/([^/]+)/)?.[1] ?? '';
+    fetch('/api/search?event=' + encodeURIComponent(eventId), {signal: controller.signal, cache: 'no-store'})
+      .then(async response => response.ok ? response.json() : null)
+      .then(data => { if (!controller.signal.aborted && data && data.userId === userId) setCatalogue({path: pathname, user: userId, rows: data.results}); })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [commandPaletteOpen, pathname, userId]);
   const listId = useId();
   const titleId = useId();
   const results = useMemo(() => {
     const needle = query.trim().toLowerCase();
-    const routes = ROUTES.filter(({ title, subtitle, terms }) =>
+    const dynamic = catalogue?.path === pathname && catalogue.user === userId ? catalogue.rows : [];
+    const routes = [...ROUTES, ...dynamic].filter(({ title, subtitle, terms }) =>
       `${title} ${subtitle} ${terms}`.toLowerCase().includes(needle)
     );
     return [
@@ -76,7 +104,7 @@ export function AppCommandPalette() {
         ? [{ id: 'theme', title: 'Switch to light theme', subtitle: 'Change the site appearance', kind: 'theme' as const }]
         : [{ id: 'theme', title: 'Switch to dark theme', subtitle: 'Change the site appearance', kind: 'theme' as const }]),
     ];
-  }, [isDark, query]);
+  }, [isDark, query, catalogue, pathname, userId]);
   const isTop = isTopOverlay(OVERLAY_ID);
 
   useEffect(() => setMounted(true), []);
@@ -155,6 +183,7 @@ export function AppCommandPalette() {
                 aria-expanded="true"
                 aria-autocomplete="list"
                 aria-controls={listId}
+                aria-activedescendant={results.length ? `${listId}-${activeIndex}` : undefined}
                 aria-label="Search EDC AITR pages"
                 value={query}
                 onChange={(event) => {
@@ -173,6 +202,7 @@ export function AppCommandPalette() {
                 <p className="px-3 py-8 text-center text-sm text-[var(--ink-muted)]">No matching pages.</p>
               ) : results.map((item, index) => (
                 <button
+                  id={`${listId}-${index}`}
                   key={item.id}
                   type="button"
                   role="option"

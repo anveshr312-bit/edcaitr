@@ -187,7 +187,8 @@ export default function ManageEventClient({
               <option value="ongoing">Ongoing</option>
               <option value="wrap_up">Wrap-up</option>
               <option value="closed">Closed</option>
-              <option value="archived">Archived</option>
+              <option value="cancelled">Cancelled</option>
+                <option value="archived">Archived</option>
             </select>
           </label>
           <label>

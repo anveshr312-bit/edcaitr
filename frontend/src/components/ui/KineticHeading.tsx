@@ -89,14 +89,14 @@ export const KineticHeading: React.FC<KineticHeadingProps> = ({
             ) : (
               <motion.span
                 initial={{
-                  opacity: 0,
-                  y: headlineDistance,
-                  filter: 'blur(4px)',
+                  opacity: immediate ? 1 : 0,
+                  y: immediate ? 4 : headlineDistance,
+                  filter: immediate ? 'none' : 'blur(4px)',
                 }}
                 animate={
                   shouldReveal
                     ? { opacity: 1, y: 0, filter: 'blur(0px)' }
-                    : { opacity: 0, y: headlineDistance, filter: 'blur(4px)' }
+                    : { opacity: immediate ? 1 : 0, y: immediate ? 4 : headlineDistance, filter: immediate ? 'none' : 'blur(4px)' }
                 }
                 transition={{
                   duration: headlineWordDuration,
@@ -137,14 +137,14 @@ export const KineticHeading: React.FC<KineticHeadingProps> = ({
               ) : (
                 <motion.span
                   initial={{
-                    opacity: 0,
-                    y: headlineDistance,
-                    filter: 'blur(4px)',
+                    opacity: immediate ? 1 : 0,
+                    y: immediate ? 4 : headlineDistance,
+                    filter: immediate ? 'none' : 'blur(4px)',
                   }}
                   animate={
                     shouldReveal
                       ? { opacity: 1, y: 0, filter: 'blur(0px)' }
-                      : { opacity: 0, y: headlineDistance, filter: 'blur(4px)' }
+                      : { opacity: immediate ? 1 : 0, y: immediate ? 4 : headlineDistance, filter: immediate ? 'none' : 'blur(4px)' }
                   }
                   transition={{
                     duration: headlineWordDuration,

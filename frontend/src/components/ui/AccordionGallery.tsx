@@ -78,6 +78,7 @@ export const AccordionGallery: React.FC<AccordionGalleryProps> = ({
   const barRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const textRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
+  const hoverTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const firstRunRef = useRef(true);
   const mediaSizeRef = useRef(560);
 
@@ -87,11 +88,7 @@ export const AccordionGallery: React.FC<AccordionGalleryProps> = ({
     Math.min(Math.max(defaultIndex, 0), Math.max(0, count - 1))
   );
   const [failedImages, setFailedImages] = useState<Record<number, boolean>>({});
-  const [reduced, setReduced] = useState(() =>
-    typeof window !== 'undefined' && window.matchMedia
-      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
-      : false
-  );
+  const [reduced, setReduced] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined' || !window.matchMedia) return;
@@ -263,6 +260,7 @@ export const AccordionGallery: React.FC<AccordionGalleryProps> = ({
 
   useEffect(
     () => () => {
+      clearTimeout(hoverTimer.current);
       tlRef.current?.kill();
     },
     []
@@ -270,7 +268,8 @@ export const AccordionGallery: React.FC<AccordionGalleryProps> = ({
 
   const handlePointerEnter = (i: number, e: React.PointerEvent) => {
     if (trigger === 'hover' && e.pointerType === 'mouse') {
-      setActiveSafe(i);
+      clearTimeout(hoverTimer.current);
+      hoverTimer.current = setTimeout(() => setActiveSafe(i), 180);
     }
   };
 
@@ -352,6 +351,7 @@ export const AccordionGallery: React.FC<AccordionGalleryProps> = ({
             style={{ borderRadius: `${radius}px` }}
             onClick={(e) => handleClick(i, e)}
             onPointerEnter={(e) => handlePointerEnter(i, e)}
+            onPointerLeave={() => clearTimeout(hoverTimer.current)}
             onFocus={() => setActiveSafe(i)}
             onKeyDown={(e) => handleKeyDown(i, e)}
             role="tab"
@@ -402,7 +402,7 @@ export const AccordionGallery: React.FC<AccordionGalleryProps> = ({
             {/* Quiet index + collapsed panel hint so inactive panels remain identifiable */}
             <span className="ag-panel__index" aria-hidden="true">
               <span className="ag-panel__index-num">{indexLabel}</span>
-              {!isActive && vertical && item.label && (
+              {!isActive && item.label && (
                 <span className="ag-panel__collapsed-title">{item.label}</span>
               )}
             </span>

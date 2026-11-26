@@ -1,16 +1,17 @@
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import { cache } from 'react';
 import { unstable_cache } from 'next/cache';
 
 function createPublicClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key || url.includes('your-project-id')) return null;
   return createSupabaseClient(url, key, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 }
 
-export type EventStatus = 'draft' | 'published' | 'ongoing' | 'wrap_up' | 'closed' | 'archived';
+export type EventStatus = 'draft' | 'published' | 'ongoing' | 'wrap_up' | 'closed' | 'archived' | 'cancelled';
 
 export interface PublicTeamMember {
   id: string;
@@ -43,6 +44,8 @@ export interface PublicEvent {
   venue: string | null;
   starts_at: string | null;
   ends_at: string | null;
+  registration_opens_at: string | null;
+  registration_closes_at: string | null;
   status: EventStatus;
   is_paid: boolean;
   fee_amount: number | null;
@@ -77,15 +80,13 @@ export interface PublicEventManual {
   file_size_kb: number | null;
 }
 
-export const getPublicTeamProfiles = unstable_cache(
+export const getPublicTeamProfiles = cache(
   async (): Promise<PublicTeamMember[]> => {
     const supabase = createPublicClient();
     if (!supabase) return [];
     const { data } = await supabase.rpc('get_public_team_profiles');
     return (data as PublicTeamMember[]) ?? [];
-  },
-  ['public-team-profiles'],
-  { revalidate: 60, tags: ['public-team'] }
+  }
 );
 
 export const getPublicPastTeams = unstable_cache(
@@ -105,12 +106,12 @@ export const getPublicEvents = unstable_cache(
     if (!supabase) return [];
 
     const statuses: EventStatus[] = includeArchived
-      ? ['published', 'ongoing', 'wrap_up', 'closed', 'archived']
-      : ['published', 'ongoing', 'wrap_up', 'closed'];
+      ? ['published', 'ongoing', 'wrap_up', 'closed', 'archived', 'cancelled']
+      : ['published', 'ongoing', 'wrap_up', 'closed', 'cancelled'];
 
     const { data } = await supabase
       .from('events')
-      .select('id, slug, title, summary, description, venue, starts_at, ends_at, status, is_paid, fee_amount, poster_ref, max_capacity')
+      .select('id, slug, title, summary, description, venue, starts_at, ends_at, registration_opens_at, registration_closes_at, status, is_paid, fee_amount, poster_ref, max_capacity')
       .eq('audience', 'public')
       .in('status', statuses)
       .order('starts_at', { ascending: false, nullsFirst: false });
@@ -133,10 +134,10 @@ export const getPublicEventBySlug = unstable_cache(
 
     const { data: event } = await supabase
       .from('events')
-      .select('id, slug, title, summary, description, venue, starts_at, ends_at, status, is_paid, fee_amount, poster_ref, max_capacity')
+      .select('id, slug, title, summary, description, venue, starts_at, ends_at, registration_opens_at, registration_closes_at, status, is_paid, fee_amount, poster_ref, max_capacity')
       .eq('slug', slug)
       .eq('audience', 'public')
-      .in('status', ['published', 'ongoing', 'wrap_up', 'closed', 'archived'])
+      .in('status', ['published', 'ongoing', 'wrap_up', 'closed', 'archived', 'cancelled'])
       .maybeSingle();
 
     if (!event) return { event: null, guests: [], highlights: [], manuals: [] };

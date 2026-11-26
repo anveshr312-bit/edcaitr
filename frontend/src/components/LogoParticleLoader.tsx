@@ -91,6 +91,7 @@ export default function LogoParticleLoader() {
   const [completed, setCompleted] = useState(false);
 
   // DOM Refs
+  const finishRef = useRef<() => void>(() => {});
   const containerRef = useRef<HTMLDivElement | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const path0Ref = useRef<SVGPathElement | null>(null);
@@ -105,7 +106,7 @@ export default function LogoParticleLoader() {
 
     // Check if session has already seen the intro or prefers reduced motion
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const alreadySeen = sessionStorage.getItem('edc_cinematic_intro_seen');
+    const alreadySeen = !document.documentElement.classList.contains('edc-preloader-active');
 
     if (reducedMotion || alreadySeen) {
       document.documentElement.classList.remove('edc-preloader-active');
@@ -142,6 +143,7 @@ export default function LogoParticleLoader() {
     };
 
     // Fail-safe dismissal (guarantees site is unlocked within 4.2s under all conditions)
+    finishRef.current = finishTransition;
     const failSafeTimer = setTimeout(finishTransition, 4200);
 
     // Viewport and device dimensions
@@ -182,7 +184,7 @@ export default function LogoParticleLoader() {
     // --- PRECOMPUTE DENSE MICRO-PARTICLE REPRESENTATION (P3, P4) ---
     const particles: Particle[] = [];
     const isMobile = winW < 768;
-    const targetParticleCount = isMobile ? 3200 : 6400;
+    const targetParticleCount = isMobile ? 850 : 2000;
 
     const offscreen = document.createElement('canvas');
     offscreen.width = EMBLEM_VIEWBOX_W;
@@ -243,7 +245,7 @@ export default function LogoParticleLoader() {
 
     const loop = (currentTime: number) => {
       if (isCleanedUp) return;
-      const elapsed = (currentTime - startTime) / 1000; // in seconds
+      const elapsed = (currentTime - startTime) * 1.65 / 1000; // Keep all six phases on a shorter timeline.
 
       // ========================================================
       // STAGE 1: PRECISION OUTLINE TRACING (0.00s – 0.70s)
@@ -449,6 +451,7 @@ export default function LogoParticleLoader() {
 
     return () => {
       isCleanedUp = true;
+      document.documentElement.classList.remove('edc-preloader-active');
       clearTimeout(failSafeTimer);
       cancelAnimationFrame(animId);
     };
@@ -463,19 +466,7 @@ export default function LogoParticleLoader() {
         ref={containerRef}
         className="edc-cinematic-preloader"
         aria-hidden="true"
-        onClick={() => {
-          // Fast-forward on tap/click
-          try {
-            sessionStorage.setItem('edc_cinematic_intro_seen', 'true');
-          } catch {}
-          document.documentElement.classList.remove('edc-preloader-active');
-          document.documentElement.style.removeProperty('--edc-main-opacity');
-          document.documentElement.style.removeProperty('--edc-main-y');
-          document.documentElement.style.removeProperty('--edc-header-opacity');
-          document.documentElement.style.removeProperty('--edc-header-y');
-          document.documentElement.style.removeProperty('--edc-footer-opacity');
-          setCompleted(true);
-        }}
+        onClick={() => finishRef.current()}
         style={{
           position: 'fixed',
           inset: 0,

@@ -53,12 +53,7 @@ export const GuestCoverflow: React.FC<GuestCoverflowProps> = ({
   const [dragDeltaX, setDragDeltaX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
 
-  const [viewport, setViewport] = useState<ViewportTier>(() => {
-    if (typeof window === 'undefined') return 'desktop';
-    if (window.innerWidth >= 1024) return 'desktop';
-    if (window.innerWidth >= 640) return 'tablet';
-    return 'mobile';
-  });
+  const [viewport, setViewport] = useState<ViewportTier>('desktop');
 
   useEffect(() => {
     if (typeof window === 'undefined' || !window.matchMedia) return;

@@ -2,8 +2,10 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { createClient } from '../../lib/supabase/client';
 import { EdcLogo } from '../ui/Primitives';
 import { EdcMark } from '../ui/EdcMark';
 import { GooeyNav, type GooeyNavItem } from '../ui/GooeyNav';
@@ -23,6 +25,22 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() || '/';
   const router = useRouter();
   const { theme, isDark } = useTheme();
+  const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    if (!supabase) return;
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user ?? null);
+    });
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => {
+      authListener?.subscription?.unsubscribe();
+    };
+  }, []);
+
   const activeIndex = Math.max(0, NAV_ITEMS.findIndex(({ href }) =>
     href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`)
   ));
@@ -31,6 +49,7 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
     <div className="relative flex min-h-screen flex-col overflow-x-clip bg-[var(--color-1-mood)] text-[var(--color-2-mood)] transition-colors duration-200">
       <div className="pointer-events-none fixed inset-0 z-0" aria-hidden="true">
         <CursorGrid
+          dpr={1}
           cellSize={isDark ? 50 : 58}
           color="#C01E30"
           gridColor={isDark ? '#A1A1AA' : '#111318'}
@@ -83,13 +102,24 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
           </nav>
           <div className="order-2 flex shrink-0 items-center gap-1.5 sm:gap-2.5 md:order-3">
             <AppCommandPaletteTrigger />
-            <Link
-              href="/account/dashboard"
-              className="inline-flex min-h-9 items-center rounded-full bg-[#BD011F] px-4 text-xs font-semibold text-white transition-colors hover:bg-[#9E1625] sm:min-h-10 sm:px-5"
-            >
-              Sign In
-            </Link>
-            <ThemeToggleButton variant="circle-blur" start="top-right" blur />
+            {user ? (
+              <Link
+                href="/account/dashboard"
+                className="inline-flex min-h-9 items-center gap-2 rounded-full border border-[var(--border-strong)] bg-[var(--surface-subtle)] px-3.5 text-xs font-semibold text-[var(--color-2-mood)] transition-colors hover:border-[#C01E30] hover:bg-[#C01E30]/10 sm:min-h-10 sm:px-4"
+                title={user.email ? `Signed in as ${user.email}` : 'My Account'}
+              >
+                <span className="h-2 w-2 rounded-full bg-[#22C55E]" aria-hidden="true" />
+                <span>Dashboard</span>
+              </Link>
+            ) : (
+              <Link
+                href="/account"
+                className="inline-flex min-h-9 items-center rounded-full bg-[#BD011F] px-4 text-xs font-semibold text-white transition-colors hover:bg-[#9E1625] sm:min-h-10 sm:px-5"
+              >
+                Sign In
+              </Link>
+            )}
+            <ThemeToggleButton variant="circle" start="top-right" blur={false} />
           </div>
         </div>
       </header>
@@ -106,12 +136,12 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
               <path d="M-30 330 C 110 300, 180 410, 310 390 C 440 370, 530 265, 675 305 C 820 345, 920 430, 1090 395" stroke="white" strokeWidth="1.1" />
             </svg>
           </div>
-          <div className="relative z-10 -mb-9 flex -translate-y-1/2 justify-center sm:-mb-11">
-            <Link href="/" aria-label="EDC AITR Home" className="rounded-2xl p-2 transition-transform hover:scale-[1.03]">
-              <EdcMark className="h-auto w-24 sm:w-28" />
+          <div className="relative z-10 flex justify-center pt-8 pb-2 sm:pt-10 sm:pb-3">
+            <Link href="/" aria-label="EDC AITR Home" className="rounded-2xl p-2 transition-transform hover:scale-[1.04]">
+              <EdcMark className="h-auto w-20 sm:w-24 text-[#C01E30]" />
             </Link>
           </div>
-          <div className="relative z-10 px-6 pb-9 pt-1 sm:px-10 sm:pb-12 lg:px-14">
+          <div className="relative z-10 px-6 pb-9 sm:px-10 sm:pb-12 lg:px-14">
             <div className="grid grid-cols-1 items-end gap-10 lg:grid-cols-12 lg:gap-6">
               <div className="flex flex-col items-center text-center lg:order-2 lg:col-span-4">
                 <h2 className="font-display text-3xl font-semibold leading-[1.04] tracking-tight text-white sm:text-[2.35rem]">
@@ -126,7 +156,7 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
               <div className="space-y-6 lg:order-1 lg:col-span-4">
                 <div className="grid grid-cols-2 items-start gap-4">
                   <div className="space-y-2"><h3 className="font-display text-base font-semibold text-white">Contact</h3><div className="space-y-0.5 text-xs leading-relaxed text-white/70"><p>Bypass Road, Manglia Square,</p><p>Indore, MP 453771</p><p className="pt-1"><a href="mailto:edc@acropolis.in" className="text-white/90 underline underline-offset-4 hover:text-[#F87171]">edc@acropolis.in</a></p></div></div>
-                  <div className="space-y-1.5 pt-1 text-xs sm:pt-7"><a href="https://instagram.com/edc_acropolis" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-white/80 hover:text-white">Instagram <ArrowUpRight className="h-3.5 w-3.5 text-[#E11D48]" /></a><a href="https://www.linkedin.com" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-white/80 hover:text-white">LinkedIn <ArrowUpRight className="h-3.5 w-3.5 text-[#E11D48]" /></a><Link href="/events/fokus-x-e-summit-2026" className="flex items-center gap-1.5 text-white/80 hover:text-white">E-Summit 2026 <ArrowUpRight className="h-3.5 w-3.5 text-[#E11D48]" /></Link></div>
+                  <div className="space-y-1.5 pt-1 text-xs sm:pt-7"><a href="https://instagram.com/edc_acropolis" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-white/80 hover:text-white">Instagram <ArrowUpRight className="h-3.5 w-3.5 text-[#E11D48]" /></a><Link href="/#summit-2026" className="flex items-center gap-1.5 text-white/80 hover:text-white">E-Summit 2026 <ArrowUpRight className="h-3.5 w-3.5 text-[#E11D48]" /></Link></div>
                 </div>
                 <div className="flex flex-wrap items-center gap-2.5 text-[11px] text-white/65"><span className="rounded-full bg-[#BD011F] px-2 py-0.5 font-mono-data text-[10px] font-semibold text-white">AIIH</span><span>Backed by AIIH Foundation · IIC (MoE Innovation Cell)</span></div>
               </div>

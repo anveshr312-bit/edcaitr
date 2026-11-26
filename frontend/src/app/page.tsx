@@ -1,3 +1,5 @@
+import { Suspense } from 'react';
+import { HomeHeroDrift } from '../components/home/HomeHeroDrift';
 import type { Metadata } from 'next';
 import { getPublicEvents } from '../lib/events/events';
 import { createPageMetadata, SITE_CONFIG } from '../lib/seo';
@@ -18,11 +20,10 @@ export const metadata: Metadata = createPageMetadata({
   ],
 });
 
-export default async function HomePage() {
-  const events = await getPublicEvents(false);
-  const activeEvents = events.filter(
-    (event) => event.status === 'published' || event.status === 'ongoing'
-  );
+async function HomeSections() {
+  return <ReferenceHome events={await getPublicEvents(true)} />;
+}
 
-  return <ReferenceHome events={activeEvents} />;
+export default function HomePage() {
+  return <><HomeHeroDrift /><Suspense fallback={<div aria-hidden="true" style={{ minHeight: '100vh' }} />}><HomeSections /></Suspense></>;
 }
