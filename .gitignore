@@ -19,6 +19,7 @@ __pycache__/
 
 # Temporary project files and local exports
 /work/
+scratch/
 
 # Operating system files
 .DS_Store

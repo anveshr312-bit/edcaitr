@@ -14,6 +14,7 @@ const EventRegisterForm = nextDynamic(
   { loading: () => <SkeletonBox height={180} borderRadius={8} /> }
 );
 import LiquidButton from '../../../components/ui/liquid-button';
+import { MultiTrackEventModalLauncher } from '../../../components/events/MultiTrackEventModalLauncher';
 
 export const revalidate = 60;
 
@@ -99,12 +100,14 @@ export default async function EventDetailPage({
 
   const supabase = await createClient();
   let userId: string | null = null;
+  let userEmail: string = '';
   let existingReg: { id: string; status: string } | null = null;
   let upiDetails: { upi_id: string | null; upi_qr_ref: string | null } = { upi_id: null, upi_qr_ref: null };
 
   if (supabase) {
     const { data: auth } = await supabase.auth.getUser();
     userId = auth.user?.id ?? null;
+    userEmail = auth.user?.email ?? '';
 
     if (userId) {
       const [{ data: reg }, { data: evPay }] = await Promise.all([
@@ -529,6 +532,15 @@ export default async function EventDetailPage({
                   </LiquidButton>
                 </div>
               )}
+
+              <MultiTrackEventModalLauncher
+                eventId={event.id}
+                eventTitle={event.title}
+                isPaid={event.is_paid}
+                feeAmount={event.fee_amount}
+                defaultName=""
+                defaultEmail={userEmail || ''}
+              />
             </div>
           )}
 

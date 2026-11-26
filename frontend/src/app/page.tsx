@@ -2,6 +2,11 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { getPublicEvents } from '../lib/events/events';
 import { createPageMetadata, SITE_CONFIG } from '../lib/seo';
+import {
+  HomeSpeakersSection,
+  HomeAccordionSection,
+  HomePartnersSection,
+} from '../components/home/HomeElevatedSections';
 
 export const dynamic = 'force-dynamic';
 
@@ -398,75 +403,14 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ─── 4. GUESTS WE HOSTED (Prominent Speakers Wall) ─── */}
+      {/* ─── 3.5. ACCORDION GALLERY (Campus & Summit Architecture) ─── */}
       <section style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
-          <div>
-            <h2
-              style={{
-                fontSize: '0.78rem',
-                fontWeight: 700,
-                letterSpacing: '0.02em',
-                color: 'var(--text-muted)',
-                margin: '0 0 8px',
-                borderLeft: '3px solid var(--color-3-accent-personality)',
-                paddingLeft: 12,
-              }}
-            >
-              Guests We Hosted
-            </h2>
-            <div style={{ fontSize: 'clamp(1.5rem, 2.6vw, 2.1rem)', fontWeight: 800 }}>
-              Founders, Operators &amp; Cultural Icons
-            </div>
-          </div>
-          <span className="stamp-label">
-            <span className="stamp-dot" />
-            Keynote Dialogues &amp; Conclaves
-          </span>
-        </div>
+        <HomeAccordionSection />
+      </section>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
-          {PAST_SPEAKERS.map((s) => (
-            <div key={s.name} className="card" style={{ padding: '20px', background: 'var(--surface)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
-                <div
-                  style={{
-                    width: 42,
-                    height: 42,
-                    borderRadius: 'var(--radius-control)',
-                    background: 'var(--surface-subtle)',
-                    border: '1px solid var(--border-hairline)',
-                    color: 'var(--text-primary)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: 700,
-                    fontSize: '1.05rem',
-                  }}
-                >
-                  {s.name.charAt(0)}
-                </div>
-                <span
-                  className="mono-meta"
-                  style={{
-                    fontSize: 11,
-                    background: 'var(--accent-tint)',
-                    color: 'var(--color-3-accent-personality)',
-                    padding: '3px 8px',
-                    borderRadius: 4,
-                    fontWeight: 600,
-                  }}
-                >
-                  {s.tag}
-                </span>
-              </div>
-              <h3 style={{ margin: '0 0 4px', fontSize: '1.05rem', fontWeight: 700 }}>{s.name}</h3>
-              <p className="card-meta" style={{ margin: 0, fontSize: 13, lineHeight: 1.5 }}>
-                {s.role}
-              </p>
-            </div>
-          ))}
-        </div>
+      {/* ─── 4. GUESTS WE HOSTED (Interactive 3D Coverflow Speaker Archive) ─── */}
+      <section style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
+        <HomeSpeakersSection />
       </section>
 
       {/* ─── 5. ORGANISATIONS THAT BACK US ─── */}
@@ -508,6 +452,8 @@ export default async function HomePage() {
             </div>
           ))}
         </div>
+
+        <HomePartnersSection />
       </section>
 
       {/* ─── 6. THE 12 OPERATIONAL DIVISIONS ─── */}

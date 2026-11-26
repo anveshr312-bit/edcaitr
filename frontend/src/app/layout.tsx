@@ -5,6 +5,7 @@ import { Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google';
 import WebVitals from '../components/WebVitals';
 import LogoParticleLoader from '../components/LogoParticleLoader';
 import { GlobalStructuredData } from '../components/StructuredData';
+import { GlobalMotionShell } from '../components/layout/GlobalMotionShell';
 import { getBaseUrl, SITE_CONFIG, isProductionDeployment } from '../lib/seo';
 import './style.css';
 
@@ -134,7 +135,8 @@ export default function Layout({ children }: { children: ReactNode }) {
       <body>
         <LogoParticleLoader />
         <WebVitals />
-        <header className="site-header">
+        <GlobalMotionShell>
+          <header className="site-header">
           <Link href="/" className="brand-link" style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -244,6 +246,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             </div>
           </div>
         </footer>
+        </GlobalMotionShell>
       </body>
     </html>
   );
