@@ -352,7 +352,7 @@ export default function Account() {
 
         {recoverySent && mode === 'forgot_password' && (
           <p style={{ fontSize: '0.8125rem', color: '#686D7A', marginTop: 12, textAlign: 'center' }}>
-            Received your reset link? <Link href="/account/reset-password">Click here to enter new password</Link>.
+            Please open the link sent to your email to verify your identity and set a new password.
           </p>
         )}
       </div>

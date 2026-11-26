@@ -1,7 +1,20 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
+import React, { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import {
+  ArrowLeft,
+  Briefcase,
+  Building2,
+  ExternalLink,
+  GraduationCap,
+  MapPin,
+  MessageSquare,
+  Search,
+  Send,
+  Users,
+} from 'lucide-react';
 import { getImageKitUrl } from '../../../lib/media/imagekit';
 import { CardGridSkeleton } from '../../../components/ui/Skeleton';
 import { fetchWithTimeout } from '../../../lib/net/fetchWithDedupe';
@@ -21,6 +34,13 @@ interface DirectoryMember {
   allow_messages: boolean;
   linkedin_url: string | null;
 }
+
+const ALUMNI_NAV_ITEMS = [
+  { label: 'Directory', href: '/alumni/directory' },
+  { label: 'Startups', href: '/alumni/startups' },
+  { label: 'Opportunities', href: '/alumni/opportunities' },
+  { label: 'Messages', href: '/alumni/messages' },
+];
 
 export default function AlumniDirectoryPage() {
   const router = useRouter();
@@ -110,169 +130,308 @@ export default function AlumniDirectoryPage() {
     if (!res.ok) {
       setStatusNote(data.error ?? 'Could not send message.');
     } else {
-      setMessageDrafts(d => ({ ...d, [recipientId]: '' }));
+      setMessageDrafts((d) => ({ ...d, [recipientId]: '' }));
       setStatusNote('Contact request sent.');
       router.push('/alumni/messages');
     }
   }
 
   return (
-    <div style={{ display: 'grid', gap: 24 }}>
-      {/* Light header card */}
-      <div className="card" style={{ background: 'var(--surface)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--radius-panel)', padding: 'clamp(24px, 3.5vw, 36px)', margin: 0 }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 10px', borderRadius: 'var(--radius-control)', background: 'var(--accent-tint)', border: '1px solid rgba(192,30,48,0.2)', marginBottom: 10 }}>
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-3-accent-personality)' }} />
-          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-3-accent-personality)' }}>
-            Alumni Connect
-          </span>
-        </div>
-        <h1 style={{ margin: '0 0 6px', fontSize: 'clamp(1.5rem, 2.8vw, 2.2rem)', fontWeight: 700, lineHeight: 1.15, color: 'var(--text-primary)' }}>
-          Member Directory
-        </h1>
-        <p style={{ margin: '0 0 20px', color: 'var(--text-secondary)', fontSize: 14 }}>
-          Verified current and alumni EDC AITR members across batches.
-        </p>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          {[{ label: 'Directory', href: '/alumni/directory' }, { label: 'Startups', href: '/alumni/startups' }, { label: 'Opportunities', href: '/alumni/opportunities' }, { label: 'Messages', href: '/alumni/messages' }].map(({ label, href }) => (
-            <a key={href} href={href} style={{ padding: '6px 14px', borderRadius: 'var(--radius-control)', background: href === '/alumni/directory' ? 'var(--color-3-accent-personality)' : 'var(--surface-subtle)', color: href === '/alumni/directory' ? '#fff' : 'var(--text-secondary)', border: '1px solid var(--border-hairline)', textDecoration: 'none', fontSize: 13, fontWeight: 500 }}>
-              {label}
-            </a>
-          ))}
-        </div>
+    <div className="mx-auto w-full max-w-[1040px] px-4 py-8 sm:px-6 sm:py-12">
+      {/* Top Breadcrumb */}
+      <div className="mb-6 flex items-center gap-2 text-xs text-[var(--text-muted)]">
+        <Link
+          href="/account/dashboard"
+          className="inline-flex items-center gap-1.5 font-medium transition-colors hover:text-[#C01E30]"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          <span>Dashboard</span>
+        </Link>
+        <span>/</span>
+        <span className="font-semibold text-[var(--color-2-mood)]">Alumni Connect</span>
       </div>
 
-      {/* Search/filter */}
-      <form onSubmit={handleSearch} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(170px,1fr))', gap: 10, alignItems: 'end' }}>
-        <label style={{ display: 'grid', gap: 5 }}>
-          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Search</span>
-          <input type="search" placeholder="Name, domain…" value={q} onChange={e => setQ(e.target.value)} />
-        </label>
-        <label style={{ display: 'grid', gap: 5 }}>
-          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Type</span>
-          <select value={memberType} onChange={e => setMemberType(e.target.value)}>
-            <option value="all">Current &amp; Alumni</option>
-            <option value="current">Current Team</option>
-            <option value="alumni">Alumni Only</option>
-          </select>
-        </label>
-        <label style={{ display: 'grid', gap: 5 }}>
-          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>City</span>
-          <input type="text" placeholder="e.g. Indore" value={city} onChange={e => setCity(e.target.value)} />
-        </label>
-        <label style={{ display: 'grid', gap: 5 }}>
-          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Industry</span>
-          <input type="text" placeholder="e.g. FinTech" value={industry} onChange={e => setIndustry(e.target.value)} />
-        </label>
-        <button type="submit" className="btn btn-primary" style={{ marginTop: 20 }}>Filter</button>
-      </form>
-
-      {statusNote && (
-        <p role="status" aria-live="polite" style={{ margin: 0, color: 'var(--accent-ink)', fontWeight: 500 }}>{statusNote}</p>
-      )}
-
-      {/* Results */}
-      {loading ? (
-        <CardGridSkeleton count={6} />
-      ) : members.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '48px 24px' }}>
-          <p className="card-meta" style={{ margin: 0 }}>No verified members match your filters.</p>
+      {/* Header Card */}
+      <div className="mb-8 rounded-2xl border border-[var(--border-hairline)] bg-[var(--surface)] p-6 sm:p-8">
+        <div className="w-fit inline-flex items-center gap-2 rounded-full border border-[#C01E30]/20 bg-[#C01E30]/10 px-3 py-1 text-xs font-semibold text-[#C01E30] dark:text-[#E67C87]">
+          <GraduationCap className="h-3.5 w-3.5" />
+          <span>Alumni Connect Network</span>
         </div>
-      ) : (
-        <div className="grid">
-          {members.map((m) => {
-            const avatarUrl = getImageKitUrl(m.avatar_ref, 128);
-            const isExpanded = expandedId === m.user_id;
+
+        <h1 className="mt-3 font-display text-2xl font-bold tracking-tight text-[var(--color-2-mood)] sm:text-3xl">
+          Member Directory
+        </h1>
+        <p className="mt-2 max-w-xl text-sm leading-relaxed text-[var(--text-secondary)]">
+          Discover verified current and alumni EDC AITR members across graduating batches, industries, and cities.
+        </p>
+
+        {/* Navigation Tabs */}
+        <div className="mt-6 flex flex-wrap gap-2">
+          {ALUMNI_NAV_ITEMS.map(({ label, href }) => {
+            const isActive = href === '/alumni/directory';
             return (
-              <article key={m.user_id} className="card">
-                <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
-                  {avatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={avatarUrl} alt={m.full_name} width={48} height={48} loading="lazy" decoding="async" className="avatar" />
-                  ) : (
-                    <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--accent-tint)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', fontWeight: 700, color: 'var(--color-3-accent-personality)', flexShrink: 0 }}>
-                      {(m.full_name || 'E').charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <h2 style={{ margin: '0 0 2px', fontSize: '1rem', fontWeight: 700 }}>{m.full_name}</h2>
-                    <p className="card-meta" style={{ margin: '0 0 6px' }}>{m.designation || m.role.replace('_', ' ')}</p>
-                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                      {m.batch_year && <span className="mono-meta">{m.batch_year}</span>}
-                      {m.city && <span className="mono-meta">{m.city}</span>}
-                      {m.industry && <span className="badge" style={{ fontSize: 11 }}>{m.industry}</span>}
-                    </div>
-                  </div>
-                </div>
-
-                {m.bio && <p style={{ margin: '12px 0 0', fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{m.bio}</p>}
-
-                <div style={{ display: 'flex', gap: 10, marginTop: 14, flexWrap: 'wrap' }}>
-                  {m.linkedin_url && (
-                    <a href={m.linkedin_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: 'var(--color-3-accent-personality)', textDecoration: 'none', fontWeight: 500 }}>
-                      LinkedIn →
-                    </a>
-                  )}
-                  {m.allow_messages && (
-                    <button
-                      type="button"
-                      style={{ fontSize: 13, color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline' }}
-                      onClick={() => setExpandedId(isExpanded ? null : m.user_id)}
-                    >
-                      {isExpanded ? 'Cancel' : 'Send message'}
-                    </button>
-                  )}
-                </div>
-
-                {isExpanded && m.allow_messages && (
-                  <div style={{ marginTop: 14, display: 'grid', gap: 8 }}>
-                    <textarea
-                      rows={3}
-                      placeholder="Introduce yourself and explain why you'd like to connect…"
-                      value={messageDrafts[m.user_id] ?? ''}
-                      onChange={e => setMessageDrafts(d => ({ ...d, [m.user_id]: e.target.value }))}
-                      style={{ font: 'inherit', padding: '8px 12px', resize: 'vertical', border: '1.5px solid var(--border-hairline)', borderRadius: 6 }}
-                    />
-                    <button
-                      type="button"
-                      className="btn btn-primary"
-                      style={{ fontSize: 13, padding: '8px 18px', width: 'fit-content' }}
-                      disabled={!(messageDrafts[m.user_id]?.trim())}
-                      onClick={() => void sendContactRequest(m.user_id)}
-                    >
-                      Send Contact Request
-                    </button>
-                  </div>
-                )}
-              </article>
+              <Link
+                key={href}
+                href={href}
+                className={`rounded-xl px-4 py-2 text-xs font-semibold transition-all ${
+                  isActive
+                    ? 'bg-[#C01E30] text-white shadow-xs'
+                    : 'border border-[var(--border-hairline)] bg-[var(--surface-subtle)] text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--color-2-mood)]'
+                }`}
+              >
+                {label}
+              </Link>
             );
           })}
         </div>
-      )}
+      </div>
 
-      {/* Pagination (max 20 per page) */}
-      {total > 20 && (
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, paddingTop: 8 }}>
-          <button
-            type="button"
-            className="btn"
-            disabled={page <= 1 || loading}
-            onClick={() => goToPage(page - 1)}
-          >
-            ← Previous
-          </button>
-          <span className="mono-meta">
-            Page {page} of {Math.ceil(total / 20)} ({total} members)
-          </span>
-          <button
-            type="button"
-            className="btn"
-            disabled={page * 20 >= total || loading}
-            onClick={() => goToPage(page + 1)}
-          >
-            Next →
-          </button>
+      {/* Search and Filters */}
+      <div className="mb-8 rounded-2xl border border-[var(--border-hairline)] bg-[var(--surface)] p-6">
+        <form onSubmit={handleSearch} className="grid gap-4 sm:grid-cols-4 items-end">
+          <div className="sm:col-span-1">
+            <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">
+              Search
+            </label>
+            <div className="relative">
+              <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-[var(--text-muted)]" />
+              <input
+                type="search"
+                placeholder="Name, domain…"
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                className="w-full rounded-xl border border-[var(--border-hairline)] bg-[var(--surface-subtle)] pl-9 pr-3 py-2 text-xs text-[var(--color-2-mood)] transition-all placeholder:text-[var(--text-muted)] focus:border-[#C01E30] focus:bg-[var(--surface)] focus:ring-1 focus:ring-[#C01E30] focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">
+              Type
+            </label>
+            <select
+              value={memberType}
+              onChange={(e) => setMemberType(e.target.value)}
+              className="w-full rounded-xl border border-[var(--border-hairline)] bg-[var(--surface-subtle)] px-3 py-2 text-xs text-[var(--color-2-mood)] transition-all focus:border-[#C01E30] focus:bg-[var(--surface)] focus:ring-1 focus:ring-[#C01E30] focus:outline-none"
+            >
+              <option value="all">Current &amp; Alumni</option>
+              <option value="current">Current Team</option>
+              <option value="alumni">Alumni Only</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">
+              City
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. Indore"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              className="w-full rounded-xl border border-[var(--border-hairline)] bg-[var(--surface-subtle)] px-3 py-2 text-xs text-[var(--color-2-mood)] transition-all placeholder:text-[var(--text-muted)] focus:border-[#C01E30] focus:bg-[var(--surface)] focus:ring-1 focus:ring-[#C01E30] focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">
+              Industry
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. FinTech"
+              value={industry}
+              onChange={(e) => setIndustry(e.target.value)}
+              className="w-full rounded-xl border border-[var(--border-hairline)] bg-[var(--surface-subtle)] px-3 py-2 text-xs text-[var(--color-2-mood)] transition-all placeholder:text-[var(--text-muted)] focus:border-[#C01E30] focus:bg-[var(--surface)] focus:ring-1 focus:ring-[#C01E30] focus:outline-none"
+            />
+          </div>
+        </form>
+      </div>
+
+      {statusNote && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="mb-6 rounded-xl border border-[#C01E30]/20 bg-[#C01E30]/10 p-3 text-xs font-semibold text-[#C01E30]"
+        >
+          {statusNote}
         </div>
       )}
+
+      {/* Directory Member Cards */}
+      <div className="rounded-2xl border border-[var(--border-hairline)] bg-[var(--surface)] p-6 sm:p-8">
+        <div className="mb-6 flex items-center justify-between border-b border-[var(--border-hairline)] pb-4">
+          <div className="flex items-center gap-2">
+            <Users className="h-4 w-4 text-[#C01E30]" />
+            <h2 className="text-base font-bold text-[var(--color-2-mood)]">
+              Verified Members
+            </h2>
+          </div>
+          <span className="text-xs text-[var(--text-muted)] font-mono">
+            {total} found
+          </span>
+        </div>
+
+        {loading ? (
+          <CardGridSkeleton count={6} />
+        ) : members.length === 0 ? (
+          <div className="py-12 text-center">
+            <Users className="mx-auto h-12 w-12 text-[var(--text-muted)] opacity-60" />
+            <h3 className="mt-4 text-sm font-semibold text-[var(--color-2-mood)]">
+              No verified members match your filters
+            </h3>
+            <p className="mt-1 text-xs text-[var(--text-muted)]">
+              Try broadening your search keywords or resetting filters.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            {members.map((m) => {
+              const avatarUrl = getImageKitUrl(m.avatar_ref, 128);
+              const isExpanded = expandedId === m.user_id;
+
+              return (
+                <article
+                  key={m.user_id}
+                  className="flex flex-col justify-between rounded-xl border border-[var(--border-hairline)] bg-[var(--surface-subtle)] p-5 transition-all hover:border-[var(--border-strong)]"
+                >
+                  <div>
+                    <div className="flex items-start gap-3.5">
+                      {avatarUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={avatarUrl}
+                          alt={m.full_name}
+                          width={48}
+                          height={48}
+                          loading="lazy"
+                          decoding="async"
+                          className="h-12 w-12 rounded-full border border-[var(--border-hairline)] object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-[var(--border-hairline)] bg-[var(--surface)] font-display text-base font-bold text-[#C01E30]">
+                          {(m.full_name || 'E').charAt(0).toUpperCase()}
+                        </div>
+                      )}
+
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-bold text-[var(--color-2-mood)] truncate">
+                          {m.full_name}
+                        </h3>
+                        <p className="text-xs text-[var(--text-secondary)] truncate">
+                          {m.designation || m.role.replace('_', ' ')}
+                        </p>
+
+                        <div className="mt-2 flex flex-wrap gap-1.5 text-[11px]">
+                          {m.batch_year && (
+                            <span className="rounded-md border border-[var(--border-hairline)] bg-[var(--surface)] px-2 py-0.5 text-[var(--text-muted)]">
+                              Class of {m.batch_year}
+                            </span>
+                          )}
+                          {m.city && (
+                            <span className="flex items-center gap-1 rounded-md border border-[var(--border-hairline)] bg-[var(--surface)] px-2 py-0.5 text-[var(--text-muted)]">
+                              <MapPin className="h-2.5 w-2.5" />
+                              <span>{m.city}</span>
+                            </span>
+                          )}
+                          {m.industry && (
+                            <span className="rounded-md border border-[#C01E30]/20 bg-[#C01E30]/10 px-2 py-0.5 font-semibold text-[#C01E30] dark:text-[#E67C87]">
+                              {m.industry}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {m.bio && (
+                      <p className="mt-3 text-xs leading-relaxed text-[var(--text-secondary)] line-clamp-3">
+                        {m.bio}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="mt-4 border-t border-[var(--border-hairline)] pt-3">
+                    <div className="flex items-center justify-between gap-3 text-xs">
+                      {m.linkedin_url ? (
+                        <a
+                          href={m.linkedin_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 font-semibold text-[#C01E30] hover:underline"
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" />
+                          <span>LinkedIn</span>
+                        </a>
+                      ) : (
+                        <div />
+                      )}
+
+                      {m.allow_messages && (
+                        <button
+                          type="button"
+                          onClick={() => setExpandedId(isExpanded ? null : m.user_id)}
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--text-muted)] hover:text-[#C01E30] transition-colors"
+                        >
+                          <MessageSquare className="h-3.5 w-3.5" />
+                          <span>{isExpanded ? 'Close' : 'Send message'}</span>
+                        </button>
+                      )}
+                    </div>
+
+                    {isExpanded && m.allow_messages && (
+                      <div className="mt-3 space-y-2 border-t border-[var(--border-hairline)] pt-3">
+                        <textarea
+                          rows={3}
+                          placeholder="Introduce yourself and explain why you'd like to connect…"
+                          value={messageDrafts[m.user_id] ?? ''}
+                          onChange={(e) =>
+                            setMessageDrafts((d) => ({ ...d, [m.user_id]: e.target.value }))
+                          }
+                          className="w-full rounded-xl border border-[var(--border-hairline)] bg-[var(--surface)] p-2.5 text-xs text-[var(--color-2-mood)] placeholder:text-[var(--text-muted)] focus:border-[#C01E30] focus:outline-none resize-y"
+                        />
+                        <button
+                          type="button"
+                          disabled={!messageDrafts[m.user_id]?.trim()}
+                          onClick={() => void sendContactRequest(m.user_id)}
+                          className="inline-flex items-center gap-1.5 rounded-xl bg-[#C01E30] px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#9E1625] disabled:opacity-50"
+                        >
+                          <Send className="h-3 w-3" />
+                          <span>Send Request</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {total > 20 && (
+          <div className="mt-8 flex items-center justify-between border-t border-[var(--border-hairline)] pt-4 text-xs">
+            <button
+              type="button"
+              disabled={page <= 1 || loading}
+              onClick={() => goToPage(page - 1)}
+              className="rounded-xl border border-[var(--border-hairline)] bg-[var(--surface-subtle)] px-4 py-2 font-semibold text-[var(--color-2-mood)] hover:bg-[var(--surface)] disabled:opacity-50"
+            >
+              ← Previous
+            </button>
+            <span className="font-mono text-[var(--text-muted)]">
+              Page {page} of {Math.ceil(total / 20)} ({total} members)
+            </span>
+            <button
+              type="button"
+              disabled={page * 20 >= total || loading}
+              onClick={() => goToPage(page + 1)}
+              className="rounded-xl border border-[var(--border-hairline)] bg-[var(--surface-subtle)] px-4 py-2 font-semibold text-[var(--color-2-mood)] hover:bg-[var(--surface)] disabled:opacity-50"
+            >
+              Next →
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
