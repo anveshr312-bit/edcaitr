@@ -44,8 +44,14 @@ export default function ProfilePage() {
           .single(),
         supabase.rpc('get_user_role', { user_uuid: data.user.id }),
       ]);
-      if (!p) { setMessage('Unable to load your profile. Reload to try again.'); setIsError(true); setUserId(null); }
-      else setProfile({ ...EMPTY, ...Object.fromEntries(Object.entries(p).filter(([, value]) => value !== null)) });
+      if (!p) {
+        setProfile({
+          ...EMPTY,
+          full_name: data.user.user_metadata?.full_name || data.user.email?.split('@')[0] || '',
+        });
+      } else {
+        setProfile({ ...EMPTY, ...Object.fromEntries(Object.entries(p).filter(([, value]) => value !== null)) });
+      }
       const assurance = roleData === 'director' ? await supabase.auth.mfa.getAuthenticatorAssuranceLevel() : null;
       setCanManageDisplay(roleData === 'advisor' || assurance?.data?.currentLevel === 'aal2');
       setLoading(false);
@@ -78,7 +84,7 @@ export default function ProfilePage() {
         payload.designation = profile.designation.trim() || null;
         payload.is_public = profile.is_public;
       }
-      const { error } = await supabase.from('profiles').update(payload).eq('id', userId);
+      const { error } = await supabase.from('profiles').upsert({ id: userId, ...payload }, { onConflict: 'id' });
       if (error) throw error;
       setMessage('Profile saved successfully.');
     } catch (err) {
