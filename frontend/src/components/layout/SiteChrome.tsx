@@ -128,7 +128,7 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
             </svg>
           </div>
           <div className="relative z-10 flex justify-center pt-8 pb-2 sm:pt-10 sm:pb-3">
-            <Link href="/" aria-label="EDC AITR Home" className="rounded-2xl p-2">
+            <Link href="/" aria-label="EDC AITR Home" className="rounded-2xl p-2 overflow-visible">
               <FooterParticleLogo className="h-auto w-20 sm:w-24" />
             </Link>
           </div>
