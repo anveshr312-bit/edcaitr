@@ -9,7 +9,7 @@ import { createClient } from '../../lib/supabase/client';
 import { EdcLogo } from '../ui/Primitives';
 import { EdcMark } from '../ui/EdcMark';
 import { GooeyNav, type GooeyNavItem } from '../ui/GooeyNav';
-import { CursorGrid } from '../ui/CursorGrid';
+import { WaveGridBackground } from '../ui/WaveGridBackground';
 import { ThemeToggleButton } from '../ui/ThemeToggle';
 import { AppCommandPaletteTrigger } from '../ui/AppCommandPalette';
 
@@ -47,28 +47,18 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-x-clip bg-[var(--color-1-mood)] text-[var(--color-2-mood)] transition-colors duration-200">
-      <div className="pointer-events-none fixed inset-0 z-0" aria-hidden="true">
-        <CursorGrid
-          dpr={1}
-          cellSize={isDark ? 50 : 58}
-          color="#C01E30"
-          gridColor={isDark ? '#A1A1AA' : '#111318'}
-          highlight="area"
-          gridStyle="lines"
-          radius={isDark ? 110 : 150}
-          falloff="smooth"
-          lineWidth={isDark ? 0.7 : 1}
-          holdTime={isDark ? 80 : 360}
-          fadeDuration={isDark ? 450 : 780}
-          maxOpacity={isDark ? 0.28 : 0.48}
-          fillOpacity={isDark ? 0.015 : 0.05}
-          gridOpacity={isDark ? 0.035 : 0.06}
-          spotlight={isDark ? 0.12 : 0.55}
-          ambient={0}
-          edgeFade={isDark ? 0.3 : 0.16}
-          lightMode={!isDark}
-          clickPulse
-          intro
+      <div className="pointer-events-none fixed inset-0 z-0 opacity-50 dark:opacity-40" aria-hidden="true">
+        <WaveGridBackground
+          gridSize={40}
+          colorBase={isDark ? "#121316" : "#f0f0f2"}
+          colorHigh="#C01E30"
+          waveAmplitude={0.4}
+          waveSpeed={6.0}
+          waveFrequency={1.2}
+          waveWidth={3.0}
+          waveMaxHeight={0.4}
+          autoAnimate
+          vignette
         />
       </div>
       <header className="sticky top-0 z-40 border-b border-[var(--border-hairline)] bg-white/90 backdrop-blur-md dark:bg-[#101011]/95">
