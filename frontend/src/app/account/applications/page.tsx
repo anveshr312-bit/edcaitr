@@ -1,4 +1,7 @@
+import React from 'react';
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
+import { ArrowLeft, CheckCircle2, Clock, FileCheck2, ShieldCheck, Users } from 'lucide-react';
 import { createClient } from '../../../lib/supabase/server';
 import { getUserRole } from '../../../lib/auth/authorization';
 import ApplicationsClient from './ApplicationsClient';
@@ -7,7 +10,10 @@ export default async function ApplicationsPage() {
   const supabase = await createClient();
   if (!supabase) redirect('/account');
 
-  const { data: { user }, error } = await supabase.auth.getUser();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
   if (error || !user) redirect('/account');
 
   const role = await getUserRole(user.id);
@@ -43,60 +49,100 @@ export default async function ApplicationsPage() {
   }));
 
   return (
-    <div style={{ display: 'grid', gap: 32 }}>
-      {/* Light header card */}
-      <div className="card" style={{ background: 'var(--surface)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--radius-panel)', padding: 'clamp(24px, 3.5vw, 36px)', margin: 0 }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 10px', borderRadius: 'var(--radius-control)', background: 'var(--accent-tint)', border: '1px solid rgba(192,30,48,0.2)', marginBottom: 10 }}>
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-3-accent-personality)' }} />
-          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-3-accent-personality)' }}>
-            {isDirector ? 'Director Review' : 'Advisor Review'}
-          </span>
+    <div className="mx-auto w-full max-w-[1040px] px-4 py-8 sm:px-6 sm:py-12">
+      {/* Top Breadcrumb */}
+      <div className="mb-6 flex items-center gap-2 text-xs text-[var(--text-muted)]">
+        <Link
+          href="/account/dashboard"
+          className="inline-flex items-center gap-1.5 font-medium transition-colors hover:text-[#C01E30]"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          <span>Dashboard</span>
+        </Link>
+        <span>/</span>
+        <span className="font-semibold text-[var(--color-2-mood)]">Applications Queue</span>
+      </div>
+
+      {/* Header Card */}
+      <div className="mb-8 rounded-2xl border border-[var(--border-hairline)] bg-[var(--surface)] p-6 sm:p-8">
+        <div className="w-fit inline-flex items-center gap-2 rounded-full border border-[#C01E30]/20 bg-[#C01E30]/10 px-3 py-1 text-xs font-semibold text-[#C01E30] dark:text-[#E67C87]">
+          <FileCheck2 className="h-3.5 w-3.5" />
+          <span>{isDirector ? 'Director Governance Review' : 'Advisor Governance Review'}</span>
         </div>
-        <h1 style={{ margin: '0 0 8px', fontSize: 'clamp(1.5rem, 2.8vw, 2.2rem)', fontWeight: 700, lineHeight: 1.15, color: 'var(--text-primary)' }}>
-          Pending Applications
+
+        <h1 className="mt-3 font-display text-2xl font-bold tracking-tight text-[var(--color-2-mood)] sm:text-3xl">
+          Pending Candidate Applications
         </h1>
-        <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 14, maxWidth: 560, lineHeight: 1.6 }}>
+        <p className="mt-2 max-w-xl text-sm leading-relaxed text-[var(--text-secondary)]">
           {isDirector
-            ? 'All pending candidate applications across every role type.'
-            : 'Review Core Team membership applications and Alumni Connect requests.'}
+            ? 'Review and decide on candidate applications across every governance level, including advisor nominations and executive promotions.'
+            : 'Evaluate student candidate statements for Core Team membership and Alumni Connect verification.'}
         </p>
       </div>
 
       {/* Stats row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px,1fr))', gap: 16 }}>
-        <div className="card" style={{ textAlign: 'center', padding: '20px 16px' }}>
-          <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--color-3-accent-personality)' }}>{normalized.length}</div>
-          <div className="card-meta" style={{ margin: 0, fontSize: 12 }}>Awaiting Review</div>
+      <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div className="rounded-2xl border border-[var(--border-hairline)] bg-[var(--surface)] p-5 text-center shadow-xs">
+          <div className="font-display text-3xl font-extrabold text-[#C01E30] dark:text-[#E67C87]">
+            {normalized.length}
+          </div>
+          <div className="mt-1 text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+            Total Queue
+          </div>
         </div>
-        <div className="card" style={{ textAlign: 'center', padding: '20px 16px' }}>
-          <div style={{ fontSize: '2rem', fontWeight: 700 }}>{normalized.filter(a => a.application_type === 'core_team_application').length}</div>
-          <div className="card-meta" style={{ margin: 0, fontSize: 12 }}>Core Team</div>
+
+        <div className="rounded-2xl border border-[var(--border-hairline)] bg-[var(--surface)] p-5 text-center shadow-xs">
+          <div className="font-display text-3xl font-extrabold text-[var(--color-2-mood)]">
+            {normalized.filter((a) => a.application_type === 'core_team_application').length}
+          </div>
+          <div className="mt-1 text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+            Core Team
+          </div>
         </div>
-        <div className="card" style={{ textAlign: 'center', padding: '20px 16px' }}>
-          <div style={{ fontSize: '2rem', fontWeight: 700 }}>{normalized.filter(a => a.application_type === 'alumni_verification').length}</div>
-          <div className="card-meta" style={{ margin: 0, fontSize: 12 }}>Alumni</div>
+
+        <div className="rounded-2xl border border-[var(--border-hairline)] bg-[var(--surface)] p-5 text-center shadow-xs">
+          <div className="font-display text-3xl font-extrabold text-[var(--color-2-mood)]">
+            {normalized.filter((a) => a.application_type === 'alumni_verification').length}
+          </div>
+          <div className="mt-1 text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+            Alumni
+          </div>
         </div>
+
         {isDirector && (
-          <div className="card" style={{ textAlign: 'center', padding: '20px 16px' }}>
-            <div style={{ fontSize: '2rem', fontWeight: 700 }}>{normalized.filter(a => a.application_type === 'advisor_application').length}</div>
-            <div className="card-meta" style={{ margin: 0, fontSize: 12 }}>Advisor</div>
+          <div className="rounded-2xl border border-[var(--border-hairline)] bg-[var(--surface)] p-5 text-center shadow-xs">
+            <div className="font-display text-3xl font-extrabold text-purple-600 dark:text-purple-400">
+              {normalized.filter((a) => a.application_type === 'advisor_application').length}
+            </div>
+            <div className="mt-1 text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+              Advisor
+            </div>
           </div>
         )}
       </div>
 
       {/* Applications list */}
-      <section>
-        <h2 style={{ fontSize: '1rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', margin: '0 0 16px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
-          Applications Queue
-        </h2>
-        <ApplicationsClient applications={normalized} />
-      </section>
+      <div className="rounded-2xl border border-[var(--border-hairline)] bg-[var(--surface)] p-6 sm:p-8">
+        <div className="mb-6 flex items-center justify-between border-b border-[var(--border-hairline)] pb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#C01E30]/10 text-[#C01E30]">
+              <Clock className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="text-base font-bold text-[var(--color-2-mood)]">
+                Awaiting Governance Decision
+              </h2>
+              <p className="text-xs text-[var(--text-secondary)]">
+                {normalized.length === 0
+                  ? 'All applications have been reviewed'
+                  : `${normalized.length} pending candidate review`}
+              </p>
+            </div>
+          </div>
+        </div>
 
-      <p>
-        <a href="/account/dashboard" style={{ color: 'var(--text-muted)', fontSize: 14, textDecoration: 'none' }}>
-          ← Back to dashboard
-        </a>
-      </p>
+        <ApplicationsClient applications={normalized} />
+      </div>
     </div>
   );
 }

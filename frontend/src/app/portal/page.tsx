@@ -1,5 +1,19 @@
+import React from 'react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import {
+  ArrowLeft,
+  ArrowRight,
+  Award,
+  Bell,
+  Calendar,
+  CheckCircle2,
+  ExternalLink,
+  Layers,
+  MapPin,
+  QrCode,
+  Ticket,
+} from 'lucide-react';
 import { createClient } from '../../lib/supabase/server';
 import { getPublicEvents } from '../../lib/events/events';
 
@@ -9,7 +23,10 @@ export default async function ParticipantPortalPage() {
   const supabase = await createClient();
   if (!supabase) redirect('/account');
 
-  const { data: { user }, error } = await supabase.auth.getUser();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
   if (error || !user) redirect('/account');
 
   const [{ data: registrations }, { data: announcements }, events] = await Promise.all([
@@ -27,146 +44,273 @@ export default async function ParticipantPortalPage() {
     getPublicEvents(false),
   ]);
 
-  const confirmedRegs = (registrations ?? []).filter(r => r.status === 'confirmed').length;
+  const confirmedRegs = (registrations ?? []).filter((r) => r.status === 'confirmed').length;
 
   return (
-    <>
-      {/* Light header card */}
-      <div className="card" style={{ background: 'var(--surface)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--radius-panel)', padding: 'clamp(24px, 3.5vw, 36px)', margin: 0 }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 10px', borderRadius: 'var(--radius-control)', background: 'var(--accent-tint)', border: '1px solid rgba(192,30,48,0.2)', marginBottom: 10 }}>
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-3-accent-personality)' }} />
-          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-3-accent-personality)' }}>
-            Participant Portal
-          </span>
+    <div className="mx-auto w-full max-w-[1040px] px-4 py-8 sm:px-6 sm:py-12">
+      {/* Top Breadcrumb */}
+      <div className="mb-6 flex items-center gap-2 text-xs text-[var(--text-muted)]">
+        <Link
+          href="/account/dashboard"
+          className="inline-flex items-center gap-1.5 font-medium transition-colors hover:text-[#C01E30]"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          <span>Dashboard</span>
+        </Link>
+        <span>/</span>
+        <span className="font-semibold text-[var(--color-2-mood)]">Participant Portal</span>
+      </div>
+
+      {/* Header Card */}
+      <div className="mb-8 rounded-2xl border border-[var(--border-hairline)] bg-[var(--surface)] p-6 sm:p-8">
+        <div className="w-fit inline-flex items-center gap-2 rounded-full border border-[#C01E30]/20 bg-[#C01E30]/10 px-3 py-1 text-xs font-semibold text-[#C01E30] dark:text-[#E67C87]">
+          <Layers className="h-3.5 w-3.5" />
+          <span>Participant Portal</span>
         </div>
-        <h1 style={{ margin: '0 0 8px', fontSize: 'clamp(1.5rem, 2.8vw, 2.2rem)', fontWeight: 700, lineHeight: 1.15, color: 'var(--text-primary)' }}>
-          Participant Portal
+
+        <h1 className="mt-3 font-display text-2xl font-bold tracking-tight text-[var(--color-2-mood)] sm:text-3xl">
+          Event Pass &amp; Credentials Hub
         </h1>
-        <p style={{ margin: '0 0 20px', color: 'var(--text-secondary)', fontSize: 14, maxWidth: 540, lineHeight: 1.6 }}>
-          Your event registrations, QR admission passes, verified certificates, and official announcements.
+        <p className="mt-2 max-w-xl text-sm leading-relaxed text-[var(--text-secondary)]">
+          Manage your verified event admissions, download QR tickets, access blockchain-audited certificates, and view live summit broadcasts.
         </p>
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <Link href="/portal/registrations" className="btn btn-primary" style={{ fontSize: 13 }}>
-            Your Registrations
+
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Link
+            href="/portal/registrations"
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-[#C01E30] px-5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#9E1625]"
+          >
+            <Ticket className="h-3.5 w-3.5" />
+            <span>Your Registrations</span>
           </Link>
-          <Link href="/portal/certificates" className="btn" style={{ fontSize: 13 }}>
-            Certificates
+          <Link
+            href="/portal/certificates"
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-[var(--border-hairline)] bg-[var(--surface-subtle)] px-5 text-xs font-semibold text-[var(--color-2-mood)] shadow-xs transition-all hover:bg-[var(--surface)] hover:border-[#C01E30]/40"
+          >
+            <Award className="h-3.5 w-3.5" />
+            <span>Certificates</span>
           </Link>
-          <Link href="/portal/announcements" className="btn" style={{ fontSize: 13 }}>
-            Announcements
+          <Link
+            href="/portal/announcements"
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-[var(--border-hairline)] bg-[var(--surface-subtle)] px-5 text-xs font-semibold text-[var(--color-2-mood)] shadow-xs transition-all hover:bg-[var(--surface)] hover:border-[#C01E30]/40"
+          >
+            <Bell className="h-3.5 w-3.5" />
+            <span>Announcements</span>
           </Link>
         </div>
       </div>
 
       {/* Quick stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(140px,1fr))', gap: 16, marginTop: 32 }}>
-        <div className="card" style={{ textAlign: 'center', padding: '20px 16px' }}>
-          <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--color-3-accent-personality)' }}>{(registrations ?? []).length}</div>
-          <div className="card-meta" style={{ margin: 0, fontSize: 12 }}>Total Registrations</div>
+      <div className="mb-10 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="rounded-2xl border border-[var(--border-hairline)] bg-[var(--surface)] p-5 text-center shadow-xs">
+          <div className="font-display text-3xl font-extrabold text-[#C01E30] dark:text-[#E67C87]">
+            {(registrations ?? []).length}
+          </div>
+          <div className="mt-1 text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+            Total Registrations
+          </div>
         </div>
-        <div className="card" style={{ textAlign: 'center', padding: '20px 16px' }}>
-          <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--success)' }}>{confirmedRegs}</div>
-          <div className="card-meta" style={{ margin: 0, fontSize: 12 }}>Confirmed</div>
+
+        <div className="rounded-2xl border border-[var(--border-hairline)] bg-[var(--surface)] p-5 text-center shadow-xs">
+          <div className="font-display text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">
+            {confirmedRegs}
+          </div>
+          <div className="mt-1 text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+            Confirmed Passes
+          </div>
         </div>
-        <div className="card" style={{ textAlign: 'center', padding: '20px 16px' }}>
-          <div style={{ fontSize: '2rem', fontWeight: 700 }}>{(announcements ?? []).length}</div>
-          <div className="card-meta" style={{ margin: 0, fontSize: 12 }}>Announcements</div>
+
+        <div className="rounded-2xl border border-[var(--border-hairline)] bg-[var(--surface)] p-5 text-center shadow-xs">
+          <div className="font-display text-3xl font-extrabold text-[var(--color-2-mood)]">
+            {(announcements ?? []).length}
+          </div>
+          <div className="mt-1 text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+            Broadcasts Posted
+          </div>
         </div>
       </div>
 
       {/* Recent registrations */}
-      <section style={{ marginTop: 40 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16, gap: 12 }}>
-          <h2 style={{ margin: 0, fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.02em', color: 'var(--text-muted)', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
-            Recent Registrations
-          </h2>
-          <Link href="/portal/registrations" style={{ fontSize: 13, color: 'var(--color-3-accent-personality)', textDecoration: 'none', fontWeight: 600 }}>View all →</Link>
+      <section className="mb-10 rounded-2xl border border-[var(--border-hairline)] bg-[var(--surface)] p-6 sm:p-8">
+        <div className="mb-6 flex items-center justify-between border-b border-[var(--border-hairline)] pb-4">
+          <div className="flex items-center gap-2.5">
+            <Ticket className="h-4 w-4 text-[#C01E30]" />
+            <h2 className="text-base font-bold text-[var(--color-2-mood)]">
+              Recent Event Registrations
+            </h2>
+          </div>
+          <Link
+            href="/portal/registrations"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-[#C01E30] hover:underline"
+          >
+            <span>View all</span>
+            <ArrowRight className="h-3 w-3" />
+          </Link>
         </div>
+
         {!registrations || registrations.length === 0 ? (
-          <div className="card" style={{ textAlign: 'center', padding: '32px 24px' }}>
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--border-hairline)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', margin: '0 auto 12px' }}>
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
-            </svg>
-            <p className="card-meta" style={{ margin: 0 }}>No registrations yet. <Link href="/events">Browse events</Link> to get your QR pass.</p>
+          <div className="py-10 text-center">
+            <Ticket className="mx-auto h-10 w-10 text-[var(--text-muted)] opacity-60" />
+            <p className="mt-3 text-sm text-[var(--text-secondary)]">No event registrations found.</p>
+            <Link
+              href="/events"
+              className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-[#C01E30] hover:underline"
+            >
+              <span>Explore upcoming summits &amp; workshops</span>
+              <ArrowRight className="h-3 w-3" />
+            </Link>
           </div>
         ) : (
-          <div className="grid">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {registrations.map((reg) => {
               const ev = Array.isArray(reg.events) ? reg.events[0] : reg.events;
-              const statusColor = reg.status === 'confirmed' ? 'var(--success)' : reg.status === 'cancelled' ? 'var(--danger)' : 'var(--accent-ink)';
+              const isConfirmed = reg.status === 'confirmed';
+
               return (
-                <article key={reg.id} className="card">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: statusColor }}>{reg.status.replace('_', ' ')}</span>
-                    <span className="mono-meta">{reg.payment_status.replace('_', ' ')}</span>
+                <div
+                  key={reg.id}
+                  className="flex flex-col justify-between rounded-xl border border-[var(--border-hairline)] bg-[var(--surface-subtle)] p-5 transition-all hover:border-[var(--border-strong)]"
+                >
+                  <div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span
+                        className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider ${
+                          isConfirmed
+                            ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
+                            : 'border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-300'
+                        }`}
+                      >
+                        {isConfirmed && <CheckCircle2 className="h-3 w-3" />}
+                        <span>{reg.status.replace('_', ' ')}</span>
+                      </span>
+                      <span className="text-[11px] text-[var(--text-muted)] capitalize">
+                        {reg.payment_status.replace('_', ' ')}
+                      </span>
+                    </div>
+
+                    <h3 className="mt-3 text-sm font-bold text-[var(--color-2-mood)]">
+                      {ev?.title ?? 'EDC Event'}
+                    </h3>
+
+                    <div className="mt-2 space-y-1 text-xs text-[var(--text-secondary)]">
+                      {ev?.starts_at && (
+                        <div className="flex items-center gap-1.5">
+                          <Calendar className="h-3 w-3 text-[var(--text-muted)]" />
+                          <span>{new Date(ev.starts_at).toLocaleDateString('en-IN', { dateStyle: 'medium' })}</span>
+                        </div>
+                      )}
+                      {ev?.venue && (
+                        <div className="flex items-center gap-1.5">
+                          <MapPin className="h-3 w-3 text-[var(--text-muted)]" />
+                          <span className="truncate">{ev.venue}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700 }}>{ev?.title ?? 'Event'}</h3>
-                  <p className="mono-meta" style={{ margin: 0 }}>
-                    {ev?.starts_at ? new Date(ev.starts_at).toLocaleDateString('en-IN') : 'Date TBA'}
-                    {ev?.venue ? ` · ${ev.venue}` : ''}
-                  </p>
-                  <div style={{ marginTop: 'auto', paddingTop: 8 }}>
-                    <Link href={`/portal/registrations/${reg.id}`} style={{ fontSize: 14, color: 'var(--color-3-accent-personality)', textDecoration: 'none', fontWeight: 600 }}>
-                      View ticket →
+
+                  <div className="mt-5 border-t border-[var(--border-hairline)] pt-3">
+                    <Link
+                      href={`/portal/registrations/${reg.id}`}
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-[#C01E30] hover:underline"
+                    >
+                      <QrCode className="h-3.5 w-3.5" />
+                      <span>Open Admission Pass &amp; QR →</span>
                     </Link>
                   </div>
-                </article>
+                </div>
               );
             })}
           </div>
         )}
       </section>
 
-      {/* Recent announcements */}
+      {/* Announcements Section */}
       {announcements && announcements.length > 0 && (
-        <section style={{ marginTop: 40 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16, gap: 12 }}>
-            <h2 style={{ margin: 0, fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.02em', color: 'var(--text-muted)', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
-              Recent Announcements
-            </h2>
-            <Link href="/portal/announcements" style={{ fontSize: 13, color: 'var(--color-3-accent-personality)', textDecoration: 'none', fontWeight: 600 }}>All →</Link>
+        <section className="mb-10 rounded-2xl border border-[var(--border-hairline)] bg-[var(--surface)] p-6 sm:p-8">
+          <div className="mb-6 flex items-center justify-between border-b border-[var(--border-hairline)] pb-4">
+            <div className="flex items-center gap-2.5">
+              <Bell className="h-4 w-4 text-[#C01E30]" />
+              <h2 className="text-base font-bold text-[var(--color-2-mood)]">
+                Latest Announcements
+              </h2>
+            </div>
+            <Link
+              href="/portal/announcements"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-[#C01E30] hover:underline"
+            >
+              <span>All updates</span>
+              <ArrowRight className="h-3 w-3" />
+            </Link>
           </div>
-          <div style={{ display: 'grid', gap: 12 }}>
-            {announcements.map(a => (
-              <article key={a.id} className="card" style={{ padding: '16px 20px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
-                  <div>
-                    <h3 style={{ margin: '0 0 6px', fontSize: '1rem', fontWeight: 700 }}>{a.title}</h3>
-                    <p style={{ margin: 0, fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.5 }}>{a.body}</p>
-                  </div>
-                  <span className="mono-meta" style={{ flexShrink: 0 }}>{new Date(a.created_at).toLocaleDateString('en-IN')}</span>
+
+          <div className="space-y-3">
+            {announcements.map((a) => (
+              <div
+                key={a.id}
+                className="rounded-xl border border-[var(--border-hairline)] bg-[var(--surface-subtle)] p-4 sm:p-5"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="text-sm font-bold text-[var(--color-2-mood)]">{a.title}</h3>
+                  <span className="text-[11px] text-[var(--text-muted)]">
+                    {new Date(a.created_at).toLocaleDateString('en-IN', { dateStyle: 'medium' })}
+                  </span>
                 </div>
-              </article>
+                <p className="mt-1 text-xs leading-relaxed text-[var(--text-secondary)] whitespace-pre-wrap">
+                  {a.body}
+                </p>
+              </div>
             ))}
           </div>
         </section>
       )}
 
-      {/* Explore upcoming */}
+      {/* Explore upcoming events */}
       {events.length > 0 && (
-        <section style={{ marginTop: 40 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16, gap: 12 }}>
-            <h2 style={{ margin: 0, fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.02em', color: 'var(--text-muted)', borderLeft: '3px solid var(--border-hairline)', paddingLeft: 12 }}>
-              Explore Events
+        <section className="rounded-2xl border border-[var(--border-hairline)] bg-[var(--surface)] p-6 sm:p-8">
+          <div className="mb-6 flex items-center justify-between border-b border-[var(--border-hairline)] pb-4">
+            <h2 className="text-base font-bold text-[var(--color-2-mood)]">
+              Upcoming Flagship Initiatives
             </h2>
-            <Link href="/events" style={{ fontSize: 13, color: 'var(--text-muted)', textDecoration: 'none' }}>All events →</Link>
+            <Link
+              href="/events"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--text-muted)] hover:text-[#C01E30]"
+            >
+              <span>View all events</span>
+              <ArrowRight className="h-3 w-3" />
+            </Link>
           </div>
-          <div className="grid">
-            {events.slice(0, 3).map(ev => (
-              <article key={ev.id} className="card">
-                <span className="badge">{ev.is_paid && ev.fee_amount ? `₹${ev.fee_amount}` : 'Free'}</span>
-                <h3 style={{ margin: 0, fontSize: '1.05rem' }}>{ev.title}</h3>
-                {ev.summary && <p className="card-meta" style={{ margin: 0 }}>{ev.summary}</p>}
-                <div style={{ marginTop: 'auto', paddingTop: 8 }}>
-                  <Link href={`/events/${ev.slug}`} style={{ fontSize: 14, color: 'var(--color-3-accent-personality)', textDecoration: 'none', fontWeight: 600 }}>
-                    Open &amp; Register →
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {events.slice(0, 3).map((ev) => (
+              <div
+                key={ev.id}
+                className="flex flex-col justify-between rounded-xl border border-[var(--border-hairline)] bg-[var(--surface-subtle)] p-5"
+              >
+                <div>
+                  <span className="inline-flex items-center rounded-full border border-[var(--border-hairline)] bg-[var(--surface)] px-2.5 py-0.5 text-[10px] font-bold uppercase text-[var(--color-2-mood)]">
+                    {ev.is_paid && ev.fee_amount ? `₹${ev.fee_amount}` : 'Free Access'}
+                  </span>
+                  <h3 className="mt-3 text-sm font-bold text-[var(--color-2-mood)]">{ev.title}</h3>
+                  {ev.summary && (
+                    <p className="mt-1.5 text-xs text-[var(--text-secondary)] line-clamp-2">
+                      {ev.summary}
+                    </p>
+                  )}
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-[var(--border-hairline)]">
+                  <Link
+                    href={`/events/${ev.slug}`}
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-[#C01E30] hover:underline"
+                  >
+                    <span>Register now →</span>
                   </Link>
                 </div>
-              </article>
+              </div>
             ))}
           </div>
         </section>
       )}
-    </>
+    </div>
   );
 }

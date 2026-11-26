@@ -1,6 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
+import {
+  AlertCircle,
+  ArrowLeft,
+  Check,
+  CheckCircle2,
+  Copy,
+  KeyRound,
+  Loader2,
+  QrCode,
+  ShieldCheck,
+  Smartphone,
+} from 'lucide-react';
 import { createClient } from '../../../lib/supabase/client';
 
 type Step = 'check' | 'enroll' | 'verify' | 'done' | 'already_enrolled';
@@ -15,6 +28,7 @@ export default function MfaPage() {
   const [totp, setTotp] = useState('');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!supabase) return;
@@ -29,12 +43,13 @@ export default function MfaPage() {
         setStep('enroll');
       }
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [supabase]);
 
   async function startEnroll() {
     if (!supabase) return;
-    setBusy(true); setMessage('');
+    setBusy(true);
+    setMessage('');
     try {
       const { data, error } = await supabase.auth.mfa.enroll({
         factorType: 'totp',
@@ -75,12 +90,13 @@ export default function MfaPage() {
 
   async function verify() {
     if (!supabase || !factorId || !challengeId || totp.length !== 6) return;
-    setBusy(true); setMessage('');
+    setBusy(true);
+    setMessage('');
     try {
       const { error } = await supabase.auth.mfa.verify({ factorId, challengeId, code: totp });
       if (error) throw error;
       setStep('done');
-      setMessage('MFA verified. Director-gated actions are now available for this session.');
+      setMessage('MFA verified. Director-gated actions are now authorized for this session.');
       setTotp('');
     } catch (err) {
       setMessage(err instanceof Error ? err.message : 'Verification failed. Check the code and try again.');
@@ -91,82 +107,188 @@ export default function MfaPage() {
     }
   }
 
+  function copySecret() {
+    if (!secret) return;
+    navigator.clipboard.writeText(secret);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
   return (
-    <div style={{ display: 'grid', gap: 32 }}>
-      {/* Light header card */}
-      <div className="card" style={{ background: 'var(--surface)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--radius-panel)', padding: 'clamp(24px, 3.5vw, 36px)', margin: 0 }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 10px', borderRadius: 'var(--radius-control)', background: 'var(--accent-tint)', border: '1px solid rgba(192,30,48,0.2)', marginBottom: 10 }}>
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-3-accent-personality)' }} />
-          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-3-accent-personality)' }}>
-            Director Security
-          </span>
+    <div className="mx-auto w-full max-w-[680px] px-4 py-8 sm:px-6 sm:py-12">
+      {/* Top Breadcrumb */}
+      <div className="mb-6 flex items-center gap-2 text-xs text-[var(--text-muted)]">
+        <Link
+          href="/account/dashboard"
+          className="inline-flex items-center gap-1.5 font-medium transition-colors hover:text-[#C01E30]"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          <span>Dashboard</span>
+        </Link>
+        <span>/</span>
+        <span className="font-semibold text-[var(--color-2-mood)]">Director MFA</span>
+      </div>
+
+      {/* Header Card */}
+      <div className="mb-8 rounded-2xl border border-[var(--border-hairline)] bg-[var(--surface)] p-6 sm:p-8">
+        <div className="w-fit inline-flex items-center gap-2 rounded-full border border-[#C01E30]/20 bg-[#C01E30]/10 px-3 py-1 text-xs font-semibold text-[#C01E30] dark:text-[#E67C87]">
+          <ShieldCheck className="h-3.5 w-3.5" />
+          <span>Director Governance Security</span>
         </div>
-        <h1 style={{ margin: '0 0 8px', fontSize: 'clamp(1.5rem, 2.8vw, 2rem)', fontWeight: 700, color: 'var(--text-primary)' }}>
-          Authenticator MFA
+
+        <h1 className="mt-3 font-display text-2xl font-bold tracking-tight text-[var(--color-2-mood)] sm:text-3xl">
+          Two-Factor Authentication (TOTP)
         </h1>
-        <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 14, maxWidth: 520, lineHeight: 1.6 }}>
-          Director-gated administrative actions require two-factor authentication via a TOTP authenticator app.
+        <p className="mt-2 text-sm leading-relaxed text-[var(--text-secondary)]">
+          Director-gated actions (such as team appointments, suspensions, and nominations) require time-based authenticator verification.
         </p>
       </div>
 
+      {/* Main Content by Step */}
       {step === 'check' && (
-        <div className="card" style={{ display: 'flex', alignItems: 'center', gap: 12, color: 'var(--text-muted)' }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 12a9 9 0 11-6.219-8.56"/>
-          </svg>
-          Checking MFA status…
+        <div className="flex items-center justify-center gap-3 rounded-2xl border border-[var(--border-hairline)] bg-[var(--surface)] p-12 text-sm text-[var(--text-muted)]">
+          <Loader2 className="h-5 w-5 animate-spin text-[#C01E30]" />
+          <span>Checking MFA authorization status…</span>
         </div>
       )}
 
       {step === 'enroll' && (
-        <div className="card" style={{ maxWidth: 480 }}>
-          <h2 style={{ margin: '0 0 12px', fontSize: '1.1rem' }}>Set up your authenticator</h2>
-          <p style={{ margin: '0 0 20px', color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.6 }}>
-            Install <strong>Google Authenticator</strong>, <strong>Authy</strong>, or any TOTP app,
-            then click the button below to get your setup QR code.
-          </p>
-          <button className="btn btn-primary" onClick={startEnroll} disabled={busy}>
-            {busy ? 'Generating…' : 'Set up authenticator app'}
-          </button>
+        <div className="rounded-2xl border border-[var(--border-hairline)] bg-[var(--surface)] p-6 sm:p-8">
+          <div className="flex items-center gap-3 border-b border-[var(--border-hairline)] pb-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#C01E30]/10 text-[#C01E30]">
+              <Smartphone className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="text-base font-bold text-[var(--color-2-mood)]">
+                Connect Authenticator App
+              </h2>
+              <p className="text-xs text-[var(--text-secondary)]">
+                Works with Google Authenticator, Microsoft Authenticator, 1Password, or Authy
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-6 space-y-4">
+            <p className="text-sm leading-relaxed text-[var(--text-secondary)]">
+              To activate Director governance permissions, link your mobile authenticator. Click below to generate your unique cryptographic QR code and manual setup secret.
+            </p>
+
+            <button
+              onClick={startEnroll}
+              disabled={busy}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#C01E30] px-6 text-sm font-semibold text-white shadow-sm transition-all hover:bg-[#9E1625] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {busy ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Generating Secret…</span>
+                </>
+              ) : (
+                <>
+                  <QrCode className="h-4 w-4" />
+                  <span>Generate Setup QR Code</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       )}
 
       {step === 'verify' && (
-        <div style={{ display: 'grid', gap: 24 }}>
+        <div className="space-y-6">
           {qrCode && (
-            <div className="card" style={{ maxWidth: 480 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-                <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--accent-tint)', color: 'var(--color-3-accent-personality)', border: '1px solid rgba(192,30,48,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, flexShrink: 0 }}>1</div>
-                <strong>Scan this QR code with your authenticator app</strong>
+            <div className="rounded-2xl border border-[var(--border-hairline)] bg-[var(--surface)] p-6 sm:p-8">
+              <div className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#C01E30]">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#C01E30]/10 text-[11px]">
+                  1
+                </span>
+                <span>Scan QR in Authenticator App</span>
               </div>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={qrCode} alt="TOTP QR code" width={180} height={180} style={{ display: 'block', margin: '0 0 16px', border: '2px solid var(--border-hairline)', borderRadius: 8, padding: 8, background: '#fff' }} />
-              <div style={{ padding: '10px 14px', background: 'var(--surface-subtle)', borderRadius: 6, fontSize: 13, color: 'var(--text-secondary)' }}>
-                Can&apos;t scan? Enter this key manually:
-                <code style={{ display: 'block', marginTop: 6, fontFamily: 'var(--font-mono)', fontSize: 12, background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border-hairline)', padding: '6px 10px', borderRadius: 'var(--radius-control)', letterSpacing: '0.04em', wordBreak: 'break-all' }}>{secret}</code>
+
+              <div className="flex flex-col sm:flex-row items-center gap-6">
+                <div className="rounded-2xl border border-[var(--border-hairline)] bg-white p-3 shadow-sm">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={qrCode}
+                    alt="TOTP Setup QR Code"
+                    width={180}
+                    height={180}
+                    className="h-44 w-44 rounded-lg"
+                  />
+                </div>
+
+                <div className="flex-1 space-y-2 text-center sm:text-left">
+                  <div className="text-xs font-semibold text-[var(--color-2-mood)]">
+                    Cannot scan the QR code?
+                  </div>
+                  <p className="text-xs text-[var(--text-secondary)]">
+                    Enter this secret key manually into your authenticator app:
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <code className="flex-1 rounded-xl border border-[var(--border-hairline)] bg-[var(--surface-subtle)] px-3 py-2 text-center font-mono text-xs tracking-wider text-[var(--color-2-mood)] select-all">
+                      {secret}
+                    </code>
+                    <button
+                      type="button"
+                      onClick={copySecret}
+                      className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-[var(--border-hairline)] bg-[var(--surface-subtle)] px-3 text-xs font-medium text-[var(--color-2-mood)] hover:bg-[var(--surface)] transition-colors"
+                    >
+                      {copied ? (
+                        <>
+                          <Check className="h-3.5 w-3.5 text-emerald-500" />
+                          <span>Copied</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-3.5 w-3.5" />
+                          <span>Copy</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
-          <div className="card" style={{ maxWidth: 480 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-              <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--accent-tint)', color: 'var(--color-3-accent-personality)', border: '1px solid rgba(192,30,48,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, flexShrink: 0 }}>{qrCode ? '2' : '1'}</div>
-              <strong>Enter the 6-digit code from your app</strong>
+          <div className="rounded-2xl border border-[var(--border-hairline)] bg-[var(--surface)] p-6 sm:p-8">
+            <div className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#C01E30]">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#C01E30]/10 text-[11px]">
+                {qrCode ? '2' : '1'}
+              </span>
+              <span>Enter 6-Digit Authenticator Code</span>
             </div>
-            <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+
+            <div className="flex flex-col sm:flex-row items-center gap-4">
               <input
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
                 maxLength={6}
                 value={totp}
-                onChange={e => setTotp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                onChange={(e) => setTotp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                 placeholder="000000"
                 autoComplete="one-time-code"
-                style={{ fontFamily: 'var(--font-mono)', fontSize: '1.5rem', letterSpacing: '0.3em', textAlign: 'center', width: 160, padding: '10px 14px', border: '2px solid var(--border-hairline)', borderRadius: 6 }}
+                className="w-full sm:w-48 rounded-xl border border-[var(--border-hairline)] bg-[var(--surface-subtle)] px-4 py-3 text-center font-mono text-2xl font-bold tracking-[0.3em] text-[var(--color-2-mood)] placeholder:text-[var(--text-muted)] focus:border-[#C01E30] focus:bg-[var(--surface)] focus:ring-1 focus:ring-[#C01E30] focus:outline-none"
               />
-              <button className="btn btn-primary" onClick={verify} disabled={busy || totp.length !== 6} style={{ marginTop: 4 }}>
-                {busy ? 'Verifying…' : 'Verify'}
+
+              <button
+                type="button"
+                onClick={verify}
+                disabled={busy || totp.length !== 6}
+                className="w-full sm:w-auto inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#C01E30] px-8 text-sm font-semibold text-white shadow-sm transition-all hover:bg-[#9E1625] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {busy ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Verifying…</span>
+                  </>
+                ) : (
+                  <>
+                    <KeyRound className="h-4 w-4" />
+                    <span>Verify Code</span>
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -174,28 +296,38 @@ export default function MfaPage() {
       )}
 
       {step === 'done' && (
-        <div className="card" style={{ maxWidth: 480, borderLeft: '4px solid var(--success)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--success)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="20 6 9 17 4 12"/>
-            </svg>
-            <strong style={{ color: 'var(--success)' }}>MFA Active</strong>
+        <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-6 sm:p-8">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
+              <CheckCircle2 className="h-6 w-6" />
+            </div>
+            <div>
+              <h2 className="text-base font-bold text-emerald-800 dark:text-emerald-200">
+                MFA Verified &amp; Active
+              </h2>
+              <p className="mt-0.5 text-xs text-emerald-700 dark:text-emerald-300">
+                {message || 'Director-level security assurance is active for this session.'}
+              </p>
+            </div>
           </div>
-          <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 14 }}>{message}</p>
+
+          <div className="mt-6">
+            <Link
+              href="/account/team"
+              className="inline-flex min-h-10 items-center justify-center rounded-xl bg-[#C01E30] px-6 text-xs font-semibold text-white transition-colors hover:bg-[#9E1625]"
+            >
+              Proceed to Team &amp; Tenure Management →
+            </Link>
+          </div>
         </div>
       )}
 
       {message && step !== 'done' && (
-        <p role="status" aria-live="polite" style={{ margin: 0, color: 'var(--danger)', fontWeight: 500 }}>
-          {message}
-        </p>
+        <div className="mt-6 flex items-start gap-2.5 rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-xs font-medium text-rose-700 dark:text-rose-300">
+          <AlertCircle className="h-4 w-4 shrink-0 text-rose-500" />
+          <span>{message}</span>
+        </div>
       )}
-
-      <p>
-        <a href="/account/dashboard" style={{ color: 'var(--text-muted)', fontSize: 14, textDecoration: 'none' }}>
-          ← Back to dashboard
-        </a>
-      </p>
     </div>
   );
 }
