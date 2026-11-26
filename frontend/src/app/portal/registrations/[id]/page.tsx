@@ -124,6 +124,9 @@ export default async function RegistrationDetailPage({
           ticketCode={ticket.ticket_code}
           qrDataUrl={qrDataUrl}
           emailSentAt={ticket.email_sent_at ?? null}
+          registrationId={reg.id}
+          initialCheckedIn={Boolean(att?.checked_in_at)}
+          initialCheckedInTime={att?.checked_in_at ?? null}
         />
       ) : (
         <div className="rounded-2xl border border-[var(--border-hairline)] bg-[var(--surface)] p-8 text-center sm:p-12">
