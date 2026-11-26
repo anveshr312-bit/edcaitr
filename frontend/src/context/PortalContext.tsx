@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   SEED_ANNOUNCEMENTS,
   SEED_APPLICATIONS,
@@ -217,11 +218,11 @@ interface PortalContextValue {
 const PortalContext = createContext<PortalContextValue | null>(null);
 
 export const PortalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const router = useRouter();
+  const pathname = usePathname();
   const [state, setState] = useState<PersistedState>(() => loadInitialState());
   const [path, setPath] = useState<string>(() => {
-    if (typeof window === 'undefined') return '/';
-    const initial = window.location.pathname || '/';
-    return initial === '' ? '/' : initial;
+    return pathname || '/';
   });
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
@@ -234,25 +235,12 @@ export const PortalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
   }, [state]);
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const onPopState = () => {
-      setPath(window.location.pathname || '/');
-    };
-    window.addEventListener('popstate', onPopState);
-    return () => window.removeEventListener('popstate', onPopState);
-  }, []);
+  useEffect(() => setPath(pathname || '/'), [pathname]);
 
   const navigate = (nextPath: string) => {
     if (nextPath !== path) {
-      if (typeof window !== 'undefined') {
-        try {
-          window.history.pushState({}, '', nextPath);
-        } catch {
-          // Fallback inside restricted iframe contexts
-        }
-      }
       setPath(nextPath);
+      router.push(nextPath);
     }
     if (typeof window !== 'undefined') {
       window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });

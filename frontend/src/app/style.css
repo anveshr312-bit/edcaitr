@@ -1,23 +1,38 @@
+@import "tailwindcss";
+@import "./reference-ui.css";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  --font-display: var(--font-bricolage);
+  --font-sans: var(--font-dm-sans);
+  --font-mono: var(--font-ibm-plex-mono);
+}
+
+@layer base {
 /*
  * MOOD: Clean Studio Alabaster (#FAFAFC) + Obsidian Ink (#111318)
  * ACCENT: EDC Logo Crimson (#C01E30)
  */
 :root {
   --color-1-mood: #fafafc;
-  --color-2-mood: #111318;
+  --color-2-mood: #030405;
   --color-3-accent-personality: #c01e30;
 
   --surface: #ffffff;
-  --surface-subtle: #f3f4f8;
-  --text-primary: #111318;
-  --text-secondary: #3f4451;
-  --text-muted: #686d7a;
-  --border-hairline: rgba(17, 19, 24, 0.1);
-  --border-strong: rgba(17, 19, 24, 0.22);
+  --surface-subtle: #f4f4f6;
+  --text-primary: #030405;
+  --text-secondary: #343435;
+  --text-muted: #636468;
+  --ink-secondary: #343435;
+  --ink-muted: #636468;
+  --border-hairline: rgba(3, 4, 5, 0.09);
+  --border-strong: rgba(3, 4, 5, 0.16);
 
-  --accent-hover: #a31828;
-  --accent-ink: #8b1422;
+  --accent-hover: #9e1625;
+  --accent-ink: #c01e30;
   --accent-tint: rgba(192, 30, 48, 0.08);
+  --accent-soft: rgba(192, 30, 48, 0.08);
+  --accent-border: rgba(192, 30, 48, 0.22);
 
   --success: #15803d;
   --danger: #b91c1c;
@@ -28,6 +43,24 @@
   --radius-tag: 4px;
 }
 
+.dark {
+  --color-1-mood: #101011;
+  --color-2-mood: #f1f0ed;
+  --surface: #171719;
+  --surface-subtle: #202022;
+  --text-primary: #f1f0ed;
+  --text-secondary: #c8c7c4;
+  --text-muted: #a4a4a8;
+  --ink-secondary: #c8c7c4;
+  --ink-muted: #a4a4a8;
+  --border-hairline: rgba(241, 240, 237, 0.09);
+  --border-strong: #303032;
+  --accent-hover: #d4283b;
+  --accent-ink: #e67c87;
+  --accent-tint: rgba(192, 30, 48, 0.14);
+  --accent-soft: rgba(192, 30, 48, 0.14);
+  --accent-border: rgba(192, 30, 48, 0.34);
+}
 /* ─── CRITICAL PRELOADER SYNCHRONIZATION (P0, P5, P6) ─── */
 .edc-cinematic-preloader {
   display: none;
@@ -68,12 +101,13 @@ html.edc-preloader-active footer.site-footer {
 }
 
 body {
-  margin: 0 auto;
-  max-width: 1120px;
-  padding: 0 24px 64px;
+  margin: 0;
+  width: 100%;
+  max-width: none;
+  padding: 0;
   background-color: var(--color-1-mood);
   color: var(--text-primary);
-  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  font-family: var(--font-dm-sans), system-ui, -apple-system, sans-serif;
   font-size: 16px;
   line-height: 1.6;
   font-weight: 400;
@@ -195,7 +229,7 @@ p {
 }
 
 section {
-  margin: 48px 0;
+  margin: 0;
 }
 
 a {
@@ -204,10 +238,19 @@ a {
 }
 
 .mono-meta {
-  font-family: var(--font-mono), ui-monospace, SFMono-Regular, monospace;
+  font-family: var(--font-ibm-plex-mono), ui-monospace, SFMono-Regular, monospace;
   font-variant-numeric: tabular-nums;
   font-size: 0.8125rem;
   color: var(--text-muted);
+}
+
+.font-display {
+  font-family: var(--font-bricolage), var(--font-dm-sans), sans-serif;
+}
+
+.font-mono-data {
+  font-family: var(--font-ibm-plex-mono), ui-monospace, SFMono-Regular, monospace;
+  font-variant-numeric: tabular-nums;
 }
 
 .stamp-label {
@@ -913,6 +956,8 @@ button:disabled {
   .skeleton,
   .skeleton-dark {
     animation: none;
+  }
+
   }
 }
 
