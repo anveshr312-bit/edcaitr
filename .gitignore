@@ -24,3 +24,7 @@ scratch/
 # Operating system files
 .DS_Store
 Thumbs.db
+
+# Verification screenshots
+fullpage_*.png
+*.png
