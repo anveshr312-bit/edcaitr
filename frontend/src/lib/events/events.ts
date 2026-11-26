@@ -1,17 +1,19 @@
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { cache } from 'react';
-import { unstable_cache } from 'next/cache';
 
 function createPublicClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+  const key =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key || url.includes('your-project-id')) return null;
   return createSupabaseClient(url, key, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 }
 
-export type EventStatus = 'draft' | 'published' | 'ongoing' | 'wrap_up' | 'closed' | 'archived' | 'cancelled';
+export type EventStatus = 'draft' | 'published' | 'ongoing' | 'wrap_up' | 'closed' | 'archived';
 
 export interface PublicTeamMember {
   id: string;
@@ -89,40 +91,41 @@ export const getPublicTeamProfiles = cache(
   }
 );
 
-export const getPublicPastTeams = unstable_cache(
+export const getPublicPastTeams = cache(
   async (): Promise<PublicPastTeamMember[]> => {
     const supabase = createPublicClient();
     if (!supabase) return [];
     const { data } = await supabase.rpc('get_public_past_teams');
     return (data as PublicPastTeamMember[]) ?? [];
-  },
-  ['public-past-teams'],
-  { revalidate: 60, tags: ['public-team'] }
+  }
 );
 
-export const getPublicEvents = unstable_cache(
+export const getPublicEvents = cache(
   async (includeArchived = false): Promise<PublicEvent[]> => {
     const supabase = createPublicClient();
     if (!supabase) return [];
 
     const statuses: EventStatus[] = includeArchived
-      ? ['published', 'ongoing', 'wrap_up', 'closed', 'archived', 'cancelled']
-      : ['published', 'ongoing', 'wrap_up', 'closed', 'cancelled'];
+      ? ['published', 'ongoing', 'wrap_up', 'closed', 'archived']
+      : ['published', 'ongoing', 'wrap_up', 'closed'];
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('events')
       .select('id, slug, title, summary, description, venue, starts_at, ends_at, registration_opens_at, registration_closes_at, status, is_paid, fee_amount, poster_ref, max_capacity')
       .eq('audience', 'public')
       .in('status', statuses)
       .order('starts_at', { ascending: false, nullsFirst: false });
 
+    if (error) {
+      console.error('getPublicEvents query error:', error);
+      return [];
+    }
+
     return (data as PublicEvent[]) ?? [];
-  },
-  ['public-events'],
-  { revalidate: 60, tags: ['public-events'] }
+  }
 );
 
-export const getPublicEventBySlug = unstable_cache(
+export const getPublicEventBySlug = cache(
   async (slug: string): Promise<{
     event: PublicEvent | null;
     guests: PublicEventGuest[];
@@ -132,13 +135,18 @@ export const getPublicEventBySlug = unstable_cache(
     const supabase = createPublicClient();
     if (!supabase) return { event: null, guests: [], highlights: [], manuals: [] };
 
-    const { data: event } = await supabase
+    const { data: event, error } = await supabase
       .from('events')
       .select('id, slug, title, summary, description, venue, starts_at, ends_at, registration_opens_at, registration_closes_at, status, is_paid, fee_amount, poster_ref, max_capacity')
       .eq('slug', slug)
       .eq('audience', 'public')
-      .in('status', ['published', 'ongoing', 'wrap_up', 'closed', 'archived', 'cancelled'])
+      .in('status', ['published', 'ongoing', 'wrap_up', 'closed', 'archived'])
       .maybeSingle();
+
+    if (error) {
+      console.error('getPublicEventBySlug query error for slug', slug, ':', error);
+      return { event: null, guests: [], highlights: [], manuals: [] };
+    }
 
     if (!event) return { event: null, guests: [], highlights: [], manuals: [] };
 
@@ -154,7 +162,5 @@ export const getPublicEventBySlug = unstable_cache(
       highlights: (highlights as PublicEventHighlight[]) ?? [],
       manuals: (manuals as PublicEventManual[]) ?? [],
     };
-  },
-  ['public-event-by-slug'],
-  { revalidate: 60, tags: ['public-events'] }
+  }
 );
