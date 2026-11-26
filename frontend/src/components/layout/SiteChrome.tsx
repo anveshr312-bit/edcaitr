@@ -8,6 +8,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { createClient } from '../../lib/supabase/client';
 import { EdcLogo } from '../ui/Primitives';
 import { EdcMark } from '../ui/EdcMark';
+import { FooterParticleLogo } from '../ui/FooterParticleLogo';
 import { GooeyNav, type GooeyNavItem } from '../ui/GooeyNav';
 import { WaveGridBackground } from '../ui/WaveGridBackground';
 import { ThemeToggleButton } from '../ui/ThemeToggle';
@@ -127,8 +128,8 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
             </svg>
           </div>
           <div className="relative z-10 flex justify-center pt-8 pb-2 sm:pt-10 sm:pb-3">
-            <Link href="/" aria-label="EDC AITR Home" className="rounded-2xl p-2 transition-transform hover:scale-[1.04]">
-              <EdcMark className="h-auto w-20 sm:w-24 text-[#C01E30]" />
+            <Link href="/" aria-label="EDC AITR Home" className="rounded-2xl p-2">
+              <FooterParticleLogo className="h-auto w-20 sm:w-24" />
             </Link>
           </div>
           <div className="relative z-10 px-6 pb-9 sm:px-10 sm:pb-12 lg:px-14">
