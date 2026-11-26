@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { createClient } from '../../../lib/supabase/client';
 import ImageUploadField from '../../../components/ImageUploadField';
+import { SmoothInput } from '../../../components/ui/SmoothInput';
 
 interface Profile {
   full_name: string;
@@ -257,53 +258,44 @@ export default function ProfilePage() {
 
           <div className="grid gap-5 sm:grid-cols-2">
             <div className="sm:col-span-2">
-              <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">
-                Full Name <span className="text-[#C01E30]">*</span>
+              <label className="block text-xs font-semibold text-[var(--color-2-mood)] mb-1.5">
+                Full name <span className="text-[#C01E30]">*</span>
               </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  required
-                  maxLength={120}
-                  value={profile.full_name}
-                  onChange={field('full_name')}
-                  autoComplete="name"
-                  placeholder="e.g. Rohan Sharma"
-                  className="w-full rounded-xl border border-[var(--border-hairline)] bg-[var(--surface-subtle)] px-4 py-2.5 text-sm text-[var(--color-2-mood)] transition-all placeholder:text-[var(--text-muted)] focus:border-[#C01E30] focus:bg-[var(--surface)] focus:ring-1 focus:ring-[#C01E30] focus:outline-none"
-                />
-              </div>
+              <SmoothInput
+                required
+                maxLength={120}
+                value={profile.full_name}
+                onChange={field('full_name')}
+                autoComplete="name"
+                placeholder="e.g. Rohan Sharma"
+                wrapperClassName="bg-[var(--surface-subtle)] border-[var(--border-hairline)]"
+              />
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">
+              <label className="block text-xs font-semibold text-[var(--color-2-mood)] mb-1.5">
                 College / Institution
               </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  maxLength={200}
-                  value={profile.college}
-                  onChange={field('college')}
-                  placeholder="e.g. Acropolis Institute of Technology & Research"
-                  className="w-full rounded-xl border border-[var(--border-hairline)] bg-[var(--surface-subtle)] px-4 py-2.5 text-sm text-[var(--color-2-mood)] transition-all placeholder:text-[var(--text-muted)] focus:border-[#C01E30] focus:bg-[var(--surface)] focus:ring-1 focus:ring-[#C01E30] focus:outline-none"
-                />
-              </div>
+              <SmoothInput
+                maxLength={200}
+                value={profile.college}
+                onChange={field('college')}
+                placeholder="e.g. Acropolis Institute of Technology & Research"
+                wrapperClassName="bg-[var(--surface-subtle)] border-[var(--border-hairline)]"
+              />
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">
-                Enrollment Number
+              <label className="block text-xs font-semibold text-[var(--color-2-mood)] mb-1.5">
+                Enrollment number
               </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  maxLength={40}
-                  value={profile.enrollment_no}
-                  onChange={field('enrollment_no')}
-                  placeholder="Optional — for Acropolis students"
-                  className="w-full rounded-xl border border-[var(--border-hairline)] bg-[var(--surface-subtle)] px-4 py-2.5 text-sm text-[var(--color-2-mood)] transition-all placeholder:text-[var(--text-muted)] focus:border-[#C01E30] focus:bg-[var(--surface)] focus:ring-1 focus:ring-[#C01E30] focus:outline-none"
-                />
-              </div>
+              <SmoothInput
+                maxLength={40}
+                value={profile.enrollment_no}
+                onChange={field('enrollment_no')}
+                placeholder="Optional — for Acropolis students"
+                wrapperClassName="bg-[var(--surface-subtle)] border-[var(--border-hairline)]"
+              />
             </div>
           </div>
         </div>
@@ -326,39 +318,35 @@ export default function ProfilePage() {
 
           <div className="grid gap-5 sm:grid-cols-2">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">
-                Phone Number
+              <label className="block text-xs font-semibold text-[var(--color-2-mood)] mb-1.5">
+                Phone number
               </label>
-              <div className="relative">
-                <input
-                  type="tel"
-                  maxLength={20}
-                  value={profile.phone}
-                  onChange={field('phone')}
-                  autoComplete="tel"
-                  placeholder="+91 98765 43210"
-                  className="w-full rounded-xl border border-[var(--border-hairline)] bg-[var(--surface-subtle)] px-4 py-2.5 text-sm text-[var(--color-2-mood)] transition-all placeholder:text-[var(--text-muted)] focus:border-[#C01E30] focus:bg-[var(--surface)] focus:ring-1 focus:ring-[#C01E30] focus:outline-none"
-                />
-              </div>
+              <SmoothInput
+                type="tel"
+                maxLength={20}
+                value={profile.phone}
+                onChange={field('phone')}
+                autoComplete="tel"
+                placeholder="+91 98765 43210"
+                wrapperClassName="bg-[var(--surface-subtle)] border-[var(--border-hairline)]"
+              />
               <p className="mt-1.5 text-[11px] text-[var(--text-muted)]">
                 Used for urgent summit check-ins and WhatsApp coordination.
               </p>
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">
-                LinkedIn Profile URL
+              <label className="block text-xs font-semibold text-[var(--color-2-mood)] mb-1.5">
+                LinkedIn profile URL
               </label>
-              <div className="relative">
-                <input
-                  type="url"
-                  maxLength={300}
-                  value={profile.linkedin_url}
-                  onChange={field('linkedin_url')}
-                  placeholder="https://linkedin.com/in/yourprofile"
-                  className="w-full rounded-xl border border-[var(--border-hairline)] bg-[var(--surface-subtle)] px-4 py-2.5 text-sm text-[var(--color-2-mood)] transition-all placeholder:text-[var(--text-muted)] focus:border-[#C01E30] focus:bg-[var(--surface)] focus:ring-1 focus:ring-[#C01E30] focus:outline-none"
-                />
-              </div>
+              <SmoothInput
+                type="url"
+                maxLength={300}
+                value={profile.linkedin_url}
+                onChange={field('linkedin_url')}
+                placeholder="https://linkedin.com/in/yourprofile"
+                wrapperClassName="bg-[var(--surface-subtle)] border-[var(--border-hairline)]"
+              />
               <p className="mt-1.5 text-[11px] text-[var(--text-muted)]">
                 Must start with https://. Displayed on public speaker &amp; team cards.
               </p>
@@ -385,19 +373,16 @@ export default function ProfilePage() {
           <div className="space-y-6">
             {canManageDisplay && (
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">
-                  Official Designation
+                <label className="block text-xs font-semibold text-[var(--color-2-mood)] mb-1.5">
+                  Official designation
                 </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    maxLength={100}
-                    value={profile.designation}
-                    onChange={field('designation')}
-                    placeholder="e.g. Lead Technical Architect, Convener, Event Head"
-                    className="w-full rounded-xl border border-[var(--border-hairline)] bg-[var(--surface-subtle)] px-4 py-2.5 text-sm text-[var(--color-2-mood)] transition-all placeholder:text-[var(--text-muted)] focus:border-[#C01E30] focus:bg-[var(--surface)] focus:ring-1 focus:ring-[#C01E30] focus:outline-none"
-                  />
-                </div>
+                <SmoothInput
+                  maxLength={100}
+                  value={profile.designation}
+                  onChange={field('designation')}
+                  placeholder="e.g. Lead Technical Architect, Convener, Event Head"
+                  wrapperClassName="bg-[var(--surface-subtle)] border-[var(--border-hairline)]"
+                />
                 <p className="mt-1.5 text-[11px] text-[var(--text-muted)]">
                   Available for Advisor &amp; Director verified administrative members.
                 </p>
@@ -415,10 +400,10 @@ export default function ProfilePage() {
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]">
-                  Short Bio
+                <label className="text-xs font-semibold text-[var(--color-2-mood)]">
+                  Short bio
                 </label>
-                <span className="text-[11px] text-[var(--text-muted)]">
+                <span className="text-[11px] text-[var(--text-muted)] font-mono">
                   {profile.bio.length} / 500
                 </span>
               </div>

@@ -37,6 +37,11 @@ export default async function EventTeamsPage({
 
   if (!event) notFound();
 
+  // Enforce governance: Advisors and Directors are not student operators; exclude them from team candidate assignment
+  const studentCandidates = ((candidates as { id: string; full_name: string; designation: string | null; role: string }[]) ?? []).filter(
+    (c) => c.role !== 'director' && c.role !== 'advisor'
+  );
+
   const normalizedMembers = (members ?? []).map((m) => {
     const p = Array.isArray(m.profiles) ? (m.profiles[0] ?? null) : (m.profiles ?? null);
     return {
@@ -78,7 +83,7 @@ export default async function EventTeamsPage({
           eventId={id}
           teams={teams ?? []}
           initialMembers={normalizedMembers}
-          candidates={(candidates as { id: string; full_name: string; designation: string | null; role: string }[]) ?? []}
+          candidates={studentCandidates}
           canManage={Boolean(canManage)}
         />
       </div>

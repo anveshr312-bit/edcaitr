@@ -35,6 +35,11 @@ export default async function ManageEventPage({
 
   if (!event) notFound();
 
+  // Enforce governance: Advisors and Directors are not student operators; exclude them from SPOC assignment
+  const studentCandidates = ((candidates as { id: string; full_name: string; designation: string | null; role: string }[]) ?? []).filter(
+    (c) => c.role !== 'director' && c.role !== 'advisor'
+  );
+
   const normalizedSpocs = (spocs ?? []).map((s) => {
     const p = Array.isArray(s.profiles) ? (s.profiles[0] ?? null) : (s.profiles ?? null);
     return {
@@ -95,7 +100,7 @@ export default async function ManageEventPage({
           event={event}
           initialSpocs={normalizedSpocs}
           initialGuests={guests ?? []}
-          candidates={(candidates as { id: string; full_name: string; designation: string | null; role: string }[]) ?? []}
+          candidates={studentCandidates}
         />
       </div>
     </>

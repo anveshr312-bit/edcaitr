@@ -24,6 +24,10 @@ export default async function NewEventPage() {
   }
 
   const { data: candidates } = await supabase.rpc('get_approved_spoc_candidates');
+  // Enforce governance: Advisors and Directors are not student operators; exclude them from SPOC assignment
+  const studentCandidates = (candidates ?? []).filter(
+    (c: { role: string }) => c.role !== 'director' && c.role !== 'advisor'
+  );
 
   return (
     <div className="mx-auto w-full max-w-[880px] px-4 py-8 sm:px-6 sm:py-12">
@@ -58,14 +62,7 @@ export default async function NewEventPage() {
       {/* New Event Form Component */}
       <div className="rounded-2xl border border-[var(--border-hairline)] bg-[var(--surface)] p-6 sm:p-8">
         <NewEventClient
-          candidates={
-            (candidates as {
-              id: string;
-              full_name: string;
-              designation: string | null;
-              role: string;
-            }[]) ?? []
-          }
+          candidates={studentCandidates}
           currentUserId={user.id}
         />
       </div>

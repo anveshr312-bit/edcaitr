@@ -86,8 +86,36 @@ export const getPublicTeamProfiles = cache(
   async (): Promise<PublicTeamMember[]> => {
     const supabase = createPublicClient();
     if (!supabase) return [];
-    const { data } = await supabase.rpc('get_public_team_profiles');
-    return (data as PublicTeamMember[]) ?? [];
+    const { data, error } = await supabase.rpc('get_public_team_profiles');
+    if (data && data.length > 0) return data as PublicTeamMember[];
+
+    // Fallback: Query all approved director, advisor, and core_team members directly
+    // so any member who created their account automatically populates into EDC ANCHORS
+    const { data: directMembers } = await supabase
+      .from('org_memberships')
+      .select('user_id, role, effective_from, profiles!user_id(id, full_name, bio, designation, linkedin_url, avatar_ref, display_order)')
+      .eq('status', 'approved')
+      .in('role', ['director', 'advisor', 'core_team'])
+      .is('effective_until', null);
+
+    if (directMembers && directMembers.length > 0) {
+      return directMembers.map((m: any) => {
+        const p = Array.isArray(m.profiles) ? m.profiles[0] : m.profiles;
+        return {
+          id: p?.id ?? m.user_id,
+          full_name: p?.full_name || 'Team Member',
+          bio: p?.bio ?? null,
+          designation: p?.designation ?? null,
+          linkedin_url: p?.linkedin_url ?? null,
+          avatar_ref: p?.avatar_ref ?? null,
+          role: m.role as 'director' | 'advisor' | 'core_team',
+          effective_from: m.effective_from ?? null,
+          display_order: p?.display_order ?? 10,
+        };
+      });
+    }
+
+    return [];
   }
 );
 

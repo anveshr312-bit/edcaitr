@@ -18,6 +18,7 @@ import {
 import { getImageKitUrl } from '../../../lib/media/imagekit';
 import { CardGridSkeleton } from '../../../components/ui/Skeleton';
 import { fetchWithTimeout } from '../../../lib/net/fetchWithDedupe';
+import MemberProfileModal, { type ModalMemberProfile } from '../../../components/ui/MemberProfileModal';
 
 interface DirectoryMember {
   user_id: string;
@@ -55,6 +56,7 @@ export default function AlumniDirectoryPage() {
   const [messageDrafts, setMessageDrafts] = useState<Record<string, string>>({});
   const [statusNote, setStatusNote] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [modalMember, setModalMember] = useState<ModalMemberProfile | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   const fetchDirectory = useCallback(
@@ -293,7 +295,22 @@ export default function AlumniDirectoryPage() {
               return (
                 <article
                   key={m.user_id}
-                  className="flex flex-col justify-between rounded-xl border border-[var(--border-hairline)] bg-[var(--surface-subtle)] p-5 transition-all hover:border-[var(--border-strong)]"
+                  onClick={(e) => {
+                    const target = e.target as HTMLElement;
+                    if (target.closest('a') || target.closest('button') || target.closest('textarea')) return;
+                    setModalMember({
+                      id: m.user_id,
+                      name: m.full_name,
+                      role: 'alumni',
+                      avatarUrl: m.avatar_ref,
+                      bio: m.bio,
+                      linkedinUrl: m.linkedin_url,
+                      designation: m.designation,
+                      company: m.industry || m.domain,
+                      tier: 'alumni',
+                    });
+                  }}
+                  className="flex flex-col justify-between rounded-xl border border-[var(--border-hairline)] bg-[var(--surface-subtle)] p-5 transition-all hover:border-[var(--border-strong)] cursor-pointer group"
                 >
                   <div>
                     <div className="flex items-start gap-3.5">
@@ -315,11 +332,11 @@ export default function AlumniDirectoryPage() {
                       )}
 
                       <div className="min-w-0 flex-1">
-                        <h3 className="font-bold text-[var(--color-2-mood)] truncate">
+                        <h3 className="font-bold text-[var(--color-2-mood)] truncate group-hover:text-[#C01E30] transition-colors">
                           {m.full_name}
                         </h3>
                         <p className="text-xs text-[var(--text-secondary)] truncate">
-                          {m.designation || m.role.replace('_', ' ')}
+                          {m.designation || 'Alumni'}
                         </p>
 
                         <div className="mt-2 flex flex-wrap gap-1.5 text-[11px]">
@@ -352,19 +369,39 @@ export default function AlumniDirectoryPage() {
 
                   <div className="mt-4 border-t border-[var(--border-hairline)] pt-3">
                     <div className="flex items-center justify-between gap-3 text-xs">
-                      {m.linkedin_url ? (
-                        <a
-                          href={m.linkedin_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 font-semibold text-[#C01E30] hover:underline"
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setModalMember({
+                              id: m.user_id,
+                              name: m.full_name,
+                              role: 'alumni',
+                              avatarUrl: m.avatar_ref,
+                              bio: m.bio,
+                              linkedinUrl: m.linkedin_url,
+                              designation: m.designation,
+                              company: m.industry || m.domain,
+                              tier: 'alumni',
+                            });
+                          }}
+                          className="inline-flex items-center gap-1 font-semibold text-xs text-[var(--text-muted)] hover:text-[#C01E30] transition-colors"
                         >
-                          <ExternalLink className="h-3.5 w-3.5" />
-                          <span>LinkedIn</span>
-                        </a>
-                      ) : (
-                        <div />
-                      )}
+                          <span>View profile</span>
+                        </button>
+
+                        {m.linkedin_url && (
+                          <a
+                            href={m.linkedin_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 font-semibold text-[#C01E30] hover:underline"
+                          >
+                            <ExternalLink className="h-3.5 w-3.5" />
+                            <span>LinkedIn</span>
+                          </a>
+                        )}
+                      </div>
 
                       {m.allow_messages && (
                         <button
@@ -432,6 +469,11 @@ export default function AlumniDirectoryPage() {
           </div>
         )}
       </div>
+
+      <MemberProfileModal
+        member={modalMember}
+        onClose={() => setModalMember(null)}
+      />
     </div>
   );
 }

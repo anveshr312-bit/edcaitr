@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { createClient } from '../../../lib/supabase/server';
 import { getUserRole } from '../../../lib/auth/authorization';
 import { SignOutButton } from './SignOutButton';
+import { OnboardingDialog } from '../../../components/account/OnboardingDialog';
 
 type AppRole = 'participant' | 'core_team' | 'advisor' | 'director' | 'alumni';
 
@@ -198,6 +199,9 @@ export default async function DashboardPage() {
         </section>
       )}
 
+      {/* First-Time Affiliation Setup Dialog */}
+      <OnboardingDialog role={role} />
+
       {/* Main Command Hub Grid */}
       <section>
         <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: '0 0 16px', color: 'var(--text-primary)' }}>
@@ -378,30 +382,68 @@ export default async function DashboardPage() {
             </article>
           )}
 
-          {/* Module 8: Role Application (Participants only) */}
-          {!isDirector && !membership && (
+          {/* Module 8: Participant Certificates */}
+          {role === 'participant' && (
             <article className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
               <div>
                 <div style={{ width: 36, height: 36, borderRadius: 'var(--radius-control)', background: 'var(--surface-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-3-accent-personality)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    <circle cx="12" cy="8" r="6" />
+                    <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11" />
                   </svg>
                 </div>
                 <h3 style={{ margin: '0 0 6px', fontSize: '1.05rem', fontWeight: 700 }}>
-                  Join the EDC AITR Team
+                  Certificates &amp; Credentials
                 </h3>
                 <p className="card-meta" style={{ margin: 0, lineHeight: 1.5 }}>
-                  Apply to join the Entrepreneurship Development Cell Core Team for operational roles across logistics, media, and tech.
+                  Download verified event participation certificates, hackathon credentials, and merit honors.
                 </p>
               </div>
               <div style={{ marginTop: 20, paddingTop: 14, borderTop: '1px solid var(--border-hairline)' }}>
-                <Link href="/account/apply" className="btn btn-primary" style={{ width: '100%', textAlign: 'center' }}>
-                  Submit Application →
+                <Link href="/portal/certificates" className="btn" style={{ width: '100%', textAlign: 'center' }}>
+                  View Certificates →
+                </Link>
+              </div>
+            </article>
+          )}
+
+          {/* Module 9: Cell Announcements for Participants */}
+          {role === 'participant' && (
+            <article className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <div>
+                <div style={{ width: 36, height: 36, borderRadius: 'var(--radius-control)', background: 'var(--surface-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-3-accent-personality)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="m3 11 18-5v12L3 14v-3z" />
+                    <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6" />
+                  </svg>
+                </div>
+                <h3 style={{ margin: '0 0 6px', fontSize: '1.05rem', fontWeight: 700 }}>
+                  Cell Notices &amp; Broadcasts
+                </h3>
+                <p className="card-meta" style={{ margin: 0, lineHeight: 1.5 }}>
+                  Read official circulars, event announcements, and incubation deadlines published by EDC AITR.
+                </p>
+              </div>
+              <div style={{ marginTop: 20, paddingTop: 14, borderTop: '1px solid var(--border-hairline)' }}>
+                <Link href="/portal/announcements" className="btn" style={{ width: '100%', textAlign: 'center' }}>
+                  Read Notices →
                 </Link>
               </div>
             </article>
           )}
         </div>
+
+        {/* Subtle affiliation link for non-staff */}
+        {!isDirector && !membership && (
+          <div style={{ marginTop: 28, padding: '16px 20px', borderRadius: 'var(--radius-control)', background: 'var(--surface-subtle)', border: '1px solid var(--border-hairline)', textAlign: 'center' }}>
+            <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+              Are you an active EDC Core Team coordinator, faculty advisor, or past alumnus?{' '}
+              <Link href="/account/apply" style={{ color: 'var(--color-3-accent-personality)', fontWeight: 600, textDecoration: 'none' }}>
+                Verify or update your cell affiliation here →
+              </Link>
+            </p>
+          </div>
+        )}
       </section>
     </div>
   );

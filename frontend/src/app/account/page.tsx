@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { ShieldCheck, Loader2 } from 'lucide-react';
 import { createClient } from '../../lib/supabase/client';
 import { returnPath } from '../../lib/auth/returnPath';
+import { SmoothInput } from '../../components/ui/SmoothInput';
 
 function destination() {
   if (typeof window === 'undefined') return '/account/dashboard';
@@ -515,31 +516,24 @@ export default function Account() {
         {/* Email / Password Form */}
         <form onSubmit={submit} style={{ display: 'grid', gap: 14 }}>
           <div>
-            <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#3F4451', marginBottom: 6 }}>
-              College or Personal Email
+            <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>
+              Email address
             </label>
-            <input
+            <SmoothInput
               type="email"
               autoComplete="email"
               placeholder="you@acropolis.in or personal"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '10px 14px',
-                borderRadius: 8,
-                border: '1px solid #D6D0C4',
-                fontSize: '0.9375rem',
-                boxSizing: 'border-box',
-              }}
+              wrapperClassName="bg-[var(--surface-subtle)] border-[var(--border-hairline)]"
             />
           </div>
 
           {mode !== 'forgot_password' && (
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                <label style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#3F4451' }}>
+                <label style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
                   Password
                 </label>
                 {mode === 'signin' && (
@@ -552,7 +546,7 @@ export default function Account() {
                   </button>
                 )}
               </div>
-              <input
+              <SmoothInput
                 type="password"
                 autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
                 minLength={8}
@@ -560,14 +554,7 @@ export default function Account() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '10px 14px',
-                  borderRadius: 8,
-                  border: '1px solid #D6D0C4',
-                  fontSize: '0.9375rem',
-                  boxSizing: 'border-box',
-                }}
+                wrapperClassName="bg-[var(--surface-subtle)] border-[var(--border-hairline)]"
               />
             </div>
           )}
