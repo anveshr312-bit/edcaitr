@@ -27,15 +27,33 @@ export async function POST(
   }
 
   const admin = createAdminClient();
-  const { data, error } = await admin.rpc('register_for_event', {
+
+  // Build RPC arguments. Only include p_track_id if a track was selected,
+  // ensuring backwards compatibility with databases that have the 6-parameter
+  // register_for_event function and preventing PostgREST schema cache misses (PGRST202).
+  const rpcArgs: Record<string, unknown> = {
     p_event_id: eventId,
-    p_track_id: body.track_id || null,
     p_user_id: ctx!.id,
     p_category: body.participant_category ?? 'student',
     p_organization: body.organization ?? null,
     p_payment_ref: body.payment_ref ?? null,
     p_payment_proof_ref: body.payment_proof_ref ?? null,
-  });
+  };
+
+  if (body.track_id) {
+    rpcArgs.p_track_id = body.track_id;
+  }
+
+  let { data, error } = await admin.rpc('register_for_event', rpcArgs);
+
+  // If p_track_id was sent but the database only has the 6-parameter function signature (PGRST202),
+  // retry without p_track_id so the participant is still registered successfully.
+  if (error && (error.code === 'PGRST202' || error.message?.includes('schema cache')) && body.track_id) {
+    delete rpcArgs.p_track_id;
+    const retry = await admin.rpc('register_for_event', rpcArgs);
+    data = retry.data;
+    error = retry.error;
+  }
 
   if (error) {
     const status = error.message.includes('full') || error.message.includes('already') ? 409 : 400;
