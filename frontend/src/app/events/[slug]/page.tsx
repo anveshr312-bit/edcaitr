@@ -6,15 +6,15 @@ import { getPublicEventBySlug } from '../../../lib/events/events';
 import { getImageKitUrl } from '../../../lib/media/imagekit';
 import { createClient } from '../../../lib/supabase/server';
 import { SkeletonBox } from '../../../components/ui/Skeleton';
-import { createPageMetadata, SITE_CONFIG } from '../../../lib/seo';
+import { createPageMetadata } from '../../../lib/seo';
 import { EventStructuredData, BreadcrumbStructuredData } from '../../../components/StructuredData';
+import LiquidButton from '../../../components/ui/liquid-button';
+import { eventAvailability } from '../../../lib/events/lifecycle';
 
 const EventRegisterForm = nextDynamic(
   () => import('../../../components/EventRegisterForm'),
-  { loading: () => <SkeletonBox height={180} borderRadius={8} /> }
+  { loading: () => <SkeletonBox height={240} borderRadius={12} /> }
 );
-import LiquidButton from '../../../components/ui/liquid-button';
-import { eventAvailability } from '../../../lib/events/lifecycle';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -58,37 +58,23 @@ export async function generateMetadata({
   });
 }
 
-/** Reusable section heading with 2px vermilion left border */
-function SectionHeading({ children }: { children: React.ReactNode }) {
+function SectionHeading({ children, subtitle }: { children: React.ReactNode; subtitle?: string }) {
   return (
-    <h2
-      style={{
-        margin: '0 0 20px',
-        fontSize: '1.2rem',
-        fontWeight: 700,
-        display: 'flex',
-        alignItems: 'center',
-        gap: 12,
-      }}
-    >
-      <span
-        aria-hidden="true"
-        style={{
-          display: 'inline-block',
-          width: 3,
-          height: '1.2em',
-          background: '#C01E30',
-          borderRadius: 2,
-          flexShrink: 0,
-        }}
-      />
-      {children}
-    </h2>
+    <div className="mb-6">
+      <div className="flex items-center gap-2.5 mb-1.5">
+        <span className="w-1.5 h-4 rounded-full bg-[#C01E30]" aria-hidden="true" />
+        <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
+          {children}
+        </h2>
+      </div>
+      {subtitle && <p className="text-xs text-muted-foreground ml-4">{subtitle}</p>}
+    </div>
   );
 }
 
 export default async function EventDetailPage({
-  params, searchParams,
+  params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
   searchParams: Promise<{ track?: string }>;
@@ -103,11 +89,28 @@ export default async function EventDetailPage({
   }
 
   const supabase = await createClient();
-  const trackResult = supabase ? await supabase.from('event_tracks').select('id,title').eq('event_id', event.id).order('title') : null;
-  const tracks: {id: string; title: string}[] = trackResult?.data ?? [];
+
+  // Safely fetch event tracks if the table exists, fallback gracefully without blocking registration
+  let tracks: { id: string; title: string }[] = [];
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('event_tracks')
+        .select('id,title')
+        .eq('event_id', event.id)
+        .order('title');
+      if (!error && data) {
+        tracks = data;
+      }
+    } catch {
+      tracks = [];
+    }
+  }
+
   const requestedTrack = (await searchParams).track;
-  const selectedTrack = tracks.find(track => track.id === requestedTrack);
+  const selectedTrack = tracks.find((track) => track.id === requestedTrack);
   const back = `/events/${event.slug}${selectedTrack ? '?track=' + selectedTrack.id : ''}#registration`;
+
   let userId: string | null = null;
   let existingReg: { id: string; status: string } | null = null;
   let upiDetails: { upi_id: string | null; upi_qr_ref: string | null } = { upi_id: null, upi_qr_ref: null };
@@ -140,6 +143,23 @@ export default async function EventDetailPage({
   const { lifecycle, open: canRegister } = eventAvailability(event);
   const isConcluded = ['completed', 'archived'].includes(lifecycle);
 
+  // Formatted date and time strings
+  const formattedDate = event.starts_at
+    ? new Date(event.starts_at).toLocaleDateString('en-IN', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      })
+    : 'Date to be announced';
+
+  const formattedTime = event.starts_at
+    ? new Date(event.starts_at).toLocaleTimeString('en-IN', {
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : null;
+
   return (
     <>
       <EventStructuredData
@@ -166,417 +186,469 @@ export default async function EventDetailPage({
           { name: event.title, path: `/events/${event.slug}` },
         ]}
       />
-      {/* ── BREADCRUMB ── */}
-      <p style={{ marginBottom: 24, fontSize: '0.9rem' }}>
-        <Link
-          href="/events"
-          style={{ color: 'var(--text-secondary)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M19 12H5M12 19l-7-7 7-7" />
-          </svg>
-          All events
-        </Link>
-      </p>
 
-      {/* ── TWO-COLUMN LAYOUT ── */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'minmax(0,3fr) minmax(0,2fr)',
-          gap: 32,
-          alignItems: 'start',
-        }}
-      >
-        {/* ════ LEFT COLUMN (60%) ════ */}
-        <div>
-          {/* Title */}
-          <h1
-            style={{
-              margin: '0 0 20px',
-              fontSize: 'clamp(1.6rem, 3vw, 2.4rem)',
-              fontWeight: 800,
-              letterSpacing: '-0.025em',
-              lineHeight: 1.15,
-            }}
+      <div className="w-full max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-8">
+        {/* ── BREADCRUMB & BACK LINK ── */}
+        <div className="flex flex-wrap items-center justify-between gap-4 pb-2 border-b border-border/40">
+          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+            <Link href="/" className="hover:text-foreground transition-colors">
+              Home
+            </Link>
+            <span className="text-border">/</span>
+            <Link href="/events" className="hover:text-foreground transition-colors">
+              Events
+            </Link>
+            <span className="text-border">/</span>
+            <span className="text-foreground font-medium truncate max-w-[240px] sm:max-w-md">
+              {event.title}
+            </span>
+          </nav>
+
+          <Link
+            href="/events"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-[#C01E30] transition-colors"
           >
-            {event.title}
-          </h1>
-
-          {/* Poster hero */}
-          {posterUrl && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={posterUrl}
-              alt={event.title}
-              style={{
-                width: '100%',
-                borderRadius: 'var(--radius-panel)',
-                objectFit: 'cover',
-                display: 'block',
-                marginBottom: 28,
-                border: '1px solid var(--border-hairline)',
-              }}
-            />
-          )}
-
-          {/* Summary + Description */}
-          {(event.summary || event.description) && (
-            <section style={{ marginBottom: 36 }}>
-              <SectionHeading>About this event</SectionHeading>
-              {event.summary && (
-                <p style={{ fontWeight: 500, marginBottom: 12, fontSize: '1.05rem' }}>{event.summary}</p>
-              )}
-              {event.description && (
-                <div style={{ whiteSpace: 'pre-wrap', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
-                  {event.description}
-                </div>
-              )}
-            </section>
-          )}
-
-          {/* Highlights */}
-          {highlights.length > 0 && (
-            <section style={{ marginBottom: 36 }}>
-              <SectionHeading>Event Highlights</SectionHeading>
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-                  gap: 12,
-                }}
-              >
-                {highlights.map((h) => {
-                  const mediaUrl = getImageKitUrl(h.media_ref) ?? h.media_ref;
-                  return (
-                    <div
-                      key={h.id}
-                      style={{
-                        borderRadius: 'var(--radius-card)',
-                        overflow: 'hidden',
-                        border: '1px solid var(--border-hairline)',
-                        background: 'var(--surface)',
-                      }}
-                    >
-                      {h.media_type === 'image' && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={mediaUrl}
-                          alt={h.title}
-                          style={{ width: '100%', height: 140, objectFit: 'cover', display: 'block' }}
-                        />
-                      )}
-                      <div style={{ padding: '10px 12px' }}>
-                        <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 600 }}>{h.title}</p>
-                        {h.caption && (
-                          <p style={{ margin: '4px 0 0', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                            {h.caption}
-                          </p>
-                        )}
-                        {h.media_type === 'video' && (
-                          <a
-                            href={mediaUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="btn"
-                            style={{ marginTop: 8, fontSize: '0.78rem', display: 'inline-block' }}
-                          >
-                            Watch video
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-          )}
-
-          {/* Manuals */}
-          {manuals.length > 0 && (
-            <section style={{ marginBottom: 36 }}>
-              <SectionHeading>Manuals &amp; Documents</SectionHeading>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                {manuals.map((m) => {
-                  const docUrl = getImageKitUrl(m.file_ref) ?? m.file_ref;
-                  return (
-                    <div
-                      key={m.id}
-                      className="card"
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        gap: 16,
-                        flexWrap: 'wrap',
-                        padding: '16px 20px',
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <svg
-                          width="18"
-                          height="18"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="var(--text-muted)"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          aria-hidden="true"
-                        >
-                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                          <polyline points="14 2 14 8 20 8" />
-                        </svg>
-                        <div>
-                          <p style={{ margin: 0, fontWeight: 600, fontSize: '0.95rem' }}>{m.title}</p>
-                          {m.description && (
-                            <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                              {m.description}
-                            </p>
-                          )}
-                          {m.file_size_kb && (
-                            <span className="mono-meta" style={{ fontSize: '0.75rem' }}>
-                              {m.file_size_kb} KB
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <a href={docUrl} target="_blank" rel="noopener noreferrer" className="btn" style={{ flexShrink: 0 }}>
-                        Open
-                      </a>
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-          )}
-
-          {/* Guests & Speakers */}
-          {guests.length > 0 && (
-            <section style={{ marginBottom: 36 }}>
-              <SectionHeading>Guests &amp; Speakers</SectionHeading>
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
-                  gap: 16,
-                }}
-              >
-                {guests.map((guest) => {
-                  const photoUrl = getImageKitUrl(guest.photo_ref);
-                  return (
-                    <div key={guest.id} className="card" style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
-                      {photoUrl && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={photoUrl}
-                          alt={guest.full_name}
-                          className="avatar"
-                          style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
-                        />
-                      )}
-                      <div>
-                        <h3 style={{ margin: '0 0 2px', fontSize: '1rem', fontWeight: 700 }}>{guest.full_name}</h3>
-                        {guest.title && (
-                          <p className="card-meta" style={{ margin: '0 0 6px' }}>{guest.title}</p>
-                        )}
-                        {guest.bio && (
-                          <p className="card-meta" style={{ margin: '0 0 8px', fontSize: '0.85rem' }}>{guest.bio}</p>
-                        )}
-                        {guest.linkedin_url && (
-                          <a
-                            href={guest.linkedin_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{ color: '#C01E30', fontSize: '0.82rem', fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}
-                          >
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                              <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
-                              <rect x="2" y="9" width="4" height="12" />
-                              <circle cx="4" cy="4" r="2" />
-                            </svg>
-                            LinkedIn
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-          )}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            All Events
+          </Link>
         </div>
 
-        {/* ════ RIGHT COLUMN (40%) — sticky registration panel ════ */}
-        <div style={{ position: 'sticky', top: 24 }}>
-          {/* Event metadata card */}
-          <div
-            className="card"
-            style={{ marginBottom: 20 }}
-          >
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
-              <span className="badge badge-accent">
-                {isConcluded ? 'Event concluded' : lifecycle}
+        {/* ── HERO BANNER & TITLE CARD ── */}
+        <div className="rounded-2xl border border-border/60 bg-card p-6 sm:p-8 lg:p-10 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-[#C01E30]/10 to-transparent blur-3xl pointer-events-none -mr-20 -mt-20" />
+
+          <div className="relative z-10 space-y-4 max-w-4xl">
+            {/* Pill badges */}
+            <div className="flex flex-wrap items-center gap-2">
+              <div
+                className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold tracking-wide border ${
+                  isConcluded
+                    ? 'border-zinc-700/40 bg-zinc-800/40 text-zinc-400'
+                    : lifecycle === 'ongoing'
+                    ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                    : canRegister
+                    ? 'border-[#C01E30]/30 bg-[#C01E30]/10 text-[#C01E30]'
+                    : 'border-amber-500/30 bg-amber-500/10 text-amber-500'
+                }`}
+              >
+                <span
+                  className={`w-2 h-2 rounded-full ${
+                    isConcluded
+                      ? 'bg-zinc-400'
+                      : lifecycle === 'ongoing'
+                      ? 'bg-emerald-500 animate-pulse'
+                      : canRegister
+                      ? 'bg-[#C01E30] animate-pulse'
+                      : 'bg-amber-400'
+                  }`}
+                />
+                {isConcluded ? 'Event Concluded' : lifecycle === 'ongoing' ? 'Happening Now' : canRegister ? 'Registrations Open' : 'Upcoming Event'}
+              </div>
+
+              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-secondary/60 text-secondary-foreground border border-border/40">
+                {event.is_paid && event.fee_amount ? `₹${event.fee_amount} Pass` : 'Free Entry'}
               </span>
-              <span className="badge">
-                {event.is_paid && event.fee_amount ? `₹${event.fee_amount}` : 'Free Entry'}
-              </span>
+
               {event.max_capacity && (
-                <span className="badge">Capacity: {event.max_capacity}</span>
+                <span className="px-3 py-1 rounded-full text-xs font-medium bg-muted/50 text-muted-foreground border border-border/30">
+                  Capacity: {event.max_capacity} Seats
+                </span>
               )}
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="var(--text-muted)"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                  style={{ marginTop: 2, flexShrink: 0 }}
-                >
+            {/* Title */}
+            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground leading-[1.12]">
+              {event.title}
+            </h1>
+
+            {/* Subhead / Summary */}
+            {event.summary && (
+              <p className="text-base sm:text-lg text-muted-foreground font-medium leading-relaxed max-w-3xl">
+                {event.summary}
+              </p>
+            )}
+
+            {/* Quick meta strip */}
+            <div className="pt-2 flex flex-wrap items-center gap-y-3 gap-x-6 text-xs sm:text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-[#C01E30]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
                   <line x1="16" y1="2" x2="16" y2="6" />
                   <line x1="8" y1="2" x2="8" y2="6" />
                   <line x1="3" y1="10" x2="21" y2="10" />
                 </svg>
-                <div>
-                  <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: 2 }}>
-                    When
-                  </span>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>
-                    {event.starts_at
-                      ? new Date(event.starts_at).toLocaleString('en-IN', {
-                          dateStyle: 'full',
-                          timeStyle: 'short',
-                        })
-                      : 'To be announced'}
-                  </span>
-                </div>
+                <span>
+                  {formattedDate} {formattedTime ? `• ${formattedTime}` : ''}
+                </span>
               </div>
 
-              <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="var(--text-muted)"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                  style={{ marginTop: 2, flexShrink: 0 }}
-                >
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-[#C01E30]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                   <circle cx="12" cy="10" r="3" />
                 </svg>
-                <div>
-                  <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: 2 }}>
-                    Venue
-                  </span>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>
-                    {event.venue ?? 'To be announced'}
-                  </span>
+                <span>{event.venue ?? 'Acropolis Main Auditorium, Indore'}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── TWO COLUMN MAIN LAYOUT ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* ════ LEFT COLUMN: CONTENT (7 cols) ════ */}
+          <div className="lg:col-span-7 space-y-10">
+            {/* Poster presentation */}
+            {posterUrl && (
+              <div className="rounded-2xl border border-border/60 bg-muted/30 overflow-hidden shadow-md">
+                <div className="relative w-full max-h-[500px] flex items-center justify-center bg-black/5 dark:bg-black/20">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={posterUrl}
+                    alt={event.title}
+                    className="w-full max-h-[500px] object-contain sm:object-cover"
+                  />
                 </div>
               </div>
+            )}
 
-              {event.is_paid && event.fee_amount && (
-                <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="var(--text-muted)"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                    style={{ marginTop: 2, flexShrink: 0 }}
-                  >
-                    <line x1="12" y1="1" x2="12" y2="23" />
-                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                  </svg>
-                  <div>
-                    <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: 2 }}>
-                      Registration fee
-                    </span>
-                    <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#C01E30' }}>
-                      ₹{event.fee_amount}
-                    </span>
+            {/* Description & Overview */}
+            {event.description && (
+              <section className="rounded-2xl border border-border/60 bg-card p-6 sm:p-8 shadow-sm">
+                <SectionHeading subtitle="Detailed schedule, scope, and participation guidelines">
+                  About this Event
+                </SectionHeading>
+                <div className="prose prose-neutral dark:prose-invert max-w-none text-sm sm:text-base leading-relaxed text-muted-foreground whitespace-pre-wrap font-sans">
+                  {event.description}
+                </div>
+              </section>
+            )}
+
+            {/* Highlights Gallery */}
+            {highlights.length > 0 && (
+              <section className="rounded-2xl border border-border/60 bg-card p-6 sm:p-8 shadow-sm">
+                <SectionHeading subtitle="Photos, clips, and visual recaps from the session">
+                  Event Highlights &amp; Media
+                </SectionHeading>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {highlights.map((h) => {
+                    const mediaUrl = getImageKitUrl(h.media_ref) ?? h.media_ref;
+                    return (
+                      <div
+                        key={h.id}
+                        className="rounded-xl border border-border/40 bg-background/50 overflow-hidden shadow-sm flex flex-col group hover:border-[#C01E30]/40 transition-all"
+                      >
+                        {h.media_type === 'image' && (
+                          <div className="h-44 overflow-hidden bg-black/10">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={mediaUrl}
+                              alt={h.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                          </div>
+                        )}
+                        <div className="p-3.5 space-y-1">
+                          <p className="text-xs font-bold text-foreground leading-snug">{h.title}</p>
+                          {h.caption && (
+                            <p className="text-[11px] text-muted-foreground line-clamp-2">{h.caption}</p>
+                          )}
+                          {h.media_type === 'video' && (
+                            <a
+                              href={mediaUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 mt-2 text-xs font-semibold text-[#C01E30] hover:underline"
+                            >
+                              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                                <polygon points="5 3 19 12 5 21 5 3" />
+                              </svg>
+                              Watch Video Clip
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {/* Keynote Guests & Speakers */}
+            {guests.length > 0 && (
+              <section className="rounded-2xl border border-border/60 bg-card p-6 sm:p-8 shadow-sm">
+                <SectionHeading subtitle="Industry leaders, venture capitalists, and guest mentors">
+                  Guests &amp; Speakers
+                </SectionHeading>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {guests.map((guest) => {
+                    const photoUrl = getImageKitUrl(guest.photo_ref);
+                    return (
+                      <div
+                        key={guest.id}
+                        className="rounded-xl border border-border/40 bg-background/50 p-4 flex gap-3.5 items-start hover:border-border transition-colors"
+                      >
+                        {photoUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={photoUrl}
+                            alt={guest.full_name}
+                            className="w-12 h-12 rounded-full object-cover border border-border/60 flex-shrink-0"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded-full bg-[#C01E30]/10 text-[#C01E30] flex items-center justify-center font-bold text-sm flex-shrink-0">
+                            {guest.full_name.charAt(0)}
+                          </div>
+                        )}
+                        <div className="space-y-1 min-w-0">
+                          <h3 className="text-sm font-bold text-foreground truncate">{guest.full_name}</h3>
+                          {guest.title && (
+                            <p className="text-xs text-muted-foreground font-medium line-clamp-1">{guest.title}</p>
+                          )}
+                          {guest.bio && (
+                            <p className="text-[11px] text-muted-foreground/80 line-clamp-2 leading-relaxed">{guest.bio}</p>
+                          )}
+                          {guest.linkedin_url && (
+                            <a
+                              href={guest.linkedin_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#C01E30] hover:underline pt-1"
+                            >
+                              <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+                                <rect x="2" y="9" width="4" height="12" />
+                                <circle cx="4" cy="4" r="2" />
+                              </svg>
+                              LinkedIn Profile
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {/* Manuals & Documents */}
+            {manuals.length > 0 && (
+              <section className="rounded-2xl border border-border/60 bg-card p-6 sm:p-8 shadow-sm">
+                <SectionHeading subtitle="Download official guidebooks, rulebooks, and participant kits">
+                  Event Manuals &amp; Briefings
+                </SectionHeading>
+                <div className="space-y-3">
+                  {manuals.map((m) => {
+                    const docUrl = getImageKitUrl(m.file_ref) ?? m.file_ref;
+                    return (
+                      <div
+                        key={m.id}
+                        className="rounded-xl border border-border/40 bg-background/50 p-4 flex items-center justify-between gap-4 hover:border-border transition-colors"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-9 h-9 rounded-lg bg-[#C01E30]/10 text-[#C01E30] flex items-center justify-center flex-shrink-0">
+                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                              <polyline points="14 2 14 8 20 8" />
+                            </svg>
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs sm:text-sm font-bold text-foreground truncate">{m.title}</p>
+                            {m.description && (
+                              <p className="text-xs text-muted-foreground truncate">{m.description}</p>
+                            )}
+                            {m.file_size_kb && (
+                              <span className="text-[10px] font-mono text-muted-foreground/70">
+                                {m.file_size_kb} KB
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <a
+                          href={docUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-1.5 rounded-lg border border-border/60 bg-background hover:bg-secondary text-xs font-semibold text-foreground transition-colors flex-shrink-0"
+                        >
+                          Open Document
+                        </a>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+          </div>
+
+          {/* ════ RIGHT COLUMN: STICKY ACTIONS & DETAILS (5 cols) ════ */}
+          <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-20">
+            {/* Quick Logistics Summary */}
+            <div className="rounded-2xl border border-border/60 bg-card p-6 shadow-sm space-y-5">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                Logistics &amp; Access
+              </h3>
+
+              <div className="space-y-4 text-xs sm:text-sm">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-secondary/80 flex items-center justify-center text-foreground flex-shrink-0">
+                    <svg className="w-4 h-4 text-[#C01E30]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                      <line x1="16" y1="2" x2="16" y2="6" />
+                      <line x1="8" y1="2" x2="8" y2="6" />
+                      <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
                   </div>
+                  <div>
+                    <span className="block text-[11px] font-semibold text-muted-foreground uppercase">Schedule</span>
+                    <span className="font-semibold text-foreground">{formattedDate}</span>
+                    {formattedTime && <span className="block text-muted-foreground">{formattedTime} IST</span>}
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-secondary/80 flex items-center justify-center text-foreground flex-shrink-0">
+                    <svg className="w-4 h-4 text-[#C01E30]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                      <circle cx="12" cy="10" r="3" />
+                    </svg>
+                  </div>
+                  <div>
+                    <span className="block text-[11px] font-semibold text-muted-foreground uppercase">Auditorium / Venue</span>
+                    <span className="font-semibold text-foreground">{event.venue ?? 'Acropolis Main Auditorium'}</span>
+                    <span className="block text-muted-foreground text-xs">Acropolis Institute, Bypass Road, Indore</span>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-secondary/80 flex items-center justify-center text-foreground flex-shrink-0">
+                    <svg className="w-4 h-4 text-[#C01E30]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <line x1="12" y1="1" x2="12" y2="23" />
+                      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                    </svg>
+                  </div>
+                  <div>
+                    <span className="block text-[11px] font-semibold text-muted-foreground uppercase">Participation Pass</span>
+                    <span className="font-bold text-[#C01E30] text-sm">
+                      {event.is_paid && event.fee_amount ? `₹${event.fee_amount} per delegate` : 'Free Registration'}
+                    </span>
+                    <span className="block text-muted-foreground text-[11px]">Includes digital gate pass &amp; verification</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Registration Action Card */}
+            <div id="registration" className="rounded-2xl border border-border/60 bg-card p-6 shadow-sm space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-border/40">
+                <h3 className="text-base font-bold text-foreground">
+                  {isConcluded ? 'Event Status' : 'Reserve Your Pass'}
+                </h3>
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  {canRegister ? 'Fast-Track Pass' : 'Concluded'}
+                </span>
+              </div>
+
+              {/* If registration is open */}
+              {canRegister && (
+                <>
+                  {/* Track selector if tracks exist */}
+                  {tracks.length > 0 && (
+                    <div className="space-y-2">
+                      <span className="text-xs font-semibold text-muted-foreground block">
+                        Select Participation Track:
+                      </span>
+                      <div className="flex flex-wrap gap-2">
+                        {tracks.map((track) => {
+                          const isActive = track.id === selectedTrack?.id;
+                          return (
+                            <Link
+                              key={track.id}
+                              href={`/events/${event.slug}?track=${track.id}#registration`}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                                isActive
+                                  ? 'bg-[#C01E30] text-white border-[#C01E30] shadow-sm'
+                                  : 'bg-background hover:bg-secondary text-foreground border-border/60'
+                              }`}
+                            >
+                              {track.title}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {tracks.length > 0 && !selectedTrack ? (
+                    <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-600 dark:text-amber-400 font-medium">
+                      Please select a participation track above to claim your pass.
+                    </div>
+                  ) : userId ? (
+                    <EventRegisterForm
+                      trackId={selectedTrack?.id ?? null}
+                      eventId={event.id}
+                      isPaid={event.is_paid}
+                      feeAmount={event.fee_amount}
+                      upiId={upiDetails.upi_id}
+                      upiQrUrl={upiQrUrl}
+                      existingRegistrationId={existingReg?.id ?? null}
+                      existingStatus={existingReg?.status ?? null}
+                    />
+                  ) : (
+                    <div className="space-y-4 pt-1">
+                      <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                        Sign in with your verified student or delegate account to claim your entry pass and digital QR ticket.
+                      </p>
+                      <LiquidButton
+                        href={`/account?next=${encodeURIComponent(back)}`}
+                        variant="accent"
+                        className="w-full flex items-center justify-center font-bold text-sm py-3"
+                      >
+                        Sign in to Register →
+                      </LiquidButton>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Concluded state */}
+              {isConcluded && (
+                <div className="text-center py-6 space-y-3">
+                  <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center mx-auto text-muted-foreground">
+                    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="12" y1="8" x2="12" y2="12" />
+                      <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-foreground">Registrations Closed</h4>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      This conclave has concluded. Check out our upcoming summits and workshops on the events calendar.
+                    </p>
+                  </div>
+                  <Link
+                    href="/events"
+                    className="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-secondary hover:bg-secondary/80 text-foreground text-xs font-semibold transition-all mt-2"
+                  >
+                    View All Upcoming Events →
+                  </Link>
+                </div>
+              )}
+
+              {/* Not open yet */}
+              {!canRegister && !isConcluded && (
+                <div className="p-4 rounded-xl bg-secondary/50 border border-border/40 text-center space-y-2">
+                  <p className="text-xs text-muted-foreground font-medium">
+                    Registrations for this event have not opened yet.
+                  </p>
+                  <p className="text-[11px] text-muted-foreground/70">
+                    Stay tuned or follow our official updates on Instagram.
+                  </p>
                 </div>
               )}
             </div>
           </div>
-
-          {/* Register section */}
-          {canRegister && (
-            <div id="registration" className="card">
-              <SectionHeading>Register</SectionHeading>
-              {tracks.length > 0 && <nav aria-label="Select registration track">{tracks.map(track => <Link key={track.id} className="btn" aria-current={track.id === selectedTrack?.id ? 'true' : undefined} href={`/events/${event.slug}?track=${track.id}#registration`}>{track.title}</Link>)}</nav>}
-              {trackResult?.error || !trackResult ? <p>Registration options are temporarily unavailable.</p> : tracks.length > 0 && !selectedTrack ? <p>Select a track to continue.</p> : userId ? (
-                <EventRegisterForm
-                  trackId={selectedTrack?.id ?? null}
-                  eventId={event.id}
-                  isPaid={event.is_paid}
-                  feeAmount={event.fee_amount}
-                  upiId={upiDetails.upi_id}
-                  upiQrUrl={upiQrUrl}
-                  existingRegistrationId={existingReg?.id ?? null}
-                  existingStatus={existingReg?.status ?? null}
-                />
-              ) : (
-                <div>
-                  <p style={{ margin: '0 0 16px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                    Sign in to your account to register for this event.
-                  </p>
-                  <LiquidButton href={`/account?next=${encodeURIComponent(back)}`} variant="accent" style={{ width: '100%' }}>
-                    Sign in to register
-                  </LiquidButton>
-                </div>
-              )}
-
-
-            </div>
-          )}
-
-          {isConcluded && (
-            <div
-              className="card"
-              style={{
-                background: 'var(--surface-subtle)',
-                borderColor: 'var(--border-hairline)',
-                textAlign: 'center',
-                padding: 24,
-              }}
-            >
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="var(--text-muted)"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-                style={{ margin: '0 auto 12px', display: 'block' }}
-              >
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                <polyline points="22 4 12 14.01 9 11.01" />
-              </svg>
-              <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                This event has concluded. Thank you to all participants.
-              </p>
-            </div>
-          )}
         </div>
       </div>
     </>
