@@ -21,16 +21,19 @@ export async function GET(request: Request) {
   const page = Math.max(1, Number(searchParams.get('page') ?? '1') || 1);
 
   const admin = createAdminClient();
-  const { data: memberships } = await admin
+  const today = new Date().toISOString().slice(0, 10);
+  const { data: memberships, error } = await admin
     .from('org_memberships')
     .select(`
       user_id, role, effective_from,
-      profiles!user_id(full_name, designation, bio, linkedin_url, avatar_ref, phone),
-      alumni_profiles!user_id(batch_year, city, industry, domain, startup_stage, labels, show_in_directory, show_contact, allow_messages)
+      profiles!user_id(full_name, designation, bio, linkedin_url, avatar_ref, phone,
+        alumni_profiles(batch_year, city, industry, domain, startup_stage, labels, show_in_directory, show_contact, allow_messages))
     `)
     .eq('status', 'approved')
     .in('role', ['director', 'advisor', 'core_team', 'alumni'])
-    .is('effective_until', null);
+    .or(`effective_from.is.null,effective_from.lte.${today}`)
+    .or(`effective_until.is.null,effective_until.gt.${today}`);
+  if (error) return NextResponse.json({error: 'Directory temporarily unavailable.'}, {status:503});
 
   const seen = new Set<string>();
   const filtered = (memberships ?? [])
@@ -38,7 +41,8 @@ export async function GET(request: Request) {
       if (seen.has(m.user_id)) return false;
       seen.add(m.user_id);
 
-      const ap = Array.isArray(m.alumni_profiles) ? m.alumni_profiles[0] : m.alumni_profiles;
+      const profile = Array.isArray(m.profiles) ? m.profiles[0] : m.profiles;
+      const ap = Array.isArray(profile?.alumni_profiles) ? profile.alumni_profiles[0] : profile?.alumni_profiles;
       if (ap && ap.show_in_directory === false) return false;
 
       if (memberFilter === 'alumni' && m.role !== 'alumni') return false;
@@ -55,7 +59,8 @@ export async function GET(request: Request) {
     })
     .map((m) => {
       const p = Array.isArray(m.profiles) ? m.profiles[0] : m.profiles;
-      const ap = Array.isArray(m.alumni_profiles) ? m.alumni_profiles[0] : m.alumni_profiles;
+      const profile = Array.isArray(m.profiles) ? m.profiles[0] : m.profiles;
+      const ap = Array.isArray(profile?.alumni_profiles) ? profile.alumni_profiles[0] : profile?.alumni_profiles;
       const showContact = Boolean(ap?.show_contact);
       return {
         user_id: m.user_id,

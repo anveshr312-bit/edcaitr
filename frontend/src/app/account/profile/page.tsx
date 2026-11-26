@@ -44,8 +44,10 @@ export default function ProfilePage() {
           .single(),
         supabase.rpc('get_user_role', { user_uuid: data.user.id }),
       ]);
-      if (p) setProfile(p as Profile);
-      setCanManageDisplay(roleData === 'advisor' || roleData === 'director');
+      if (!p) { setMessage('Unable to load your profile. Reload to try again.'); setIsError(true); setUserId(null); }
+      else setProfile({ ...EMPTY, ...Object.fromEntries(Object.entries(p).filter(([, value]) => value !== null)) });
+      const assurance = roleData === 'director' ? await supabase.auth.mfa.getAuthenticatorAssuranceLevel() : null;
+      setCanManageDisplay(roleData === 'advisor' || assurance?.data?.currentLevel === 'aal2');
       setLoading(false);
     });
   }, [supabase]);
@@ -97,7 +99,7 @@ export default function ProfilePage() {
   );
   if (!userId) return (
     <div className="card" style={{ maxWidth: 400, margin: '48px auto', textAlign: 'center' }}>
-      <p style={{ margin: 0 }}>Please <a href="/account">sign in</a> to edit your profile.</p>
+      <p style={{ margin: 0 }}>{message || <>Please <a href="/account">sign in</a> to edit your profile.</>}</p>
     </div>
   );
 
@@ -190,6 +192,7 @@ export default function ProfilePage() {
             <label style={{ flexDirection: 'row', alignItems: 'center', gap: 10, display: 'flex', cursor: 'pointer' }}>
               <input
                 type="checkbox"
+                disabled={!canManageDisplay}
                 checked={profile.is_public}
                 onChange={e => setProfile(prev => ({ ...prev, is_public: e.target.checked }))}
                 style={{ width: 'auto', padding: 0, accentColor: 'var(--color-3-accent-personality)' }}
@@ -212,6 +215,7 @@ export default function ProfilePage() {
         </p>
       )}
 
+      <p><a href="/portal/certificates">View issued credentials</a></p>
       <p>
         <a href="/account/dashboard" style={{ color: 'var(--text-muted)', fontSize: 14, textDecoration: 'none' }}>
           ← Back to dashboard

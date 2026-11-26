@@ -363,7 +363,7 @@ export const CursorGrid: React.FC<CursorGridProps> = ({
       const s = settingsRef.current;
       view.width = Math.max(1, container.clientWidth);
       view.height = Math.max(1, container.clientHeight);
-      view.ratio = Math.min(s.dpr || window.devicePixelRatio || 1, 2);
+      view.ratio = Math.min(s.dpr || 1, 1.25);
       canvas.width = Math.max(1, Math.round(view.width * view.ratio));
       canvas.height = Math.max(1, Math.round(view.height * view.ratio));
       const size = s.cellSize;
@@ -560,13 +560,24 @@ export const CursorGrid: React.FC<CursorGridProps> = ({
     }
 
     const locate = (event: PointerEvent) => {
-      const rect = container.getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
-      return { x, y, inside: x >= 0 && y >= 0 && x <= rect.width && y <= rect.height };
+      const x = event.clientX;
+      const y = event.clientY;
+      return { x, y, inside: x >= 0 && y >= 0 && x <= view.width && y <= view.height };
     };
 
+    let scrollTimeout: ReturnType<typeof setTimeout> | null = null;
+    let isScrolling = false;
+    const onScroll = () => {
+      isScrolling = true;
+      if (scrollTimeout) clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        isScrolling = false;
+      }, 120);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+
     const onPointerMove = (event: PointerEvent) => {
+      if (isScrolling) return;
       const { x, y, inside } = locate(event);
       const was = pointer.inside;
       pointer.inside = inside;
@@ -637,6 +648,7 @@ export const CursorGrid: React.FC<CursorGridProps> = ({
       wakeRef.current = null;
       resizeObserver.disconnect();
       intersection.disconnect();
+      window.removeEventListener('scroll', onScroll);
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('pointerdown', onPointerDown);
       document.documentElement.removeEventListener('pointerleave', onPointerLeave);
@@ -650,7 +662,7 @@ export const CursorGrid: React.FC<CursorGridProps> = ({
 
   useEffect(() => {
     wakeRef.current?.();
-  });
+  }, [cellSize, radius, falloff, highlight, lineWidth, maxOpacity, fillOpacity, gridOpacity, gridStyle, spotlight, ambient, edgeFade, lightMode]);
 
   return (
     <div ref={containerRef} className={`cursor-grid${className ? ` ${className}` : ''}`} style={style}>

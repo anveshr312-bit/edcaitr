@@ -1,12 +1,31 @@
 'use client';
 
-import React, { useMemo } from 'react';
-import { CountUp, type CountUpEasing, type CountUpMode } from './CountUp';
+import React from 'react';
+import CountUp, { type CountUpEasing, type CountUpMode } from './CountUp';
+
+/**
+ * Parses numeric stats from strings like "2 Lakh+", "₹1.5 Cr+", "50+", "12 Teams", "45+", "4 Cities"
+ */
+function parseStatValue(raw: string | number) {
+  if (typeof raw === 'number') {
+    return { to: raw, from: 0, prefix: '', suffix: '', decimals: raw % 1 !== 0 ? 1 : 0 };
+  }
+  const str = String(raw).trim();
+  const match = str.match(/^([^0-9.-]*)([0-9]+(?:\.[0-9]+)?)(.*)$/);
+  if (!match) {
+    return null;
+  }
+  const prefix = match[1] || '';
+  const numStr = match[2];
+  const suffix = match[3] || '';
+  const num = parseFloat(numStr);
+  const decimals = numStr.includes('.') ? numStr.split('.')[1].length : 0;
+  return { to: num, from: 0, prefix, suffix, decimals };
+}
 
 /**
  * Formatted institutional stat counter powered by React Bits <CountUp />.
- * Parses strings like "2 Lakh+", "₹1.5 Cr+", "50+", "12 Teams", "45+", "4 Cities", or numeric KPIs
- * and animates cleanly to the exact final value without getting stuck between digits.
+ * Counts up smoothly when in view, and replays on hover.
  */
 export const RollingStat: React.FC<{
   value: string | number;
@@ -23,57 +42,42 @@ export const RollingStat: React.FC<{
   className = '',
   mode = 'count',
   easing = 'easeOut',
-  duration = 1.15,
+  duration = 1.8,
   delay = 0,
   replayOnHover = true,
   editorialDark = false,
   editorial = false,
 }) => {
-  const rawStr = String(value);
-
-  const parsed = useMemo(() => {
-    const match = rawStr.match(/^([^0-9]*)(\d+(?:,\d+)*(?:\.\d+)?)(.*)$/);
-    if (!match) {
-      return { prefix: '', target: null as number | null, decimals: 0, suffix: rawStr };
-    }
-    const [, prefix, numStr, suffix] = match;
-    const cleanNum = numStr.replace(/,/g, '');
-    const decimals = cleanNum.includes('.') ? cleanNum.split('.')[1].length : 0;
-    return {
-      prefix,
-      target: parseFloat(cleanNum),
-      decimals,
-      suffix,
-    };
-  }, [rawStr]);
-
   const fontClass = editorial
-    ? 'font-display font-bold tracking-[-0.03em] tabular-nums'
+    ? 'font-display font-bold'
     : editorialDark
-      ? 'font-mono-data dark:font-display dark:font-bold dark:tracking-[-0.03em] tabular-nums'
-      : 'font-mono-data tabular-nums';
+      ? 'font-mono-data dark:font-display'
+      : 'font-mono-data';
 
-  if (parsed.target === null || Number.isNaN(parsed.target)) {
-    return <span className={`${fontClass} ${className}`}>{rawStr}</span>;
+  const parsed = parseStatValue(value);
+
+  if (!parsed) {
+    return (
+      <span className={`rolling-stat inline-block tabular-nums ${fontClass} ${className}`}>
+        {value}
+      </span>
+    );
   }
 
   return (
     <CountUp
-      from={0}
-      to={parsed.target}
-      mode={mode}
-      easing={easing}
-      format="standard"
-      separator=","
+      to={parsed.to}
+      from={parsed.from}
       decimals={parsed.decimals}
       prefix={parsed.prefix}
       suffix={parsed.suffix}
-      direction="up"
+      mode={mode}
+      easing={easing}
       duration={duration}
       delay={delay}
       trigger="view"
       replayOnHover={replayOnHover}
-      className={`${fontClass} ${className}`}
+      className={`rolling-stat inline-block tabular-nums ${fontClass} ${className}`}
     />
   );
 };

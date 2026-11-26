@@ -48,18 +48,21 @@ export async function POST(request: Request) {
         { status: 429 }
       );
     }
-  } else if (recipientId) {
+  }
+  if (recipientId) {
+    if (!/^[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}$/i.test(recipientId)) return NextResponse.json({error: 'Invalid recipient.'}, {status:400});
     if (recipientId === ctx!.id) {
       return NextResponse.json({ error: 'Cannot message yourself.' }, { status: 400 });
     }
 
     // Check blocks in both directions
-    const { data: block } = await admin
+    const { data: block, error: blockError } = await admin
       .from('user_blocks')
       .select('blocker_id')
       .or(`and(blocker_id.eq.${ctx!.id},blocked_id.eq.${recipientId}),and(blocker_id.eq.${recipientId},blocked_id.eq.${ctx!.id})`)
       .limit(1);
 
+    if (blockError) return NextResponse.json({ error: 'Messaging unavailable.' }, { status: 503 });
     if (block && block.length > 0) {
       return NextResponse.json({ error: 'Messaging is blocked between these accounts.' }, { status: 403 });
     }
@@ -70,15 +73,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Recipient is not an Alumni Connect member.' }, { status: 403 });
     }
 
-    const { data: ap } = await admin
+    const { data: ap, error: preferenceError } = await admin
       .from('alumni_profiles')
       .select('allow_messages')
       .eq('user_id', recipientId)
       .maybeSingle();
+    if (preferenceError) return NextResponse.json({ error: 'Messaging unavailable.' }, { status: 503 });
     if (ap && ap.allow_messages === false) {
       return NextResponse.json({ error: 'Recipient has disabled incoming messages.' }, { status: 403 });
     }
 
+  }
+  if (!convId && recipientId) {
     // Check existing conversation
     const { data: existing } = await admin
       .from('conversations')
@@ -121,7 +127,7 @@ export async function POST(request: Request) {
       if (convErr) return NextResponse.json({ error: convErr.message }, { status: 400 });
       convId = created.id;
     }
-  } else {
+  } else if (!convId) {
     return NextResponse.json({ error: 'conversation_id or recipient_id is required.' }, { status: 400 });
   }
 
@@ -173,22 +179,25 @@ export async function PATCH(request: Request) {
     if (conv.recipient_id !== ctx!.id) {
       return NextResponse.json({ error: 'Only the recipient can accept or decline a request.' }, { status: 403 });
     }
-    await admin
+    const {error} = await admin
       .from('conversations')
       .update({ request_status: body.action === 'accept' ? 'accepted' : 'declined' })
       .eq('id', conv.id);
+    if (error) return NextResponse.json({error:'Unable to update request.'},{status:503});
   } else if (body.action === 'block') {
-    await admin
+    const {error} = await admin
       .from('user_blocks')
-      .insert({ blocker_id: ctx!.id, blocked_id: otherId })
+      .upsert({ blocker_id: ctx!.id, blocked_id: otherId }, {onConflict:'blocker_id,blocked_id'})
       .select()
       .maybeSingle();
+    if (error) return NextResponse.json({error:'Unable to save block.'},{status:503});
   } else if (body.action === 'report') {
-    await admin.from('message_reports').insert({
+    const {error} = await admin.from('message_reports').insert({
       reporter_id: ctx!.id,
       conversation_id: conv.id,
       reason: body.reason?.trim() || 'Inappropriate message',
     });
+    if (error) return NextResponse.json({error:'Unable to save report.'},{status:503});
   }
 
   return NextResponse.json({ ok: true });

@@ -6,6 +6,7 @@ import Link from 'next/link';
 
 interface Props {
   eventId: string;
+  trackId: string | null;
   isPaid: boolean;
   feeAmount: number | null;
   upiId: string | null;
@@ -16,6 +17,7 @@ interface Props {
 
 export default function EventRegisterForm({
   eventId,
+  trackId,
   isPaid,
   feeAmount,
   upiId,
@@ -52,6 +54,7 @@ export default function EventRegisterForm({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          track_id: trackId,
           participant_category: category,
           organization,
           payment_ref: isPaid ? paymentRef : undefined,

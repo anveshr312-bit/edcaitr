@@ -1,3 +1,4 @@
+import { eventAvailability } from '../../lib/events/lifecycle';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { getPublicEvents } from '../../lib/events/events';
@@ -22,9 +23,9 @@ export const metadata: Metadata = createPageMetadata({
 });
 
 export default async function EventsPage() {
-  const events = await getPublicEvents(false);
-  const activeEvents = events.filter((e) => e.status === 'published' || e.status === 'ongoing');
-  const concludedDbEvents = events.filter((e) => e.status === 'closed');
+  const events = await getPublicEvents(true);
+  const activeEvents = events.filter((e) => ['ongoing', 'upcoming'].includes(eventAvailability(e).lifecycle));
+  const concludedDbEvents = events.filter((e) => !activeEvents.includes(e));
 
   const PASS_TIERS = [
     {
@@ -37,7 +38,6 @@ export default async function EventsPage() {
         'Official PVR cinema-style QR digital pass',
         'Verified participation certificate',
       ],
-      cta: 'Claim Free Pass',
     },
     {
       title: 'External Delegate Pass',
@@ -49,7 +49,6 @@ export default async function EventsPage() {
         'Entry to keynote sessions and panel discussions',
         'Digital QR pass with gate scanner verification',
       ],
-      cta: 'Register as Delegate',
     },
     {
       title: 'PitchBiz Founder Desk',
@@ -61,7 +60,6 @@ export default async function EventsPage() {
         'Product demo & stall space in exhibition avenue',
         'Investor syndication consideration',
       ],
-      cta: 'Apply to Pitch',
     },
     {
       title: 'Workshop Masterclass Pass',
@@ -73,7 +71,6 @@ export default async function EventsPage() {
         'Practical frameworks, templates and learning kits',
         'Specialized masterclass completion credential',
       ],
-      cta: 'View Masterclasses',
     },
   ];
 
@@ -158,7 +155,7 @@ export default async function EventsPage() {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14, background: 'var(--surface-subtle)', padding: '18px', borderRadius: 'var(--radius-card)', marginBottom: 24 }}>
             <div>
-              <strong style={{ display: 'block', fontSize: 13 }}>PitchBiz Desk</strong>
+              <strong id="pitchbiz" style={{ display: 'block', fontSize: 13 }}>PitchBiz Desk</strong>
               <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Live VC &amp; Angel pitch track</span>
             </div>
             <div>
@@ -176,9 +173,7 @@ export default async function EventsPage() {
           </div>
 
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <Link href="/account" className="btn btn-primary">
-              Register for E-Summit 2026
-            </Link>
+
             <Link href="/contact" className="btn">
               Inquire for Sponsorship
             </Link>
@@ -193,7 +188,7 @@ export default async function EventsPage() {
             Pass Categories
           </h2>
           <div style={{ fontSize: 'clamp(1.4rem, 2.5vw, 2rem)', fontWeight: 800 }}>
-            Choose Your Pass
+            2026 Summit Pass Categories
           </div>
         </div>
 
@@ -217,11 +212,7 @@ export default async function EventsPage() {
                 ))}
               </ul>
 
-              <div style={{ marginTop: 'auto' }}>
-                <Link href="/account" className="btn btn-primary" style={{ width: '100%', textAlign: 'center', display: 'block', fontSize: 13 }}>
-                  {tier.cta}
-                </Link>
-              </div>
+
             </article>
           ))}
         </div>
@@ -232,7 +223,7 @@ export default async function EventsPage() {
         <section style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
           <div style={{ marginBottom: 20 }}>
             <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.02em', color: 'var(--text-muted)', margin: '0 0 6px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
-              Current Registrations Open
+              Upcoming and ongoing events
             </h2>
             <div style={{ fontSize: 'clamp(1.2rem, 2.2vw, 1.6rem)', fontWeight: 800 }}>
               Live Calendar Events ({activeEvents.length})
@@ -249,18 +240,18 @@ export default async function EventsPage() {
                     <img src={posterUrl} alt={ev.title} className="poster" />
                   )}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-                    <span className="badge badge-accent">{ev.status.replace('_', ' ')}</span>
+                    <span className="badge badge-accent">{eventAvailability(ev).lifecycle}</span>
                     <span className="mono-meta">{ev.is_paid && ev.fee_amount ? `₹${ev.fee_amount}` : 'Free'}</span>
                   </div>
                   <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700 }}>{ev.title}</h3>
                   {ev.summary && <p className="card-meta" style={{ margin: 0 }}>{ev.summary}</p>}
                   <p className="mono-meta" style={{ margin: 0 }}>
-                    {ev.starts_at ? new Date(ev.starts_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'Schedule TBA'}
+                    {ev.starts_at ? new Date(ev.starts_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Kolkata' }) : 'Schedule TBA'}
                     {ev.venue ? ` · ${ev.venue}` : ''}
                   </p>
                   <div style={{ marginTop: 'auto', paddingTop: 10 }}>
                     <Link href={`/events/${ev.slug}`} className="btn btn-primary" style={{ fontSize: 13 }}>
-                      Open &amp; Register
+                      View event details
                     </Link>
                   </div>
                 </article>
@@ -297,7 +288,7 @@ export default async function EventsPage() {
 
           {concludedDbEvents.map((ev) => (
             <div key={ev.id} className="card" style={{ padding: '18px 20px', background: 'var(--surface-subtle)' }}>
-              <span className="badge">Concluded</span>
+              <span className="badge">{eventAvailability(ev).lifecycle}</span>
               <h3 style={{ margin: '6px 0 4px', fontSize: '1rem', fontWeight: 700 }}>{ev.title}</h3>
               {ev.summary && <p style={{ margin: '0 0 8px', fontSize: 13, color: 'var(--text-secondary)' }}>{ev.summary}</p>}
               <Link href={`/events/${ev.slug}`} style={{ fontSize: 13, color: 'var(--color-3-accent-personality)', textDecoration: 'none', fontWeight: 600 }}>

@@ -5,6 +5,12 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '../../lib/supabase/client';
 
+import { returnPath } from '../../lib/auth/returnPath';
+
+function destination() {
+  return returnPath(new URLSearchParams(window.location.search).get('next'));
+}
+
 export default function Account() {
   const router = useRouter();
   const [supabase] = useState(() => createClient());
@@ -37,7 +43,7 @@ export default function Account() {
       } else {
         setUserEmail(data.user.email ?? null);
         // Automatically route logged-in users to the full Account Dashboard
-        router.replace('/account/dashboard');
+        router.replace(destination());
       }
     });
 
@@ -45,7 +51,7 @@ export default function Account() {
       const currentEmail = session?.user?.email ?? null;
       setUserEmail(currentEmail);
       if (event === 'SIGNED_IN' && session?.user) {
-        router.replace('/account/dashboard');
+        router.replace(destination());
       } else if (event === 'SIGNED_OUT') {
         setUserEmail(null);
         setPassword('');
@@ -66,7 +72,7 @@ export default function Account() {
     setMessage('');
     try {
       const origin = window.location.origin;
-      const callbackUrl = `${origin}/auth/callback?next=/account/dashboard`;
+      const callbackUrl = `${origin}/auth/callback?next=${encodeURIComponent(destination())}`;
 
       if (action === 'google') {
         const { error } = await supabase.auth.signInWithOAuth({
@@ -102,7 +108,7 @@ export default function Account() {
         });
         if (error) throw error;
         setPassword('');
-        router.replace('/account/dashboard');
+        router.replace(destination());
       }
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Action failed. Please retry.');
@@ -346,7 +352,7 @@ export default function Account() {
 
         {recoverySent && mode === 'forgot_password' && (
           <p style={{ fontSize: '0.8125rem', color: '#686D7A', marginTop: 12, textAlign: 'center' }}>
-            Received your reset link? <Link href="/account/reset-password">Click here to enter new password</Link>.
+            Please open the link sent to your email to verify your identity and set a new password.
           </p>
         )}
       </div>

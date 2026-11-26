@@ -255,14 +255,21 @@ export const DriftWall: React.FC<DriftWallProps> = ({
     setActiveId(null);
   }, []);
 
+  const lastCheckRef = useRef(0);
   const handlePointerMove = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
-      const rect = containerRef.current?.getBoundingClientRect();
-      if (!rect) return;
+      const now = performance.now();
+      // Throttle pointer move math to at most once per 16ms
+      if (now - lastCheckRef.current < 16) return;
+      lastCheckRef.current = now;
+
+      const container = containerRef.current;
+      if (!container) return;
+      const rect = container.getBoundingClientRect();
       if (parallax > 0 && !reduced) {
         pointerRef.current = {
-          x: (e.clientX - rect.left) / rect.width - 0.5,
-          y: (e.clientY - rect.top) / rect.height - 0.5,
+          x: (e.clientX - rect.left) / (rect.width || 1) - 0.5,
+          y: (e.clientY - rect.top) / (rect.height || 1) - 0.5,
         };
       }
       const hit = document.elementFromPoint(e.clientX, e.clientY);

@@ -210,7 +210,7 @@ export default function EventTasksClient({
             {visibleTasks.map((task) => {
               const owner = assignees.find((a) => a.id === task.assignee_id);
               return (
-                <article key={task.id} className="card">
+                <article key={task.id} id={`task-${task.id}`} className="card">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
                     <span className="badge badge-accent">{task.status.replace('_', ' ')}</span>
                     <span className="mono-meta">
