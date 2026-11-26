@@ -16,7 +16,8 @@ const EventRegisterForm = nextDynamic(
 import LiquidButton from '../../../components/ui/liquid-button';
 import { eventAvailability } from '../../../lib/events/lifecycle';
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function generateMetadata({
   params,
