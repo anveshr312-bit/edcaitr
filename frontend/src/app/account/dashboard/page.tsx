@@ -72,6 +72,10 @@ export default async function DashboardPage() {
       .maybeSingle(),
   ]);
 
+  if (role === 'director' && mfaResult.data?.currentLevel !== 'aal2') {
+    redirect('/account/mfa?required=1');
+  }
+
   const profile = profileResult.data;
   const membership = membershipResult.data;
   const hasMfa = mfaResult.data?.currentLevel === 'aal2';

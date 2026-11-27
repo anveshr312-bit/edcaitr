@@ -13,7 +13,14 @@ function createPublicClient() {
   });
 }
 
-export type EventStatus = 'draft' | 'published' | 'ongoing' | 'wrap_up' | 'closed' | 'archived';
+export type EventStatus =
+  | 'draft'
+  | 'published'
+  | 'ongoing'
+  | 'wrap_up'
+  | 'closed'
+  | 'archived'
+  | 'cancelled';
 
 export interface PublicTeamMember {
   id: string;
@@ -53,6 +60,8 @@ export interface PublicEvent {
   fee_amount: number | null;
   poster_ref: string | null;
   max_capacity: number | null;
+  cancellation_reason?: string | null;
+  planning_stage?: string | null;
 }
 
 export interface PublicEventGuest {
@@ -134,15 +143,26 @@ export const getPublicEvents = cache(
     if (!supabase) return [];
 
     const statuses: EventStatus[] = includeArchived
-      ? ['published', 'ongoing', 'wrap_up', 'closed', 'archived']
-      : ['published', 'ongoing', 'wrap_up', 'closed'];
+      ? ['published', 'ongoing', 'wrap_up', 'closed', 'archived', 'cancelled']
+      : ['published', 'ongoing', 'wrap_up', 'closed', 'cancelled'];
 
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('events')
-      .select('id, slug, title, summary, description, venue, starts_at, ends_at, registration_opens_at, registration_closes_at, status, is_paid, fee_amount, poster_ref, max_capacity')
-      .eq('audience', 'public')
+      .select('id, slug, title, summary, description, venue, starts_at, ends_at, registration_opens_at, registration_closes_at, status, is_paid, fee_amount, poster_ref, max_capacity, cancellation_reason, planning_stage')
+      .or('audience.eq.public,audience.is.null')
       .in('status', statuses)
       .order('starts_at', { ascending: false, nullsFirst: false });
+
+    if (error && (error.code === '42703' || String(error.message).includes('cancellation_reason'))) {
+      const fallback = await supabase
+        .from('events')
+        .select('id, slug, title, summary, description, venue, starts_at, ends_at, registration_opens_at, registration_closes_at, status, is_paid, fee_amount, poster_ref, max_capacity')
+        .or('audience.eq.public,audience.is.null')
+        .in('status', statuses)
+        .order('starts_at', { ascending: false, nullsFirst: false });
+      data = fallback.data;
+      error = fallback.error;
+    }
 
     if (error) {
       console.error('getPublicEvents query error:', error);
@@ -163,13 +183,23 @@ export const getPublicEventBySlug = cache(
     const supabase = createPublicClient();
     if (!supabase) return { event: null, guests: [], highlights: [], manuals: [] };
 
-    const { data: event, error } = await supabase
+    let { data: event, error } = await supabase
       .from('events')
-      .select('id, slug, title, summary, description, venue, starts_at, ends_at, registration_opens_at, registration_closes_at, status, is_paid, fee_amount, poster_ref, max_capacity')
+      .select('id, slug, title, summary, description, venue, starts_at, ends_at, registration_opens_at, registration_closes_at, status, is_paid, fee_amount, poster_ref, max_capacity, cancellation_reason, planning_stage')
       .eq('slug', slug)
-      .eq('audience', 'public')
-      .in('status', ['published', 'ongoing', 'wrap_up', 'closed', 'archived'])
+      .in('status', ['published', 'ongoing', 'wrap_up', 'closed', 'archived', 'cancelled', 'draft'])
       .maybeSingle();
+
+    if (error && (error.code === '42703' || String(error.message).includes('cancellation_reason'))) {
+      const fallback = await supabase
+        .from('events')
+        .select('id, slug, title, summary, description, venue, starts_at, ends_at, registration_opens_at, registration_closes_at, status, is_paid, fee_amount, poster_ref, max_capacity')
+        .eq('slug', slug)
+        .in('status', ['published', 'ongoing', 'wrap_up', 'closed', 'archived', 'cancelled', 'draft'])
+        .maybeSingle();
+      event = fallback.data;
+      error = fallback.error;
+    }
 
     if (error) {
       console.error('getPublicEventBySlug query error for slug', slug, ':', error);

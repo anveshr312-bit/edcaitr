@@ -155,6 +155,15 @@ export function requireDirectorMfa(ctx: UserContext | null): AuthorizationError 
   return null;
 }
 
+/** Server component redirect check: mandatory MFA for director on any administrative page. */
+export function enforceDirectorMfaRedirect(ctx: UserContext | null): string | null {
+  if (!ctx) return '/account';
+  if (ctx.role === 'director' && !ctx.hasMfa) {
+    return '/account/mfa?required=1';
+  }
+  return null;
+}
+
 // ---------------------------------------------------------------------------
 // Reusable route handler wrappers
 // ---------------------------------------------------------------------------

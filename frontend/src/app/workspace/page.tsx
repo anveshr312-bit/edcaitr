@@ -54,6 +54,14 @@ export default async function WorkspaceHomePage() {
     redirect('/account/dashboard');
   }
 
+  // Mandatory Director MFA check
+  if (role === 'director') {
+    const { data: mfaData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (mfaData?.currentLevel !== 'aal2') {
+      redirect('/account/mfa?required=1');
+    }
+  }
+
   const [{ data: myTeams }, { data: myTasks }, { data: events }, { data: profile }] = await Promise.all([
     supabase
       .from('event_team_members')
@@ -202,7 +210,20 @@ export default async function WorkspaceHomePage() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16, marginTop: 18 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16, marginTop: 18 }}>
+                <div style={{ padding: '16px', borderRadius: 12, background: 'var(--accent-tint)', border: '1px solid rgba(192,30,48,0.2)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, color: 'var(--color-3-accent-personality)' }}>
+                    <Calendar style={{ width: 16, height: 16 }} />
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>Master Event Calendar</span>
+                  </div>
+                  <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', margin: '0 0 12px', lineHeight: 1.5 }}>
+                    Schedule upcoming dates, monitor readiness % (0-100), update milestones, and manage public notices.
+                  </p>
+                  <Link href="/workspace/calendar" style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-3-accent-personality)', textDecoration: 'none' }}>
+                    Open Event Calendar →
+                  </Link>
+                </div>
+
                 <div style={{ padding: '16px', borderRadius: 12, background: 'var(--surface-subtle)', border: '1px solid var(--border-hairline)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, color: 'var(--color-3-accent-personality)' }}>
                     <Sparkles style={{ width: 16, height: 16 }} />

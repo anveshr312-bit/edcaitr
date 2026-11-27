@@ -54,6 +54,9 @@ export default async function EventsPage() {
   const liveEvents = events.filter((e) => eventAvailability(e).lifecycle === 'ongoing');
   const upcomingEvents = events.filter((e) => eventAvailability(e).lifecycle === 'upcoming');
   const concludedEvents = events.filter((e) => ['completed', 'archived'].includes(eventAvailability(e).lifecycle));
+  const cancelledEvents = events.filter(
+    (e) => e.status === 'cancelled' || eventAvailability(e).lifecycle === 'cancelled'
+  );
 
   const primaryUpcoming = upcomingEvents[0] ?? null;
   const remainingUpcoming = upcomingEvents.slice(1);
@@ -293,6 +296,63 @@ export default async function EventsPage() {
           ))}
         </div>
       </section>
+
+      {/* ── ADVISORY: CANCELLED & RESCHEDULED EVENTS (Never vanished / 404) ── */}
+      {cancelledEvents.length > 0 && (
+        <section className="space-y-4 pt-4 border-t border-border/40">
+          <div className="space-y-1">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border border-rose-500/20 bg-rose-500/10 text-rose-600 dark:text-rose-400">
+              <span>Official Leadership Advisories</span>
+            </div>
+            <h2 className="text-base sm:text-lg font-bold text-foreground tracking-tight">
+              Rescheduled &amp; Cancelled Conclaves
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              Transparent institutional notices for cancelled or postponed summits and masterclasses.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {cancelledEvents.map((ev) => (
+              <div
+                key={ev.id}
+                className="rounded-2xl border border-rose-500/30 bg-rose-500/[0.04] p-5 flex flex-col justify-between space-y-3"
+              >
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold border border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400">
+                      Cancelled / Rescheduled
+                    </span>
+                    <span className="text-[11px] font-mono text-muted-foreground">
+                      {ev.starts_at ? new Date(ev.starts_at).toLocaleDateString('en-IN') : 'Date TBA'}
+                    </span>
+                  </div>
+
+                  <h3 className="text-sm font-bold text-foreground line-through opacity-85">
+                    {ev.title}
+                  </h3>
+
+                  <p className="text-xs text-muted-foreground line-clamp-3 leading-relaxed">
+                    {ev.cancellation_reason || ev.summary || 'Official cancellation notice recorded.'}
+                  </p>
+                </div>
+
+                <div className="pt-2 border-t border-rose-500/20 flex items-center justify-between">
+                  <span className="text-[11px] text-rose-600 dark:text-rose-400 font-medium">
+                    Read Official Notice →
+                  </span>
+                  <Link
+                    href={`/events/${ev.slug}`}
+                    className="text-xs font-semibold text-foreground hover:text-[#C01E30] transition-colors"
+                  >
+                    View Advisory
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* ── PRIORITY 3: CONCLUDED CONCLAVES & ARCHIVES ── */}
       <section className="space-y-6 pt-6 border-t border-border/40">

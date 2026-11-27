@@ -10,6 +10,7 @@ import { createPageMetadata } from '../../../lib/seo';
 import { EventStructuredData, BreadcrumbStructuredData } from '../../../components/StructuredData';
 import LiquidButton from '../../../components/ui/liquid-button';
 import { eventAvailability } from '../../../lib/events/lifecycle';
+import { EventReminderButton } from '../../../components/events/EventReminderButton';
 
 const EventRegisterForm = nextDynamic(
   () => import('../../../components/EventRegisterForm'),
@@ -141,7 +142,8 @@ export default async function EventDetailPage({
   const posterUrl = getImageKitUrl(event.poster_ref);
   const upiQrUrl = getImageKitUrl(upiDetails.upi_qr_ref);
   const { lifecycle, open: canRegister } = eventAvailability(event);
-  const isConcluded = ['completed', 'archived'].includes(lifecycle);
+  const isCancelled = event.status === 'cancelled' || lifecycle === 'cancelled' || event.planning_stage === 'cancelled';
+  const isConcluded = !isCancelled && ['completed', 'archived'].includes(lifecycle);
 
   // Formatted date and time strings
   const formattedDate = event.starts_at
@@ -224,7 +226,9 @@ export default async function EventDetailPage({
             <div className="flex flex-wrap items-center gap-2">
               <div
                 className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold tracking-wide border ${
-                  isConcluded
+                  isCancelled
+                    ? 'border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400'
+                    : isConcluded
                     ? 'border-zinc-700/40 bg-zinc-800/40 text-zinc-400'
                     : lifecycle === 'ongoing'
                     ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
@@ -235,7 +239,9 @@ export default async function EventDetailPage({
               >
                 <span
                   className={`w-2 h-2 rounded-full ${
-                    isConcluded
+                    isCancelled
+                      ? 'bg-rose-500'
+                      : isConcluded
                       ? 'bg-zinc-400'
                       : lifecycle === 'ongoing'
                       ? 'bg-emerald-500 animate-pulse'
@@ -244,7 +250,15 @@ export default async function EventDetailPage({
                       : 'bg-amber-400'
                   }`}
                 />
-                {isConcluded ? 'Event Concluded' : lifecycle === 'ongoing' ? 'Happening Now' : canRegister ? 'Registrations Open' : 'Upcoming Event'}
+                {isCancelled
+                  ? 'Cancelled / Rescheduled'
+                  : isConcluded
+                  ? 'Event Concluded'
+                  : lifecycle === 'ongoing'
+                  ? 'Happening Now'
+                  : canRegister
+                  ? 'Registrations Open'
+                  : 'Upcoming Event'}
               </div>
 
               <span className="px-3 py-1 rounded-full text-xs font-semibold bg-secondary/60 text-secondary-foreground border border-border/40">
@@ -263,6 +277,24 @@ export default async function EventDetailPage({
               {event.title}
             </h1>
 
+            {/* Prominent Official Leadership Notice if Cancelled / Rescheduled */}
+            {isCancelled && (
+              <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 sm:p-5 text-xs sm:text-sm text-rose-900 dark:text-rose-100 space-y-1.5 shadow-xs">
+                <div className="font-bold flex items-center gap-2 text-rose-600 dark:text-rose-400">
+                  <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                  </svg>
+                  <span>Official Leadership Advisory: Event Cancelled / Rescheduled</span>
+                </div>
+                <p className="leading-relaxed">
+                  {event.cancellation_reason ||
+                    'This conclave has been cancelled or rescheduled by the EDC leadership board. Further announcements regarding revised dates will be published on this portal and emailed to all registered delegates.'}
+                </p>
+              </div>
+            )}
+
             {/* Subhead / Summary */}
             {event.summary && (
               <p className="text-base sm:text-lg text-muted-foreground font-medium leading-relaxed max-w-3xl">
@@ -271,26 +303,33 @@ export default async function EventDetailPage({
             )}
 
             {/* Quick meta strip */}
-            <div className="pt-2 flex flex-wrap items-center gap-y-3 gap-x-6 text-xs sm:text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <svg className="w-4 h-4 text-[#C01E30]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                  <line x1="16" y1="2" x2="16" y2="6" />
-                  <line x1="8" y1="2" x2="8" y2="6" />
-                  <line x1="3" y1="10" x2="21" y2="10" />
-                </svg>
-                <span>
-                  {formattedDate} {formattedTime ? `• ${formattedTime}` : ''}
-                </span>
+            <div className="pt-2 flex flex-wrap items-center justify-between gap-y-3 gap-x-6 text-xs sm:text-sm text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-y-2 gap-x-6">
+                <div className="flex items-center gap-2">
+                  <svg className="w-4 h-4 text-[#C01E30]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
+                  </svg>
+                  <span>
+                    {formattedDate} {formattedTime ? `• ${formattedTime}` : ''}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <svg className="w-4 h-4 text-[#C01E30]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                    <circle cx="12" cy="10" r="3" />
+                  </svg>
+                  <span>{event.venue ?? 'Acropolis Main Auditorium, Indore'}</span>
+                </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <svg className="w-4 h-4 text-[#C01E30]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                  <circle cx="12" cy="10" r="3" />
-                </svg>
-                <span>{event.venue ?? 'Acropolis Main Auditorium, Indore'}</span>
-              </div>
+              {/* Remind Me Button for Upcoming Events */}
+              {!isCancelled && !isConcluded && (
+                <EventReminderButton eventId={event.id} />
+              )}
             </div>
           </div>
         </div>
@@ -542,15 +581,40 @@ export default async function EventDetailPage({
             <div id="registration" className="rounded-2xl border border-border/60 bg-card p-6 shadow-sm space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-border/40">
                 <h3 className="text-base font-bold text-foreground">
-                  {isConcluded ? 'Event Status' : 'Reserve Your Pass'}
+                  {isCancelled ? 'Event Notice' : isConcluded ? 'Event Status' : 'Reserve Your Pass'}
                 </h3>
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  {canRegister ? 'Fast-Track Pass' : 'Concluded'}
+                  {isCancelled ? 'Cancelled' : canRegister ? 'Fast-Track Pass' : 'Concluded'}
                 </span>
               </div>
 
+              {/* Cancelled State */}
+              {isCancelled && (
+                <div className="text-center py-6 space-y-3">
+                  <div className="w-12 h-12 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto">
+                    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="15" y1="9" x2="9" y2="15" />
+                      <line x1="9" y1="9" x2="15" y2="15" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-foreground">Registrations Discontinued</h4>
+                    <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                      This event has been officially cancelled or rescheduled. If you already held an admission pass, our team has notified you via registered email.
+                    </p>
+                  </div>
+                  <Link
+                    href="/events"
+                    className="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-secondary hover:bg-secondary/80 text-foreground text-xs font-semibold transition-all mt-2"
+                  >
+                    View Active Summits &amp; Events →
+                  </Link>
+                </div>
+              )}
+
               {/* If registration is open */}
-              {canRegister && (
+              {!isCancelled && canRegister && (
                 <>
                   {/* Track selector if tracks exist */}
                   {tracks.length > 0 && (
@@ -612,7 +676,7 @@ export default async function EventDetailPage({
               )}
 
               {/* Concluded state */}
-              {isConcluded && (
+              {!isCancelled && isConcluded && (
                 <div className="text-center py-6 space-y-3">
                   <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center mx-auto text-muted-foreground">
                     <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -637,7 +701,7 @@ export default async function EventDetailPage({
               )}
 
               {/* Not open yet */}
-              {!canRegister && !isConcluded && (
+              {!isCancelled && !canRegister && !isConcluded && (
                 <div className="p-4 rounded-xl bg-secondary/50 border border-border/40 text-center space-y-2">
                   <p className="text-xs text-muted-foreground font-medium">
                     Registrations for this event have not opened yet.

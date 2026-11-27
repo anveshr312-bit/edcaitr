@@ -23,14 +23,16 @@ const PUBLIC_NAV_ITEMS: GooeyNavItem[] = [
 ];
 
 const DIRECTOR_NAV_ITEMS: GooeyNavItem[] = [
-  { label: 'Overview', href: '/account/dashboard' },
+  { label: 'Dashboard', href: '/account/dashboard' },
+  { label: 'Calendar', href: '/workspace/calendar' },
   { label: 'Applications', href: '/account/applications' },
   { label: 'Workspace', href: '/workspace' },
   { label: 'Alumni', href: '/alumni/directory' },
 ];
 
 const ADVISOR_NAV_ITEMS: GooeyNavItem[] = [
-  { label: 'Overview', href: '/account/dashboard' },
+  { label: 'Dashboard', href: '/account/dashboard' },
+  { label: 'Calendar', href: '/workspace/calendar' },
   { label: 'Applications', href: '/account/applications' },
   { label: 'Workspace', href: '/workspace' },
   { label: 'Alumni', href: '/alumni/directory' },
@@ -38,6 +40,7 @@ const ADVISOR_NAV_ITEMS: GooeyNavItem[] = [
 
 const CORE_TEAM_NAV_ITEMS: GooeyNavItem[] = [
   { label: 'Workspace', href: '/workspace' },
+  { label: 'Calendar', href: '/workspace/calendar' },
   { label: 'Events Desk', href: '/workspace/events' },
   { label: 'Alumni', href: '/alumni/directory' },
   { label: 'Passes', href: '/portal' },
@@ -109,22 +112,16 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
 
   const isStaffUser = ['director', 'advisor', 'core_team', 'alumni'].includes(role);
 
-  // Pick contextual nav items based on user role and whether they are in workspace or public mode
+  // Pick contextual nav items based on user role
   const activeNavItems = useMemo(() => {
     if (!user) return PUBLIC_NAV_ITEMS;
 
-    // If on a public route, even staff can see public links with the "Back to Workspace" switcher
-    if (!isWorkspaceRoute) {
-      return PUBLIC_NAV_ITEMS;
-    }
-
-    // Inside workspace routes:
     if (role === 'director') return DIRECTOR_NAV_ITEMS;
     if (role === 'advisor') return ADVISOR_NAV_ITEMS;
     if (role === 'core_team') return CORE_TEAM_NAV_ITEMS;
     if (role === 'alumni') return ALUMNI_NAV_ITEMS;
     return PARTICIPANT_NAV_ITEMS;
-  }, [user, role, isWorkspaceRoute]);
+  }, [user, role]);
 
   const activeIndex = Math.max(
     0,
@@ -160,8 +157,19 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
         />
       </div>
 
+      {/* Staff Public Website Awareness Banner */}
+      {isStaffUser && !isWorkspaceRoute && (
+        <div className="relative z-50 border-b border-[#C01E30]/20 bg-[#C01E30]/[0.08] px-4 py-1.5 text-center text-xs text-[#C01E30] dark:text-[#E67C87] flex items-center justify-center gap-2 font-medium">
+          <span>Signed in as <strong className="capitalize">{role.replace('_', ' ')}</strong> · You are viewing the public website</span>
+          <Link href="/workspace" className="inline-flex items-center gap-1 font-bold underline hover:opacity-80">
+            <span>Return to Workspace Hub</span>
+            <ArrowRight className="h-3 w-3" />
+          </Link>
+        </div>
+      )}
+
       {/* Unslopped Frosted Glass Header */}
-      <header className="sticky top-0 z-40 border-b border-border/40 bg-background/80 backdrop-blur-xl shadow-xs transition-colors">
+      <header className="sticky top-0 z-40 border-b border-[var(--border-hairline)] bg-[var(--surface)]/85 backdrop-blur-xl backdrop-saturate-150 shadow-xs transition-colors">
         <div className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-x-3 gap-y-2 px-3 py-2 sm:px-6 md:h-[68px] md:flex-nowrap md:gap-4 md:py-0">
           {/* Logo */}
           <Link
@@ -224,11 +232,12 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
                 {isWorkspaceRoute ? (
                   <Link
                     href="/"
-                    className="inline-flex h-9 items-center gap-1.5 rounded-full border border-border/60 bg-secondary/60 px-3 text-xs font-semibold text-foreground hover:bg-secondary hover:border-border transition-all"
+                    className="inline-flex h-9 items-center gap-1.5 rounded-full border border-border/70 bg-secondary/70 px-3 text-xs font-semibold text-foreground hover:bg-secondary hover:border-border transition-all"
                     title="View the public website"
                   >
                     <Globe className="h-3.5 w-3.5 text-muted-foreground" />
-                    <span className="hidden sm:inline">Public Website</span>
+                    <span>Public Website</span>
+                    <ArrowUpRight className="h-3 w-3 opacity-60" />
                   </Link>
                 ) : (
                   <Link
@@ -237,7 +246,7 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
                     title="Switch to Workspace Hub"
                   >
                     <Zap className="h-3.5 w-3.5 fill-[#C01E30]" />
-                    <span className="hidden sm:inline">Workspace</span>
+                    <span>Workspace Hub</span>
                   </Link>
                 )}
               </>

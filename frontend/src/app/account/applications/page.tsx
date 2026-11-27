@@ -20,6 +20,20 @@ export default async function ApplicationsPage() {
   if (role !== 'advisor' && role !== 'director') redirect('/account/dashboard');
 
   const isDirector = role === 'director';
+
+  // Mandatory Director MFA check
+  if (isDirector) {
+    const { data: mfaData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (mfaData?.currentLevel !== 'aal2') {
+      redirect('/account/mfa?required=1&next=/account/applications');
+    }
+  }
+  if (isDirector) {
+    const { data: mfaData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (mfaData?.currentLevel !== 'aal2') {
+      redirect('/account/mfa?required=1');
+    }
+  }
   const allowedTypes = isDirector
     ? ['advisor_application', 'core_team_application', 'alumni_verification', 'promotion_nomination']
     : ['core_team_application', 'alumni_verification'];
