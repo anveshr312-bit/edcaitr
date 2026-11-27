@@ -192,23 +192,29 @@ export const getPublicEventBySlug = cache(
     let event: any = null;
     let error: any = null;
 
-    const query = await supabase
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
+
+    let queryBuilder = supabase
       .from('events')
       .select('id, slug, title, summary, description, venue, starts_at, ends_at, registration_opens_at, registration_closes_at, status, is_paid, fee_amount, poster_ref, max_capacity, cancellation_reason, planning_stage')
-      .eq('slug', slug)
-      .in('status', ['published', 'ongoing', 'wrap_up', 'closed', 'archived', 'cancelled', 'draft'])
-      .maybeSingle();
+      .in('status', ['published', 'ongoing', 'wrap_up', 'closed', 'archived', 'cancelled', 'draft']);
+
+    queryBuilder = isUuid ? queryBuilder.or(`slug.eq.${slug},id.eq.${slug}`) : queryBuilder.eq('slug', slug);
+
+    const query = await queryBuilder.maybeSingle();
 
     event = query.data;
     error = query.error;
 
     if (error && (error.code === '42703' || String(error.message).includes('cancellation_reason'))) {
-      const fallback = await supabase
+      let fallbackBuilder = supabase
         .from('events')
         .select('id, slug, title, summary, description, venue, starts_at, ends_at, registration_opens_at, registration_closes_at, status, is_paid, fee_amount, poster_ref, max_capacity')
-        .eq('slug', slug)
-        .in('status', ['published', 'ongoing', 'wrap_up', 'closed', 'archived', 'cancelled', 'draft'])
-        .maybeSingle();
+        .in('status', ['published', 'ongoing', 'wrap_up', 'closed', 'archived', 'cancelled', 'draft']);
+
+      fallbackBuilder = isUuid ? fallbackBuilder.or(`slug.eq.${slug},id.eq.${slug}`) : fallbackBuilder.eq('slug', slug);
+
+      const fallback = await fallbackBuilder.maybeSingle();
       event = fallback.data;
       error = fallback.error;
     }

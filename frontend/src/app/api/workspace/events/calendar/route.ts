@@ -226,7 +226,7 @@ export async function PATCH(request: Request) {
       .from('events')
       .update(updatePayload)
       .eq('id', event_id)
-      .select('id, title, status, planning_stage, planning_progress, cancellation_reason')
+      .select('id, slug, title, status, planning_stage, planning_progress, cancellation_reason')
       .single();
 
     if (updateErr) {
@@ -249,7 +249,7 @@ export async function PATCH(request: Request) {
             body:
               updated.cancellation_reason ||
               `The event "${updated.title}" has been cancelled or rescheduled by the Programs & Experiences team.`,
-            link_url: `/events/${updated.id}`,
+            link_url: `/events/${updated.slug || updated.id}`,
             notification_type: 'event_cancelled',
           }));
 
