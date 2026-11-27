@@ -8,6 +8,7 @@ import {
   Briefcase,
   Building2,
   CheckCircle2,
+  ChevronDown,
   ExternalLink,
   GraduationCap,
   Globe,
@@ -33,6 +34,7 @@ interface Profile {
   college: string;
   enrollment_no: string;
   is_public: boolean;
+  domain?: string | null;
 }
 
 const EMPTY: Profile = {
@@ -45,6 +47,7 @@ const EMPTY: Profile = {
   college: '',
   enrollment_no: '',
   is_public: false,
+  domain: null,
 };
 
 export default function ProfilePage() {
@@ -75,7 +78,7 @@ export default function ProfilePage() {
       const [{ data: p }, { data: roleData }] = await Promise.all([
         supabase
           .from('profiles')
-          .select('full_name,phone,bio,designation,linkedin_url,avatar_ref,college,enrollment_no,is_public')
+          .select('full_name,phone,bio,designation,linkedin_url,avatar_ref,college,enrollment_no,is_public,domain')
           .eq('id', data.user.id)
           .single(),
         supabase.rpc('get_user_role', { user_uuid: data.user.id }),
@@ -136,6 +139,10 @@ export default function ProfilePage() {
       if (canManageDisplay) {
         payload.designation = profile.designation.trim() || null;
         payload.is_public = profile.is_public;
+      }
+
+      if (userRole === 'core_team') {
+        payload.domain = profile.domain || null;
       }
 
       const { error } = await supabase
@@ -297,6 +304,32 @@ export default function ProfilePage() {
                 wrapperClassName="bg-[var(--surface-subtle)] border-[var(--border-hairline)]"
               />
             </div>
+
+            {userRole === 'core_team' && (
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-semibold text-[var(--color-2-mood)] mb-1.5">
+                  EDC domain affiliation
+                </label>
+                <div className="relative">
+                  <select
+                    value={profile.domain ?? ''}
+                    onChange={(e) => setProfile((prev) => ({ ...prev, domain: e.target.value || null }))}
+                    className="w-full rounded-xl border border-[var(--border-hairline)] bg-[var(--surface-subtle)] px-4 py-2.5 text-sm text-[var(--color-2-mood)] transition-all focus:border-[#C01E30] focus:bg-[var(--surface)] focus:ring-1 focus:ring-[#C01E30] focus:outline-none appearance-none cursor-pointer"
+                  >
+                    <option value="">Unassigned / To be decided</option>
+                    <option value="research_digital">Research &amp; Digital Communications (Knowledge, Research &amp; Content)</option>
+                    <option value="programs_experiences">Programs &amp; Experiences (Event Design, Speakers &amp; Live Production)</option>
+                    <option value="partnerships_ecosystem">Partnerships &amp; Ecosystem Relations (Sponsorships, MoUs &amp; Outreach)</option>
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[var(--text-muted)]">
+                    <ChevronDown className="h-4 w-4" />
+                  </div>
+                </div>
+                <p className="mt-1.5 text-[11px] text-[var(--text-muted)] leading-relaxed">
+                  Choose your primary operating pillar within the EDC AITR Core Team structure. You can update this whenever your responsibilities rotate.
+                </p>
+              </div>
+            )}
           </div>
         </div>
 

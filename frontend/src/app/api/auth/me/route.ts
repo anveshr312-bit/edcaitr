@@ -28,7 +28,7 @@ export async function GET() {
     getUserRole(user.id),
     supabase
       .from('profiles')
-      .select('full_name, avatar_ref, designation, college, bio, linkedin_url')
+      .select('full_name, avatar_ref, designation, college, bio, linkedin_url, domain')
       .eq('id', user.id)
       .maybeSingle(),
   ]);

@@ -1,9 +1,46 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import {
+  BookOpen,
+  Calendar,
+  Handshake,
+  Sparkles,
+  FileText,
+  Award,
+  Ticket,
+  CheckCircle2,
+  ArrowRight,
+  ShieldCheck,
+  HelpCircle,
+  TrendingUp,
+  Radio,
+  Users,
+} from 'lucide-react';
 import { createClient } from '../../lib/supabase/server';
 import { getUserRole } from '../../lib/auth/authorization';
 
 export const dynamic = 'force-dynamic';
+
+const DOMAIN_DETAILS: Record<
+  string,
+  { title: string; subtitle: string; icon: React.ComponentType<{ className?: string }> }
+> = {
+  research_digital: {
+    title: 'Research & Digital Communications',
+    subtitle: 'Knowledge, Content & Entrepreneurship Education',
+    icon: BookOpen,
+  },
+  programs_experiences: {
+    title: 'Programs & Experiences',
+    subtitle: 'Event Design, Interventions & Learning Outcomes',
+    icon: Calendar,
+  },
+  partnerships_ecosystem: {
+    title: 'Partnerships & Ecosystem Relations',
+    subtitle: 'Sponsorships, Resource Mobilization & Outreach',
+    icon: Handshake,
+  },
+};
 
 export default async function WorkspaceHomePage() {
   const supabase = await createClient();
@@ -17,7 +54,7 @@ export default async function WorkspaceHomePage() {
     redirect('/account/dashboard');
   }
 
-  const [{ data: myTeams }, { data: myTasks }, { data: events }] = await Promise.all([
+  const [{ data: myTeams }, { data: myTasks }, { data: events }, { data: profile }] = await Promise.all([
     supabase
       .from('event_team_members')
       .select('id, event_id, team_code, is_coordinator, operational_teams(name), events(id, title, starts_at)')
@@ -30,6 +67,11 @@ export default async function WorkspaceHomePage() {
       .from('events')
       .select('id, title, status, starts_at')
       .order('starts_at', { ascending: false, nullsFirst: false }),
+    supabase
+      .from('profiles')
+      .select('full_name, domain')
+      .eq('id', user.id)
+      .maybeSingle(),
   ]);
 
   const openTasks = (myTasks ?? []).filter((t) => t.status !== 'approved');
@@ -42,7 +84,7 @@ export default async function WorkspaceHomePage() {
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 10px', borderRadius: 'var(--radius-control)', background: 'var(--accent-tint)', border: '1px solid rgba(192,30,48,0.2)', marginBottom: 10 }}>
           <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-3-accent-personality)' }} />
           <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-3-accent-personality)' }}>
-            Workspace · {role.replace('_', ' ')}
+            Workspace · {role === 'core_team' && profile?.domain ? DOMAIN_DETAILS[profile.domain]?.title : role.replace('_', ' ')}
           </span>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
@@ -81,6 +123,268 @@ export default async function WorkspaceHomePage() {
           <div className="card-meta" style={{ margin: 0, fontSize: 12 }}>Total Events</div>
         </div>
       </div>
+
+      {/* ── CORE TEAM DOMAIN-SPECIFIC OPERATIONAL CONSOLE ── */}
+      {role === 'core_team' && (
+        <section style={{ marginTop: 36 }}>
+          {profile?.domain === 'research_digital' ? (
+            /* Domain 1: Research & Digital Communications Desk */
+            <div className="card" style={{ background: 'var(--surface)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--radius-panel)', padding: '24px 28px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--accent-tint)', color: 'var(--color-3-accent-personality)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <BookOpen style={{ width: 16, height: 16 }} />
+                </div>
+                <div>
+                  <h2 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                    Research &amp; Digital Communications Desk
+                  </h2>
+                  <p style={{ margin: 0, fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
+                    Knowledge generation, startup case studies, policy research, and editorial calendars.
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16, marginTop: 18 }}>
+                <div style={{ padding: '16px', borderRadius: 12, background: 'var(--surface-subtle)', border: '1px solid var(--border-hairline)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, color: 'var(--color-3-accent-personality)' }}>
+                    <FileText style={{ width: 16, height: 16 }} />
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>Case Studies &amp; Teardowns</span>
+                  </div>
+                  <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', margin: '0 0 12px', lineHeight: 1.5 }}>
+                    Draft teardowns of startup business models, founder decisions, and market trends for the EDC knowledge archive.
+                  </p>
+                  <Link href="/workspace/events" style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-3-accent-personality)', textDecoration: 'none' }}>
+                    Knowledge CMS →
+                  </Link>
+                </div>
+
+                <div style={{ padding: '16px', borderRadius: 12, background: 'var(--surface-subtle)', border: '1px solid var(--border-hairline)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, color: 'var(--color-3-accent-personality)' }}>
+                    <TrendingUp style={{ width: 16, height: 16 }} />
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>Grant &amp; Opportunity Radar</span>
+                  </div>
+                  <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', margin: '0 0 12px', lineHeight: 1.5 }}>
+                    Track active government funding windows (DPIIT Seed Fund, MP Startup Policy, NIDHI-EIR, SISFS) for campus founders.
+                  </p>
+                  <Link href="/workspace/events" style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-3-accent-personality)', textDecoration: 'none' }}>
+                    Grant Tracker →
+                  </Link>
+                </div>
+
+                <div style={{ padding: '16px', borderRadius: 12, background: 'var(--surface-subtle)', border: '1px solid var(--border-hairline)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, color: 'var(--color-3-accent-personality)' }}>
+                    <Calendar style={{ width: 16, height: 16 }} />
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>Editorial Publishing Queue</span>
+                  </div>
+                  <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', margin: '0 0 12px', lineHeight: 1.5 }}>
+                    Coordinate social media calendar, Instagram carousels, founder spotlights, and monthly digital newsletters.
+                  </p>
+                  <Link href="/workspace/events" style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-3-accent-personality)', textDecoration: 'none' }}>
+                    Editorial Queue →
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ) : profile?.domain === 'programs_experiences' ? (
+            /* Domain 2: Programs & Experiences Production Deck */
+            <div className="card" style={{ background: 'var(--surface)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--radius-panel)', padding: '24px 28px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--accent-tint)', color: 'var(--color-3-accent-personality)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Calendar style={{ width: 16, height: 16 }} />
+                </div>
+                <div>
+                  <h2 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                    Programs &amp; Experiences Production Deck
+                  </h2>
+                  <p style={{ margin: 0, fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
+                    Event design, speaker curation, stage agendas, and live gate check-in.
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16, marginTop: 18 }}>
+                <div style={{ padding: '16px', borderRadius: 12, background: 'var(--surface-subtle)', border: '1px solid var(--border-hairline)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, color: 'var(--color-3-accent-personality)' }}>
+                    <Sparkles style={{ width: 16, height: 16 }} />
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>Run-of-Show &amp; Agendas</span>
+                  </div>
+                  <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', margin: '0 0 12px', lineHeight: 1.5 }}>
+                    Plan minute-by-minute timelines, audio/visual cues, speaker tech checks, and stage coordinator rosters.
+                  </p>
+                  <Link href="/workspace/events" style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-3-accent-personality)', textDecoration: 'none' }}>
+                    Stage Timelines →
+                  </Link>
+                </div>
+
+                <div style={{ padding: '16px', borderRadius: 12, background: 'var(--surface-subtle)', border: '1px solid var(--border-hairline)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, color: 'var(--color-3-accent-personality)' }}>
+                    <Users style={{ width: 16, height: 16 }} />
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>Speaker &amp; Jury Bureau</span>
+                  </div>
+                  <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', margin: '0 0 12px', lineHeight: 1.5 }}>
+                    Manage speaker shortlists, invitation letters, travel coordination, and pitch jury panel confirmations.
+                  </p>
+                  <Link href="/workspace/events" style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-3-accent-personality)', textDecoration: 'none' }}>
+                    Speaker Bureau →
+                  </Link>
+                </div>
+
+                <div style={{ padding: '16px', borderRadius: 12, background: 'var(--surface-subtle)', border: '1px solid var(--border-hairline)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, color: 'var(--color-3-accent-personality)' }}>
+                    <Ticket style={{ width: 16, height: 16 }} />
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>Live Gate &amp; Check-in</span>
+                  </div>
+                  <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', margin: '0 0 12px', lineHeight: 1.5 }}>
+                    Monitor real-time attendee arrivals, validate digital passes, and oversee automated badge and food coupon check-in.
+                  </p>
+                  <Link href="/workspace/events" style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-3-accent-personality)', textDecoration: 'none' }}>
+                    Gate Scanner →
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ) : profile?.domain === 'partnerships_ecosystem' ? (
+            /* Domain 3: Partnerships & Ecosystem Deal Room */
+            <div className="card" style={{ background: 'var(--surface)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--radius-panel)', padding: '24px 28px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--accent-tint)', color: 'var(--color-3-accent-personality)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Handshake style={{ width: 16, height: 16 }} />
+                </div>
+                <div>
+                  <h2 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                    Partnerships &amp; Ecosystem Deal Room
+                  </h2>
+                  <p style={{ margin: 0, fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
+                    Corporate sponsorships, MoUs, brand deliverables, and ecosystem outreach.
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16, marginTop: 18 }}>
+                <div style={{ padding: '16px', borderRadius: 12, background: 'var(--surface-subtle)', border: '1px solid var(--border-hairline)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, color: 'var(--color-3-accent-personality)' }}>
+                    <Award style={{ width: 16, height: 16 }} />
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>Sponsorship CRM</span>
+                  </div>
+                  <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', margin: '0 0 12px', lineHeight: 1.5 }}>
+                    Track corporate sponsor prospects across Title, Co-Presenting, Powered By, In-kind, and Prize partnership tiers.
+                  </p>
+                  <Link href="/workspace/events" style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-3-accent-personality)', textDecoration: 'none' }}>
+                    Sponsor Pipeline →
+                  </Link>
+                </div>
+
+                <div style={{ padding: '16px', borderRadius: 12, background: 'var(--surface-subtle)', border: '1px solid var(--border-hairline)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, color: 'var(--color-3-accent-personality)' }}>
+                    <CheckCircle2 style={{ width: 16, height: 16 }} />
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>Deliverables Fulfillment</span>
+                  </div>
+                  <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', margin: '0 0 12px', lineHeight: 1.5 }}>
+                    Track branding obligations: logo presence on banners, booth space allocation, stall setup, and VIP lounge access.
+                  </p>
+                  <Link href="/workspace/events" style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-3-accent-personality)', textDecoration: 'none' }}>
+                    Deliverable Matrix →
+                  </Link>
+                </div>
+
+                <div style={{ padding: '16px', borderRadius: 12, background: 'var(--surface-subtle)', border: '1px solid var(--border-hairline)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, color: 'var(--color-3-accent-personality)' }}>
+                    <ShieldCheck style={{ width: 16, height: 16 }} />
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>MoU &amp; Partner Vault</span>
+                  </div>
+                  <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', margin: '0 0 12px', lineHeight: 1.5 }}>
+                    Manage signed institutional collaboration agreements with TiE MP, Headstart, AIIH Foundation, and IIC hubs.
+                  </p>
+                  <Link href="/workspace/events" style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-3-accent-personality)', textDecoration: 'none' }}>
+                    Partner Vault →
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* Unassigned Domain Prompt */
+            <div className="card" style={{ background: 'var(--surface)', border: '1px dashed var(--border-hairline)', borderRadius: 'var(--radius-panel)', padding: '24px 28px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--surface-subtle)', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <HelpCircle style={{ width: 18, height: 18 }} />
+                  </div>
+                  <div>
+                    <h3 style={{ margin: '0 0 4px', fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                      Select Your Core Team Operating Domain
+                    </h3>
+                    <p style={{ margin: 0, fontSize: '0.8125rem', color: 'var(--text-secondary)', maxWidth: 520, lineHeight: 1.5 }}>
+                      Under the EDC AITR team structure, every core member operates within one of three pillars: <strong>Research &amp; Digital</strong>, <strong>Programs &amp; Experiences</strong>, or <strong>Partnerships &amp; Ecosystem</strong>.
+                    </p>
+                  </div>
+                </div>
+
+                <Link
+                  href="/account/profile"
+                  className="btn btn-primary"
+                  style={{ fontSize: 13, padding: '8px 16px', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                >
+                  <span>Choose Domain in Profile</span>
+                  <ArrowRight style={{ width: 14, height: 14 }} />
+                </Link>
+              </div>
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* ── LEADERSHIP EXECUTIVE CONSOLE (For Director & Advisor) ── */}
+      {(role === 'director' || role === 'advisor') && (
+        <section style={{ marginTop: 36 }}>
+          <div className="card" style={{ background: 'var(--surface)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--radius-panel)', padding: '24px 28px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+              <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--accent-tint)', color: 'var(--color-3-accent-personality)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ShieldCheck style={{ width: 16, height: 16 }} />
+              </div>
+              <div>
+                <h2 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                  Executive Governance &amp; Domain Oversight
+                </h2>
+                <p style={{ margin: 0, fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
+                  Institutional monitoring across all three operational pillars of the EDC AITR student team.
+                </p>
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14 }}>
+              <div style={{ padding: '14px 16px', borderRadius: 10, background: 'var(--surface-subtle)', border: '1px solid var(--border-hairline)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                  <BookOpen style={{ width: 14, height: 14, color: 'var(--color-3-accent-personality)' }} />
+                  <span style={{ fontSize: '0.8125rem', fontWeight: 700 }}>Research &amp; Digital</span>
+                </div>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: 0 }}>
+                  Case studies, founder teardowns, policy playbooks, and content publishing cadence.
+                </p>
+              </div>
+
+              <div style={{ padding: '14px 16px', borderRadius: 10, background: 'var(--surface-subtle)', border: '1px solid var(--border-hairline)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                  <Calendar style={{ width: 14, height: 14, color: 'var(--color-3-accent-personality)' }} />
+                  <span style={{ fontSize: '0.8125rem', fontWeight: 700 }}>Programs &amp; Experiences</span>
+                </div>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: 0 }}>
+                  Interventions, hackathons, speaker briefings, gate verification, and feedback audits.
+                </p>
+              </div>
+
+              <div style={{ padding: '14px 16px', borderRadius: 10, background: 'var(--surface-subtle)', border: '1px solid var(--border-hairline)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                  <Handshake style={{ width: 14, height: 14, color: 'var(--color-3-accent-personality)' }} />
+                  <span style={{ fontSize: '0.8125rem', fontWeight: 700 }}>Partnerships &amp; Ecosystem</span>
+                </div>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: 0 }}>
+                  Corporate sponsorships, brand deliverables, institutional MoUs, and alumni network.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Assigned teams */}
       <section style={{ marginTop: 40 }}>

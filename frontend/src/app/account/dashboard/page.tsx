@@ -38,6 +38,12 @@ const ROLE_CONFIG: Record<
   },
 };
 
+const DOMAIN_LABELS: Record<string, string> = {
+  research_digital: 'Research & Digital Communications',
+  programs_experiences: 'Programs & Experiences',
+  partnerships_ecosystem: 'Partnerships & Ecosystem Relations',
+};
+
 export default async function DashboardPage() {
   const supabase = await createClient();
   if (!supabase) redirect('/account');
@@ -52,7 +58,7 @@ export default async function DashboardPage() {
   const [profileResult, role, mfaResult, membershipResult] = await Promise.all([
     supabase
       .from('profiles')
-      .select('full_name, avatar_ref, designation, college, bio, linkedin_url, is_public')
+      .select('full_name, avatar_ref, designation, college, bio, linkedin_url, is_public, domain')
       .eq('id', user.id)
       .single(),
     getUserRole(user.id),
@@ -106,6 +112,21 @@ export default async function DashboardPage() {
               <span className={roleMeta.badgeClass} style={{ fontSize: '0.75rem', letterSpacing: '0.04em' }}>
                 {roleMeta.label}
               </span>
+              {role === 'core_team' && (
+                <span
+                  style={{
+                    fontSize: '0.75rem',
+                    padding: '2px 8px',
+                    borderRadius: 'var(--radius-control)',
+                    background: profile?.domain ? 'var(--accent-tint)' : 'var(--surface-subtle)',
+                    color: profile?.domain ? 'var(--color-3-accent-personality)' : 'var(--text-muted)',
+                    border: '1px solid var(--border-hairline)',
+                    fontWeight: 600,
+                  }}
+                >
+                  {profile?.domain ? DOMAIN_LABELS[profile.domain] : 'Unassigned Domain'}
+                </span>
+              )}
               {isDirector && (
                 <span
                   style={{
