@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient, getUserContext, requireRole } from '../../../lib/auth/authorization';
+import { encodeEventFoodConfig, type EventFoodConfig } from '../../../lib/events/foodCoupons';
 
 export async function POST(request: Request) {
   const ctx = await getUserContext();
@@ -27,6 +28,7 @@ export async function POST(request: Request) {
     poster_ref?: string;
     max_capacity?: number | null;
     spoc_ids?: string[];
+    food_coupon_config?: EventFoodConfig;
   };
 
   try {
@@ -75,6 +77,15 @@ export async function POST(request: Request) {
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
+  }
+
+  if (body.food_coupon_config && eventId) {
+    try {
+      const encoded = encodeEventFoodConfig(body.food_coupon_config, []);
+      await admin.from('events').update({ published_social_links: encoded }).eq('id', eventId);
+    } catch (saveErr) {
+      console.warn('Failed to save food coupon config:', saveErr);
+    }
   }
 
   return NextResponse.json({ ok: true, id: eventId, slug });

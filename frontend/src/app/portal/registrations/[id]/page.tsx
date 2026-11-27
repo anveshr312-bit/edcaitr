@@ -15,7 +15,12 @@ import {
 } from 'lucide-react';
 import { createClient } from '../../../../lib/supabase/server';
 import { generateQrDataUrl } from '../../../../lib/tickets/email';
+import {
+  generateCouponsForRegistration,
+  parseEventFoodConfig,
+} from '../../../../lib/events/foodCoupons';
 import TicketPrinterClient from './TicketPrinterClient';
+import FoodCouponsSection from './FoodCouponsSection';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,8 +43,8 @@ export default async function RegistrationDetailPage({
     supabase
       .from('registrations')
       .select(`
-        id, status, payment_status, payment_ref, participant_category,
-        events(title, slug, venue, starts_at),
+        id, status, payment_status, payment_ref, participant_category, event_id,
+        events(id, title, slug, venue, starts_at, published_social_links),
         tickets(ticket_code, qr_token, email_sent_at),
         attendance_logs(checked_in_at)
       `)
@@ -57,6 +62,37 @@ export default async function RegistrationDetailPage({
 
   const qrDataUrl = ticket?.qr_token ? await generateQrDataUrl(ticket.qr_token) : null;
   const isConfirmed = reg.status === 'confirmed';
+
+  // Load food coupons if enabled for this event
+  const foodConfig = parseEventFoodConfig(ev);
+  let coupons: any[] = [];
+  if (foodConfig.enabled && ev?.id) {
+    const redemptions: Record<string, { redeemed_at: string; redeemed_by?: string }> = {};
+    try {
+      const { data: logs } = await supabase
+        .from('event_manuals')
+        .select('title, created_at')
+        .eq('event_id', ev.id)
+        .like('title', `[FOOD_REDEEM]:EDC-COUPON:${ev.id}:${reg.id}:%`);
+
+      if (logs) {
+        for (const log of logs) {
+          const token = log.title.replace('[FOOD_REDEEM]:', '');
+          redemptions[token] = { redeemed_at: log.created_at };
+        }
+      }
+    } catch {}
+
+    coupons = generateCouponsForRegistration({
+      eventId: ev.id,
+      eventTitle: ev.title,
+      registrationId: reg.id,
+      userId: user.id,
+      participantName: profile?.full_name || user.email || 'Participant',
+      config: foodConfig,
+      redemptions,
+    });
+  }
 
   return (
     <div className="mx-auto w-full max-w-[880px] px-4 py-8 sm:px-6 sm:py-12">
@@ -124,9 +160,6 @@ export default async function RegistrationDetailPage({
           ticketCode={ticket.ticket_code}
           qrDataUrl={qrDataUrl}
           emailSentAt={ticket.email_sent_at ?? null}
-          registrationId={reg.id}
-          initialCheckedIn={Boolean(att?.checked_in_at)}
-          initialCheckedInTime={att?.checked_in_at ?? null}
         />
       ) : (
         <div className="rounded-2xl border border-[var(--border-hairline)] bg-[var(--surface)] p-8 text-center sm:p-12">
@@ -138,6 +171,10 @@ export default async function RegistrationDetailPage({
             Your admission pass and QR code will be generated once payment confirmation or seat allocation is verified by event administrators.
           </p>
         </div>
+      )}
+      {/* Food Coupons Section if meals are enabled */}
+      {coupons.length > 0 && (
+        <FoodCouponsSection initialCoupons={coupons} registrationId={reg.id} />
       )}
     </div>
   );

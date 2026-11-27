@@ -14,8 +14,15 @@ import {
   Search,
   Sparkles,
   Users,
+  UtensilsCrossed,
 } from 'lucide-react';
 import ImageUploadField from '../../../../components/ImageUploadField';
+import {
+  DEFAULT_FOOD_CONFIG,
+  type EventFoodConfig,
+  type MealType,
+  MEAL_THEMES,
+} from '../../../../lib/events/foodCoupons';
 
 interface Candidate {
   id: string;
@@ -47,6 +54,7 @@ export default function NewEventClient({
   const [posterRef, setPosterRef] = useState('');
   const [maxCapacity, setMaxCapacity] = useState('');
   const [selectedSpocs, setSelectedSpocs] = useState<string[]>([currentUserId]);
+  const [foodConfig, setFoodConfig] = useState<EventFoodConfig>(DEFAULT_FOOD_CONFIG);
   const [spocQuery, setSpocQuery] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -91,6 +99,7 @@ export default function NewEventClient({
           poster_ref: posterRef,
           max_capacity: maxCapacity ? Number(maxCapacity) : null,
           spoc_ids: selectedSpocs,
+          food_coupon_config: foodConfig.enabled ? foodConfig : undefined,
         }),
       });
       const data = await res.json();
@@ -256,6 +265,125 @@ export default function NewEventClient({
             />
           </div>
         </div>
+      </div>
+
+      {/* Food Coupons & Catering Entitlements */}
+      <div className="space-y-4 rounded-2xl border border-[var(--border-hairline)] bg-[var(--surface)] p-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+              <UtensilsCrossed className="h-3.5 w-3.5" />
+              <span>Catering &amp; Food Passes</span>
+            </div>
+            <h3 className="mt-1.5 text-sm font-bold text-[var(--color-2-mood)]">
+              Enable Event Food Coupons
+            </h3>
+            <p className="text-xs text-[var(--text-secondary)]">
+              Generates individual digital meal passes with dedicated QR codes for registered participants.
+            </p>
+          </div>
+
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={foodConfig.enabled}
+              onChange={(e) =>
+                setFoodConfig((prev) => ({ ...prev, enabled: e.target.checked }))
+              }
+              className="sr-only peer"
+            />
+            <div className="w-11 h-6 bg-[var(--surface-subtle)] border border-[var(--border-hairline)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+          </label>
+        </div>
+
+        {foodConfig.enabled && (
+          <div className="mt-5 space-y-4 border-t border-[var(--border-hairline)] pt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {(['breakfast', 'lunch', 'high_tea', 'dinner'] as const).map((mealType) => {
+                const theme = MEAL_THEMES[mealType];
+                const meal = foodConfig.meals[mealType];
+                return (
+                  <div
+                    key={mealType}
+                    className={`rounded-xl border p-4 transition-all ${
+                      meal.enabled
+                        ? 'border-emerald-500/40 bg-[var(--surface-subtle)]'
+                        : 'border-[var(--border-hairline)] bg-[var(--surface)] opacity-70'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={meal.enabled}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            setFoodConfig((prev) => ({
+                              ...prev,
+                              meals: {
+                                ...prev.meals,
+                                [mealType]: { ...prev.meals[mealType], enabled: checked },
+                              },
+                            }));
+                          }}
+                          className="rounded border-[var(--border-hairline)] text-emerald-600 focus:ring-emerald-500"
+                        />
+                        <span className="text-lg">{theme.icon}</span>
+                        <span className="text-xs font-bold uppercase tracking-wider text-[var(--color-2-mood)]">
+                          {theme.title}
+                        </span>
+                      </label>
+
+                      {meal.enabled && (
+                        <div className="flex items-center gap-1.5 text-xs">
+                          <span className="text-[11px] font-semibold text-[var(--text-muted)]">Qty:</span>
+                          <input
+                            type="number"
+                            min={1}
+                            max={10}
+                            value={meal.quantity}
+                            onChange={(e) => {
+                              const qty = Math.max(1, parseInt(e.target.value) || 1);
+                              setFoodConfig((prev) => ({
+                                ...prev,
+                                meals: {
+                                  ...prev.meals,
+                                  [mealType]: { ...prev.meals[mealType], quantity: qty },
+                                },
+                              }));
+                            }}
+                            className="w-14 rounded-lg border border-[var(--border-hairline)] bg-[var(--surface)] px-2 py-1 text-center font-bold text-xs"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {meal.enabled && (
+                      <div className="mt-3 space-y-2">
+                        <input
+                          type="text"
+                          value={meal.title || ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setFoodConfig((prev) => ({
+                              ...prev,
+                              meals: {
+                                ...prev.meals,
+                                [mealType]: { ...prev.meals[mealType], title: val },
+                              },
+                            }));
+                          }}
+                          placeholder={`Custom label (e.g. Day 1 ${theme.title})`}
+                          className="w-full rounded-lg border border-[var(--border-hairline)] bg-[var(--surface)] px-3 py-1.5 text-xs text-[var(--color-2-mood)] placeholder:text-[var(--text-muted)]"
+                        />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Media Assets */}

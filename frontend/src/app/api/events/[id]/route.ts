@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createSessionClient, getUserContext, requireRole } from '../../../../lib/auth/authorization';
+import { encodeEventFoodConfig } from '../../../../lib/events/foodCoupons';
 
 export async function PATCH(
   request: Request,
@@ -31,10 +32,24 @@ export async function PATCH(
   const fields = [
     'title', 'summary', 'description', 'venue', 'starts_at', 'ends_at',
     'status', 'is_paid', 'fee_amount', 'upi_id', 'upi_qr_ref', 'poster_ref', 'max_capacity',
-    'google_sheet_id',
+    'google_sheet_id', 'published_social_links',
   ];
   for (const f of fields) {
     if (f in body) allowedUpdates[f] = body[f];
+  }
+
+  if (body.food_coupon_config) {
+    const { data: existing } = await supabase
+      .from('events')
+      .select('published_social_links')
+      .eq('id', id)
+      .maybeSingle();
+
+    const encoded = encodeEventFoodConfig(
+      body.food_coupon_config as any,
+      existing?.published_social_links
+    );
+    allowedUpdates['published_social_links'] = encoded;
   }
 
   const { data, error } = await supabase

@@ -1,7 +1,13 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
+import { UtensilsCrossed } from 'lucide-react';
 import ImageUploadField from '../../../../components/ImageUploadField';
+import {
+  parseEventFoodConfig,
+  type EventFoodConfig,
+  MEAL_THEMES,
+} from '../../../../lib/events/foodCoupons';
 
 interface Spoc {
   user_id: string;
@@ -40,6 +46,7 @@ export default function ManageEventClient({
     venue: string | null;
     summary: string | null;
     poster_ref?: string | null;
+    published_social_links?: any;
   };
   initialSpocs: Spoc[];
   initialGuests: Guest[];
@@ -49,6 +56,9 @@ export default function ManageEventClient({
   const [venue, setVenue] = useState(event.venue ?? '');
   const [summary, setSummary] = useState(event.summary ?? '');
   const [posterRef, setPosterRef] = useState(event.poster_ref ?? '');
+  const [foodConfig, setFoodConfig] = useState<EventFoodConfig>(() =>
+    parseEventFoodConfig(event)
+  );
   const [spocs, setSpocs] = useState<Spoc[]>(initialSpocs);
   const [guests, setGuests] = useState<Guest[]>(initialGuests);
   const [spocSearch, setSpocSearch] = useState('');
@@ -68,7 +78,13 @@ export default function ManageEventClient({
       const res = await fetch(`/api/events/${event.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status, venue, summary, poster_ref: posterRef || null }),
+        body: JSON.stringify({
+          status,
+          venue,
+          summary,
+          poster_ref: posterRef || null,
+          food_coupon_config: foodConfig,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'Update failed.');
@@ -199,6 +215,111 @@ export default function ManageEventClient({
             <input type="text" value={venue} onChange={(e) => setVenue(e.target.value)} />
           </label>
           <ImageUploadField label="Event Thumbnail / Poster" folder="events" value={posterRef} onChange={setPosterRef} />
+
+          {/* Food Coupons Configuration */}
+          <div style={{ marginTop: 24, padding: 16, border: '1px solid var(--border-hairline)', borderRadius: 12, background: 'var(--surface-subtle)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <div>
+                <strong style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.9rem' }}>
+                  <UtensilsCrossed style={{ width: 16, height: 16, color: '#10B981' }} />
+                  Food Coupons &amp; Catering Passes
+                </strong>
+                <p style={{ margin: '4px 0 0', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                  Issue scannable meal coupons with auto-tearing QR codes to registered participants.
+                </p>
+              </div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', margin: 0 }}>
+                <input
+                  type="checkbox"
+                  checked={foodConfig.enabled}
+                  onChange={(e) => setFoodConfig((prev) => ({ ...prev, enabled: e.target.checked }))}
+                />
+                <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Enable Food Coupons</span>
+              </label>
+            </div>
+
+            {foodConfig.enabled && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, marginTop: 16 }}>
+                {(['breakfast', 'lunch', 'high_tea', 'dinner'] as const).map((mealType) => {
+                  const theme = MEAL_THEMES[mealType];
+                  const meal = foodConfig.meals[mealType];
+                  return (
+                    <div
+                      key={mealType}
+                      style={{
+                        padding: 12,
+                        borderRadius: 8,
+                        border: `1px solid ${meal.enabled ? 'rgba(16, 185, 129, 0.4)' : 'var(--border-hairline)'}`,
+                        background: 'var(--surface)',
+                      }}
+                    >
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', marginBottom: 8 }}>
+                        <input
+                          type="checkbox"
+                          checked={meal.enabled}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            setFoodConfig((prev) => ({
+                              ...prev,
+                              meals: {
+                                ...prev.meals,
+                                [mealType]: { ...prev.meals[mealType], enabled: checked },
+                              },
+                            }));
+                          }}
+                        />
+                        <span>{theme.icon}</span>
+                        <strong style={{ fontSize: '0.85rem' }}>{theme.title}</strong>
+                      </label>
+
+                      {meal.enabled && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
+                          <label style={{ fontSize: '0.75rem', margin: 0 }}>
+                            Quantity per attendee
+                            <input
+                              type="number"
+                              min={1}
+                              max={10}
+                              value={meal.quantity}
+                              onChange={(e) => {
+                                const qty = Math.max(1, parseInt(e.target.value) || 1);
+                                setFoodConfig((prev) => ({
+                                  ...prev,
+                                  meals: {
+                                    ...prev.meals,
+                                    [mealType]: { ...prev.meals[mealType], quantity: qty },
+                                  },
+                                }));
+                              }}
+                              style={{ width: '100%', marginTop: 4, padding: '4px 8px' }}
+                            />
+                          </label>
+
+                          <input
+                            type="text"
+                            value={meal.title || ''}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setFoodConfig((prev) => ({
+                                ...prev,
+                                meals: {
+                                  ...prev.meals,
+                                  [mealType]: { ...prev.meals[mealType], title: val },
+                                },
+                              }));
+                            }}
+                            placeholder={`Label (e.g. Day 1 ${theme.title})`}
+                            style={{ fontSize: '0.75rem', padding: '4px 8px' }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
           <button type="submit" disabled={busy}>
             Save Changes
           </button>
