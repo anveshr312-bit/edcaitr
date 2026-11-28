@@ -1,63 +1,96 @@
 import React from 'react';
 
+/**
+ * SkeletonBox: Theme-aware, subtle animated shimmer box
+ */
 export function SkeletonBox({
   width = '100%',
   height = 16,
-  borderRadius = 6,
-  dark = false,
+  borderRadius = 8,
+  className = '',
   style,
 }: {
   width?: string | number;
   height?: string | number;
   borderRadius?: number | string;
-  dark?: boolean;
+  dark?: boolean; // Deprecated, kept for backward compatibility
+  className?: string;
   style?: React.CSSProperties;
 }) {
   return (
     <div
       aria-hidden="true"
-      className={dark ? 'skeleton-dark' : 'skeleton'}
+      className={`skeleton rounded-lg ${className}`}
       style={{ width, height, borderRadius, ...style }}
     />
   );
 }
 
-export function CardGridSkeleton({ count = 6, hasPoster = false }: { count?: number; hasPoster?: boolean }) {
+/**
+ * PageHeaderSkeleton: Clean, neutral, theme-aware hero banner skeleton.
+ * Completely eliminates the harsh black column.
+ */
+export function PageHeaderSkeleton({ titleWidth = 260 }: { titleWidth?: number }) {
   return (
-    <div className="grid" aria-busy="true" aria-label="Loading content">
+    <div
+      aria-hidden="true"
+      className="rounded-2xl border border-[var(--border-hairline)] bg-[var(--surface-subtle)]/70 p-6 sm:p-10 mb-8 space-y-4"
+    >
+      <div className="flex items-center gap-2">
+        <SkeletonBox width={16} height={16} borderRadius={999} />
+        <SkeletonBox width={120} height={14} borderRadius={999} />
+      </div>
+      <SkeletonBox width={titleWidth} height={40} borderRadius={10} />
+      <SkeletonBox width="60%" height={16} borderRadius={6} />
+    </div>
+  );
+}
+
+/**
+ * Alias for backward compatibility - no longer renders a pitch-black box.
+ */
+export const DarkHeaderSkeleton = PageHeaderSkeleton;
+
+/**
+ * CardGridSkeleton: Frosted, clean skeleton cards with subtle hairline borders.
+ */
+export function CardGridSkeleton({
+  count = 6,
+  hasPoster = false,
+}: {
+  count?: number;
+  hasPoster?: boolean;
+}) {
+  return (
+    <div
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+      aria-busy="true"
+      aria-label="Loading content"
+    >
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="card" style={{ gap: 14 }}>
-          {hasPoster && <SkeletonBox height={180} borderRadius={8} />}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <SkeletonBox width={84} height={22} borderRadius={4} />
-            <SkeletonBox width={48} height={16} />
+        <div
+          key={i}
+          className="rounded-2xl border border-[var(--border-hairline)] bg-[var(--surface)] p-6 space-y-4 shadow-xs"
+        >
+          {hasPoster && (
+            <SkeletonBox height={180} borderRadius={12} className="w-full" />
+          )}
+          <div className="flex items-center justify-between">
+            <SkeletonBox width={84} height={20} borderRadius={999} />
+            <SkeletonBox width={50} height={16} borderRadius={6} />
           </div>
-          <SkeletonBox width="78%" height={22} />
-          <SkeletonBox width="100%" height={14} />
-          <SkeletonBox width="62%" height={14} />
-          <SkeletonBox width={120} height={34} borderRadius={999} style={{ marginTop: 6 }} />
+          <SkeletonBox width="85%" height={24} borderRadius={8} />
+          <div className="space-y-2 pt-1">
+            <SkeletonBox width="100%" height={14} borderRadius={6} />
+            <SkeletonBox width="65%" height={14} borderRadius={6} />
+          </div>
+          <div className="pt-2">
+            <SkeletonBox width={120} height={34} borderRadius={999} />
+          </div>
         </div>
       ))}
     </div>
   );
 }
 
-export function DarkHeaderSkeleton({ titleWidth = 220 }: { titleWidth?: number }) {
-  return (
-    <div
-      aria-hidden="true"
-      style={{
-        background: 'var(--color-2-mood)',
-        padding: '48px 36px',
-        marginLeft: -24,
-        marginRight: -24,
-        marginTop: -24,
-        marginBottom: 36,
-      }}
-    >
-      <SkeletonBox dark width={80} height={12} style={{ marginBottom: 14 }} />
-      <SkeletonBox dark width={titleWidth} height={36} style={{ marginBottom: 14 }} />
-      <SkeletonBox dark width="55%" height={16} />
-    </div>
-  );
-}
+export default SkeletonBox;

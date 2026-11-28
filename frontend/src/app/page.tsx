@@ -5,7 +5,7 @@ import { getPublicEvents } from '../lib/events/events';
 import { createPageMetadata, SITE_CONFIG } from '../lib/seo';
 import ReferenceHome from '../components/home/ReferenceHome';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 export const metadata: Metadata = createPageMetadata({
   title: SITE_CONFIG.defaultTitle,

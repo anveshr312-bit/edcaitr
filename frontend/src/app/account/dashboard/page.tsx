@@ -17,7 +17,7 @@ const ROLE_CONFIG: Record<
     description: 'Full organization-wide authority and security oversight.',
   },
   advisor: {
-    label: 'Faculty Advisor',
+    label: 'Advisor',
     badgeClass: 'badge badge-accent',
     description: 'Organization-wide guidance and team recruitment approval.',
   },

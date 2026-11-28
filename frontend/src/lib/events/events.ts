@@ -91,12 +91,26 @@ export interface PublicEventManual {
   file_size_kb: number | null;
 }
 
+let cachedEventsAll: { data: PublicEvent[]; timestamp: number } | null = null;
+let cachedEventsActive: { data: PublicEvent[]; timestamp: number } | null = null;
+let cachedTeamProfiles: { data: PublicTeamMember[]; timestamp: number } | null = null;
+const CACHE_TTL_MS = 30_000; // 30 seconds memory cache for lightning-fast loads
+
 export const getPublicTeamProfiles = cache(
   async (): Promise<PublicTeamMember[]> => {
+    const now = Date.now();
+    if (cachedTeamProfiles && now - cachedTeamProfiles.timestamp < CACHE_TTL_MS) {
+      return cachedTeamProfiles.data;
+    }
+
     const supabase = createPublicClient();
     if (!supabase) return [];
     const { data, error } = await supabase.rpc('get_public_team_profiles');
-    if (data && data.length > 0) return data as PublicTeamMember[];
+    if (data && data.length > 0) {
+      const res = data as PublicTeamMember[];
+      cachedTeamProfiles = { data: res, timestamp: now };
+      return res;
+    }
 
     // Fallback: Query all approved director, advisor, and core_team members directly
     // so any member who created their account automatically populates into EDC ANCHORS
@@ -108,7 +122,7 @@ export const getPublicTeamProfiles = cache(
       .is('effective_until', null);
 
     if (directMembers && directMembers.length > 0) {
-      return directMembers.map((m: any) => {
+      const res = directMembers.map((m: any) => {
         const p = Array.isArray(m.profiles) ? m.profiles[0] : m.profiles;
         return {
           id: p?.id ?? m.user_id,
@@ -122,6 +136,8 @@ export const getPublicTeamProfiles = cache(
           display_order: p?.display_order ?? 10,
         };
       });
+      cachedTeamProfiles = { data: res, timestamp: now };
+      return res;
     }
 
     return [];
@@ -139,6 +155,12 @@ export const getPublicPastTeams = cache(
 
 export const getPublicEvents = cache(
   async (includeArchived = false): Promise<PublicEvent[]> => {
+    const now = Date.now();
+    const cacheEntry = includeArchived ? cachedEventsAll : cachedEventsActive;
+    if (cacheEntry && now - cacheEntry.timestamp < CACHE_TTL_MS) {
+      return cacheEntry.data;
+    }
+
     const supabase = createPublicClient();
     if (!supabase) return [];
 
@@ -188,7 +210,14 @@ export const getPublicEvents = cache(
       return [];
     }
 
-    return (data as PublicEvent[]) ?? [];
+    const result = (data as PublicEvent[]) ?? [];
+    if (includeArchived) {
+      cachedEventsAll = { data: result, timestamp: now };
+    } else {
+      cachedEventsActive = { data: result, timestamp: now };
+    }
+
+    return result;
   }
 );
 

@@ -5,7 +5,8 @@ import { getImageKitUrl } from '../../lib/media/imagekit';
 import { createPageMetadata } from '../../lib/seo';
 import { BreadcrumbStructuredData } from '../../components/StructuredData';
 import { eventAvailability } from '../../lib/events/lifecycle';
-import { Calendar, MapPin, Ticket, ArrowRight, Sparkles, Radio, Award } from 'lucide-react';
+import { createClient } from '../../lib/supabase/server';
+import { Calendar, MapPin, Ticket, ArrowRight, Sparkles, Radio, Award, CheckCircle2, ExternalLink } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -48,7 +49,69 @@ const PAST_EDITIONS = [
 ];
 
 export default async function EventsPage() {
-  const events = await getPublicEvents(true);
+  const [events, supabase] = await Promise.all([
+    getPublicEvents(true),
+    createClient(),
+  ]);
+
+  let userRegistrations: Array<{
+    id: string;
+    status: string;
+    payment_status: string;
+    created_at: string;
+    events: {
+      id?: string;
+      title: string;
+      slug: string;
+      starts_at: string | null;
+      venue: string | null;
+      poster_ref: string | null;
+    } | null;
+  }> = [];
+
+  let userCertificates: Array<{
+    id: string;
+    certificate_code: string;
+    title: string;
+    issued_at: string;
+    event_id?: string;
+    events: {
+      title: string;
+      slug: string;
+    } | null;
+  }> = [];
+
+  if (supabase) {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        const [regRes, certRes] = await Promise.all([
+          supabase
+            .from('registrations')
+            .select('id, status, payment_status, created_at, events(id, title, slug, starts_at, venue, poster_ref)')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false }),
+          supabase
+            .from('certificates')
+            .select('id, certificate_code, title, issued_at, event_id, events(title, slug)')
+            .eq('user_id', user.id)
+            .order('issued_at', { ascending: false }),
+        ]);
+
+        if (regRes.data) {
+          userRegistrations = regRes.data as any;
+        }
+        if (certRes.data) {
+          userCertificates = certRes.data as any;
+        }
+      }
+    } catch {
+      // Graceful fallback if user session or database tables are unavailable
+    }
+  }
 
   // Group events by priority
   const liveEvents = events.filter((e) => eventAvailability(e).lifecycle === 'ongoing');
@@ -87,6 +150,165 @@ export default async function EventsPage() {
           </p>
         </div>
       </section>
+
+      {/* ── USER'S REGISTERED EVENTS & VERIFIED CERTIFICATES ── */}
+      {(userRegistrations.length > 0 || userCertificates.length > 0) && (
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#C01E30]" />
+              <h2 className="text-xs font-semibold tracking-wide text-[#C01E30] dark:text-[#E67C87]">
+                Events You Registered &amp; Verified Certificates
+              </h2>
+            </div>
+            <Link
+              href="/portal/registrations"
+              className="text-xs font-medium text-muted-foreground hover:text-[#C01E30] transition-colors inline-flex items-center gap-1"
+            >
+              <span>Manage all passes</span>
+              <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {userRegistrations.map((reg) => {
+              const ev = reg.events;
+              const matchingCert = userCertificates.find(
+                (c) => (c.event_id && ev?.id && c.event_id === ev.id) || (c.events?.slug === ev?.slug)
+              );
+
+              return (
+                <div
+                  key={reg.id}
+                  className="rounded-2xl border border-border/70 bg-card p-5 flex flex-col justify-between hover:border-border transition-all shadow-xs"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                        <CheckCircle2 className="h-3 w-3" />
+                        {reg.status === 'confirmed' ? 'Pass confirmed' : reg.status}
+                      </span>
+                      <span className="text-[10px] font-mono text-muted-foreground">
+                        {reg.payment_status === 'free' ? 'Free pass' : reg.payment_status}
+                      </span>
+                    </div>
+
+                    <div>
+                      <h3 className="text-base font-bold text-foreground leading-snug">
+                        {ev?.title ?? 'Registered Event'}
+                      </h3>
+                      {ev?.venue && (
+                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                          <MapPin className="h-3 w-3 text-muted-foreground/70" />
+                          <span>{ev.venue}</span>
+                        </p>
+                      )}
+                    </div>
+
+                    {matchingCert && (
+                      <div className="rounded-xl border border-amber-500/25 bg-amber-500/5 p-2.5 text-xs flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5 text-amber-700 dark:text-amber-400">
+                          <Award className="h-4 w-4 shrink-0" />
+                          <span className="font-semibold truncate">{matchingCert.title}</span>
+                        </div>
+                        <Link
+                          href="/portal/certificates"
+                          className="text-[10px] font-mono underline hover:text-amber-800 dark:hover:text-amber-300 shrink-0"
+                        >
+                          View cert →
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="pt-4 mt-4 border-t border-border/40 flex items-center justify-between gap-2">
+                    <div className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Calendar className="h-3.5 w-3.5 text-muted-foreground/70" />
+                      <span>
+                        {ev?.starts_at
+                          ? new Date(ev.starts_at).toLocaleDateString('en-IN', {
+                              day: 'numeric',
+                              month: 'short',
+                            })
+                          : 'Schedule TBA'}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5">
+                      {ev?.slug && (
+                        <Link
+                          href={`/events/${ev.slug}`}
+                          className="px-2.5 py-1.5 rounded-lg border border-border/60 hover:bg-secondary text-[11px] font-medium transition-colors"
+                        >
+                          Details
+                        </Link>
+                      )}
+                      <Link
+                        href={`/portal/registrations/${reg.id}`}
+                        className="px-3 py-1.5 rounded-lg bg-[#C01E30] hover:bg-[#a01828] text-white text-[11px] font-semibold transition-colors inline-flex items-center gap-1"
+                      >
+                        <Ticket className="h-3 w-3" />
+                        <span>View pass</span>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Standalone certificates that do not correspond to the shown registrations */}
+            {userCertificates
+              .filter(
+                (c) =>
+                  !userRegistrations.some(
+                    (r) => (c.event_id && r.events?.id && c.event_id === r.events.id) || (c.events?.slug === r.events?.slug)
+                  )
+              )
+              .map((cert) => (
+                <div
+                  key={cert.id}
+                  className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-5 flex flex-col justify-between hover:border-amber-500/50 transition-all shadow-xs"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/25">
+                        <Award className="h-3 w-3" />
+                        Official credential
+                      </span>
+                      <span className="text-[10px] font-mono text-muted-foreground truncate">
+                        {cert.certificate_code}
+                      </span>
+                    </div>
+
+                    <div>
+                      <h3 className="text-base font-bold text-foreground leading-snug">
+                        {cert.title}
+                      </h3>
+                      {cert.events?.title && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Conferred for {cert.events.title}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="pt-4 mt-4 border-t border-border/40 flex items-center justify-between gap-2">
+                    <span className="text-xs text-muted-foreground">
+                      Issued {new Date(cert.issued_at).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}
+                    </span>
+                    <Link
+                      href="/portal/certificates"
+                      className="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-semibold transition-colors inline-flex items-center gap-1"
+                    >
+                      <Award className="h-3 w-3" />
+                      <span>View certificate</span>
+                    </Link>
+                  </div>
+                </div>
+              ))}
+          </div>
+        </section>
+      )}
 
       {/* ── PRIORITY 1: LIVE NOW EVENTS (If active) ── */}
       {liveEvents.length > 0 && (

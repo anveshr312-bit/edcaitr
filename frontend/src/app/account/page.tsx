@@ -18,6 +18,7 @@ export default function Account() {
   const [supabase] = useState(() => createClient());
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isEdcAffiliated, setIsEdcAffiliated] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [checkingSession, setCheckingSession] = useState(true);
   const [message, setMessage] = useState('');
@@ -128,6 +129,16 @@ export default function Account() {
     try {
       const origin = window.location.origin;
       const callbackUrl = `${origin}/auth/callback?next=${encodeURIComponent(destination())}`;
+
+      if (action === 'login' || action === 'signup' || action === 'google') {
+        if (isEdcAffiliated) {
+          localStorage.setItem('edc_affiliation_requested', 'true');
+          localStorage.removeItem('edc_affiliation_answered');
+        } else {
+          localStorage.setItem('edc_affiliation_answered', 'participant');
+          localStorage.removeItem('edc_affiliation_requested');
+        }
+      }
 
       if (action === 'google') {
         const { error } = await supabase.auth.signInWithOAuth({
@@ -556,6 +567,36 @@ export default function Account() {
                 onChange={(e) => setPassword(e.target.value)}
                 wrapperClassName="bg-[var(--surface-subtle)] border-[var(--border-hairline)]"
               />
+            </div>
+          )}
+
+          {mode !== 'forgot_password' && (
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginTop: 4, marginBottom: 4 }}>
+              <input
+                type="checkbox"
+                id="edc-affiliation-checkbox"
+                checked={isEdcAffiliated}
+                onChange={(e) => setIsEdcAffiliated(e.target.checked)}
+                style={{
+                  marginTop: 2,
+                  height: 16,
+                  width: 16,
+                  accentColor: '#C01E30',
+                  cursor: 'pointer',
+                }}
+              />
+              <label
+                htmlFor="edc-affiliation-checkbox"
+                style={{
+                  fontSize: '0.8125rem',
+                  color: 'var(--text-secondary)',
+                  lineHeight: '1.35',
+                  cursor: 'pointer',
+                  userSelect: 'none',
+                }}
+              >
+                Are you an EDC team member, advisor, or alumnus?
+              </label>
             </div>
           )}
 

@@ -120,7 +120,8 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
     if (role === 'advisor') return ADVISOR_NAV_ITEMS;
     if (role === 'core_team') return CORE_TEAM_NAV_ITEMS;
     if (role === 'alumni') return ALUMNI_NAV_ITEMS;
-    return PARTICIPANT_NAV_ITEMS;
+    // Participants and guests browse the exact public website navigation
+    return PUBLIC_NAV_ITEMS;
   }, [user, role]);
 
   const activeIndex = Math.max(
@@ -197,21 +198,25 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
           </nav>
 
           {/* Actions: Search, Notifications, Switcher & Profile */}
-          <div className="order-2 flex shrink-0 items-center gap-1.5 sm:gap-2.5 md:order-3">
+          <div className="order-2 flex shrink-0 items-center gap-2 sm:gap-3 md:order-3">
             {/* Gooey search input */}
-            <GooeySearch
-              items={searchItems}
-              placeholder="Search..."
-              buttonLabel="Search"
-              onSelect={(item) => {
-                if (typeof item === 'object' && item.url) {
-                  router.push(item.url);
-                }
-              }}
-            />
+            <div className="relative shrink-0 z-10">
+              <GooeySearch
+                items={searchItems}
+                placeholder="Search..."
+                buttonLabel="Search"
+                onSelect={(item) => {
+                  if (typeof item === 'object' && item.url) {
+                    router.push(item.url);
+                  }
+                }}
+              />
+            </div>
 
             {/* Notification & Announcement Drawer */}
-            <NotificationsDrawer />
+            <div className="relative shrink-0 z-20">
+              <NotificationsDrawer />
+            </div>
 
             {/* Public Website vs Workspace Switcher for Staff */}
             {isStaffUser && (

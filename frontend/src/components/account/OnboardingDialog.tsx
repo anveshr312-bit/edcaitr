@@ -7,13 +7,12 @@ import {
   Users,
   GraduationCap,
   ShieldCheck,
-  Ticket,
   BookOpen,
   Calendar,
   Handshake,
   Clock,
   ArrowLeft,
-  Loader2,
+  X,
 } from "lucide-react";
 import { createClient } from "../../lib/supabase/client";
 
@@ -29,10 +28,12 @@ export function OnboardingDialog({ role }: Props) {
   const [supabase] = useState(() => createClient());
 
   useEffect(() => {
-    // Only show to participants who haven't completed or dismissed the onboarding prompt
+    // Only show to participants who explicitly indicated affiliation during sign in/up
+    // and have not yet completed or dismissed the onboarding choice.
     if (role === "participant") {
+      const requested = localStorage.getItem("edc_affiliation_requested");
       const answered = localStorage.getItem("edc_affiliation_answered");
-      if (!answered) {
+      if (requested === "true" && !answered) {
         setShow(true);
       }
     }
@@ -40,8 +41,9 @@ export function OnboardingDialog({ role }: Props) {
 
   if (!show) return null;
 
-  const handleParticipantChoice = () => {
+  const handleDismiss = () => {
     localStorage.setItem("edc_affiliation_answered", "participant");
+    localStorage.removeItem("edc_affiliation_requested");
     setShow(false);
   };
 
@@ -49,6 +51,7 @@ export function OnboardingDialog({ role }: Props) {
     setSaving(true);
     try {
       localStorage.setItem("edc_affiliation_answered", "core_team");
+      localStorage.removeItem("edc_affiliation_requested");
       if (domainValue) {
         localStorage.setItem("edc_core_team_domain", domainValue);
       }
@@ -187,99 +190,113 @@ export function OnboardingDialog({ role }: Props) {
             </div>
           </>
         ) : (
-          /* Step 1: Organization Role Selection */
+          /* Step 1: Organization Role Selection (Strictly 3 Options: Advisor, Core Team Member, Alumni) */
           <>
             <div className="flex items-center justify-between">
               <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full text-xs font-medium border border-border/80 bg-secondary/60 text-muted-foreground">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#C01E30]" />
-                First-time member setup
+                EDC AITR Affiliation Onboarding
               </div>
               <button
                 type="button"
-                onClick={handleParticipantChoice}
-                className="text-muted-foreground hover:text-foreground text-xs font-medium cursor-pointer"
+                onClick={handleDismiss}
+                className="text-muted-foreground hover:text-foreground text-xs font-medium inline-flex items-center gap-1 cursor-pointer"
               >
-                Skip for now
+                <X className="h-3.5 w-3.5" />
+                <span>Dismiss</span>
               </button>
             </div>
 
             <div>
               <h3 className="text-base sm:text-lg font-bold text-foreground tracking-tight">
-                Are you an active or past member of EDC AITR?
+                Select your official EDC AITR role
               </h3>
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mt-1">
-                Let us know your affiliation so we can tailor your workspace, permissions, and directory access.
+                You indicated that you are part of EDC AITR. Please select your role to configure your verified profile and workspace access:
               </p>
             </div>
 
-            {/* 4 Affiliation Options */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
-              {/* Option 1: Participant */}
-              <button
-                type="button"
-                onClick={handleParticipantChoice}
-                className="flex flex-col text-left p-4 rounded-xl border border-border/60 bg-background/50 hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all group cursor-pointer"
+            {/* Exactly 3 Affiliation Options */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+              {/* Option 1: Advisor */}
+              <Link
+                href="/account/apply?role=advisor"
+                onClick={() => {
+                  localStorage.setItem("edc_affiliation_answered", "advisor");
+                  localStorage.removeItem("edc_affiliation_requested");
+                }}
+                className="flex flex-col justify-between text-left p-5 rounded-xl border border-border/60 bg-background/50 hover:border-[#C01E30]/50 hover:bg-[#C01E30]/5 transition-all group"
               >
-                <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center mb-2.5">
-                  <Ticket className="h-4 w-4" />
+                <div>
+                  <div className="w-9 h-9 rounded-lg bg-[#C01E30]/10 text-[#C01E30] flex items-center justify-center mb-3">
+                    <ShieldCheck className="h-5 w-5" />
+                  </div>
+                  <h4 className="text-sm font-bold text-foreground group-hover:text-[#C01E30]">
+                    Advisor
+                  </h4>
+                  <div className="text-[10px] font-mono text-[#C01E30] dark:text-[#E67C87] mt-0.5">
+                    Advisory Board &amp; Guidance
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed mt-2">
+                    Advisory board members, alumni entrepreneurs, and faculty mentors guiding institutional policy and ecosystem initiatives.
+                  </p>
                 </div>
-                <h4 className="text-xs font-bold text-foreground group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
-                  Event Participant
-                </h4>
-                <p className="text-[11px] text-muted-foreground leading-relaxed mt-1">
-                  Attending summits, hackathons, or pitching at investor arenas.
-                </p>
-              </button>
+                <div className="pt-3 mt-3 border-t border-border/30 text-xs font-semibold text-[#C01E30] inline-flex items-center gap-1">
+                  <span>Complete advisor profile →</span>
+                </div>
+              </Link>
 
-              {/* Option 2: Core Team -> triggers Step 2 */}
+              {/* Option 2: Core Team Member */}
               <button
                 type="button"
                 onClick={() => setCoreTeamDomainStep(true)}
-                className="flex flex-col text-left p-4 rounded-xl border border-border/60 bg-background/50 hover:border-[#C01E30]/50 hover:bg-[#C01E30]/5 transition-all group cursor-pointer"
+                className="flex flex-col justify-between text-left p-5 rounded-xl border border-border/60 bg-background/50 hover:border-[#C01E30]/50 hover:bg-[#C01E30]/5 transition-all group cursor-pointer"
               >
-                <div className="w-8 h-8 rounded-lg bg-[#C01E30]/10 text-[#C01E30] flex items-center justify-center mb-2.5">
-                  <Users className="h-4 w-4" />
+                <div>
+                  <div className="w-9 h-9 rounded-lg bg-[#C01E30]/10 text-[#C01E30] flex items-center justify-center mb-3">
+                    <Users className="h-5 w-5" />
+                  </div>
+                  <h4 className="text-sm font-bold text-foreground group-hover:text-[#C01E30]">
+                    Core Team Member
+                  </h4>
+                  <div className="text-[10px] font-mono text-[#C01E30] dark:text-[#E67C87] mt-0.5">
+                    Student Leadership &amp; Operations
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed mt-2">
+                    Active student coordinators driving Research &amp; Digital, Programs &amp; Experiences, or Partnerships &amp; Ecosystem.
+                  </p>
                 </div>
-                <h4 className="text-xs font-bold text-foreground group-hover:text-[#C01E30]">
-                  Core Team Member
-                </h4>
-                <p className="text-[11px] text-muted-foreground leading-relaxed mt-1">
-                  Active student coordinator in Research, Programs, or Partnerships.
-                </p>
+                <div className="pt-3 mt-3 border-t border-border/30 text-xs font-semibold text-[#C01E30] inline-flex items-center gap-1">
+                  <span>Select operational domain →</span>
+                </div>
               </button>
 
               {/* Option 3: Alumni */}
               <Link
                 href="/account/apply?role=alumni"
-                onClick={() => localStorage.setItem("edc_affiliation_answered", "alumni")}
-                className="flex flex-col text-left p-4 rounded-xl border border-border/60 bg-background/50 hover:border-[#C01E30]/50 hover:bg-[#C01E30]/5 transition-all group"
+                onClick={() => {
+                  localStorage.setItem("edc_affiliation_answered", "alumni");
+                  localStorage.removeItem("edc_affiliation_requested");
+                }}
+                className="flex flex-col justify-between text-left p-5 rounded-xl border border-border/60 bg-background/50 hover:border-[#C01E30]/50 hover:bg-[#C01E30]/5 transition-all group"
               >
-                <div className="w-8 h-8 rounded-lg bg-[#C01E30]/10 text-[#C01E30] flex items-center justify-center mb-2.5">
-                  <GraduationCap className="h-4 w-4" />
+                <div>
+                  <div className="w-9 h-9 rounded-lg bg-[#C01E30]/10 text-[#C01E30] flex items-center justify-center mb-3">
+                    <GraduationCap className="h-5 w-5" />
+                  </div>
+                  <h4 className="text-sm font-bold text-foreground group-hover:text-[#C01E30]">
+                    Alumni
+                  </h4>
+                  <div className="text-[10px] font-mono text-[#C01E30] dark:text-[#E67C87] mt-0.5">
+                    Founder &amp; Industry Network
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed mt-2">
+                    Former EDC AITR coordinators and student leaders who have graduated and are pursuing ventures or careers.
+                  </p>
                 </div>
-                <h4 className="text-xs font-bold text-foreground group-hover:text-[#C01E30]">
-                  EDC Alumnus
-                </h4>
-                <p className="text-[11px] text-muted-foreground leading-relaxed mt-1">
-                  Former student cell member now working in industry or running a venture.
-                </p>
-              </Link>
-
-              {/* Option 4: Advisor */}
-              <Link
-                href="/account/apply?role=advisor"
-                onClick={() => localStorage.setItem("edc_affiliation_answered", "advisor")}
-                className="flex flex-col text-left p-4 rounded-xl border border-border/60 bg-background/50 hover:border-[#C01E30]/50 hover:bg-[#C01E30]/5 transition-all group"
-              >
-                <div className="w-8 h-8 rounded-lg bg-[#C01E30]/10 text-[#C01E30] flex items-center justify-center mb-2.5">
-                  <ShieldCheck className="h-4 w-4" />
+                <div className="pt-3 mt-3 border-t border-border/30 text-xs font-semibold text-[#C01E30] inline-flex items-center gap-1">
+                  <span>Join alumni network →</span>
                 </div>
-                <h4 className="text-xs font-bold text-foreground group-hover:text-[#C01E30]">
-                  Faculty Advisor
-                </h4>
-                <p className="text-[11px] text-muted-foreground leading-relaxed mt-1">
-                  Acropolis faculty mentor or institutional advisory board member.
-                </p>
               </Link>
             </div>
           </>

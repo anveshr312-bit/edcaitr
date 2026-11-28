@@ -73,23 +73,23 @@ export function NotificationsDrawer() {
   const unreadCount = notifications.filter((n) => n.unread).length;
 
   return (
-    <div className="relative inline-block" ref={containerRef}>
+    <div className="relative shrink-0 z-20 flex items-center" ref={containerRef}>
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="relative flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full border border-border/50 bg-secondary/50 text-foreground hover:bg-secondary transition-all cursor-pointer"
+        className="relative flex h-9 w-9 items-center justify-center rounded-full border border-border/70 bg-secondary/80 text-foreground hover:text-[#C01E30] hover:border-[#C01E30]/40 hover:bg-secondary transition-all cursor-pointer shrink-0"
         aria-label="View notifications and announcements"
       >
-        <Bell className="h-4 w-4" />
+        <Bell className="h-4 w-4 shrink-0" />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#C01E30] text-[10px] font-bold text-white shadow-sm animate-pulse">
+          <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#C01E30] text-[10px] font-bold text-white shadow-xs animate-pulse">
             {unreadCount}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-[340px] sm:w-[380px] rounded-2xl border border-border/60 bg-card p-4 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed sm:absolute right-4 sm:right-0 top-16 sm:top-full mt-2 w-[calc(100vw-32px)] sm:w-[380px] max-w-[380px] rounded-2xl border border-border/70 bg-card p-4 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-150">
           {/* Header tabs */}
           <div className="flex items-center justify-between border-b border-border/40 pb-3 mb-3">
             <div className="flex gap-1 p-1 bg-secondary/60 rounded-xl">
