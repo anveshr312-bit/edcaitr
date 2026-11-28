@@ -146,39 +146,203 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* 12 Operational Teams Breakdown */}
+      {/* Operational Anatomy: 3 Domains Breakdown */}
       <section style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
         <div style={{ marginBottom: 28 }}>
           <h2 style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.02em', color: 'var(--text-muted)', margin: '0 0 8px', borderLeft: '3px solid var(--color-3-accent-personality)', paddingLeft: 12 }}>
             Operational Anatomy
           </h2>
           <div style={{ fontSize: 'clamp(1.5rem, 2.8vw, 2.2rem)', fontWeight: 800 }}>
-            The 12 Confirmed Teams
+            The 3 Operating Domains
           </div>
+          <p style={{ margin: '8px 0 0', fontSize: '0.95rem', color: 'var(--text-secondary)', maxWidth: 680, lineHeight: 1.6 }}>
+            Every active core member and operational workflow in EDC AITR is organized across three foundational pillars, driving research-backed intelligence, flawless conclave experiences, and strategic ecosystem alliances.
+          </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14 }}>
-          {[
-            { name: 'Research & Development (RD)', desc: 'Problem curation, hackathon frameworks, judge scoring grids & innovation benchmarks.' },
-            { name: 'Audio / Visual (AV)', desc: 'Professional audio mix, live feeds, multi-display projection & stage lighting management.' },
-            { name: 'Stage Management', desc: 'Dignitary cueing, run-of-show synchronization & speaker introduction management.' },
-            { name: 'Logistics', desc: 'Material procurement, technical apparatus setup, vendor contracts & venue layout.' },
-            { name: 'Crowd Management', desc: 'Auditorium flow, QR gate access verification, turnstile flow & safety.' },
-            { name: 'CLIX (Photo & Media)', desc: 'High-speed event photography, official session recording, reels & photo archives.' },
-            { name: 'Guest Relations', desc: 'VIP dignitary protocol, airport/hotel transit, green-room hospitality & gifting.' },
-            { name: 'Documentation', desc: 'Pre-event briefs, post-event analytics, institutional reporting & governance records.' },
-            { name: 'Anchoring', desc: 'Stage hosts, keynote emcees, debate moderators & interactive crowd engagement.' },
-            { name: 'Design & Visuals', desc: 'Stage wraps, digital promotional collateral, credentials, passes & certificate design.' },
-            { name: 'Video Production', desc: 'Aftermovies, teaser promos, founder interviews & cinematic broadcast reels.' },
-            { name: 'Social Media & Outreach', desc: 'Live event coverage on @edc_acropolis, press coordination & campus ambassador network.' },
-          ].map((t) => (
-            <div key={t.name} className="card" style={{ padding: '18px 20px' }}>
-              <h3 style={{ margin: '0 0 6px', fontSize: '0.95rem', fontWeight: 700 }}>{t.name}</h3>
-              <p style={{ margin: 0, fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.55 }}>
-                {t.desc}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20 }}>
+          {/* Domain 1: Research & Digital Communications */}
+          <div
+            className="card"
+            style={{
+              padding: '28px 24px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              border: '1px solid var(--border-hairline)',
+              borderRadius: 'var(--radius-panel)',
+              background: 'var(--surface)',
+            }}
+          >
+            <div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 12px', borderRadius: 999, background: 'rgba(192, 30, 48, 0.08)', color: 'var(--color-3-accent-personality)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 16 }}>
+                Pillar 01 · Knowledge &amp; Media
+              </div>
+              <h3 style={{ margin: '0 0 6px', fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+                Research &amp; Digital Communications
+              </h3>
+              <p style={{ margin: '0 0 18px', fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                Synthesizing founder intelligence, analyzing emerging market sectors, and directing all creative, cinematic, and digital touchpoints across campus and social media.
               </p>
+
+              <div style={{ borderTop: '1px solid var(--border-hairline)', paddingTop: 16, display: 'grid', gap: 12 }}>
+                <div>
+                  <div style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2 }}>
+                    Market &amp; Venture Research
+                  </div>
+                  <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                    Problem statement curation, investor market briefs, government scheme radars, and founder case studies.
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2 }}>
+                    Design &amp; Brand Systems
+                  </div>
+                  <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                    Conclave stage wraps, delegate passes, digital banners, editorial layouts, and typography systems.
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2 }}>
+                    CLIX, Media &amp; Video Production
+                  </div>
+                  <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                    Cinematic aftermovies, speaker interview podcasts, live photography archives, and dynamic reels.
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2 }}>
+                    Editorial &amp; Outreach Strategy
+                  </div>
+                  <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                    Official documentation, governance records, campus ambassador network, and social outreach (@edc_acropolis).
+                  </div>
+                </div>
+              </div>
             </div>
-          ))}
+          </div>
+
+          {/* Domain 2: Programs & Experiences */}
+          <div
+            className="card"
+            style={{
+              padding: '28px 24px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              border: '1px solid var(--border-hairline)',
+              borderRadius: 'var(--radius-panel)',
+              background: 'var(--surface)',
+            }}
+          >
+            <div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 12px', borderRadius: 999, background: 'rgba(192, 30, 48, 0.08)', color: 'var(--color-3-accent-personality)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 16 }}>
+                Pillar 02 · Conclaves &amp; Production
+              </div>
+              <h3 style={{ margin: '0 0 6px', fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+                Programs &amp; Experiences
+              </h3>
+              <p style={{ margin: '0 0 18px', fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                Architecting flagship hackathons, masterclasses, and investor summits with rigorous stage management, audio-visual excellence, and seamless gate flow.
+              </p>
+
+              <div style={{ borderTop: '1px solid var(--border-hairline)', paddingTop: 16, display: 'grid', gap: 12 }}>
+                <div>
+                  <div style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2 }}>
+                    Hackathons &amp; Pitch Competitions
+                  </div>
+                  <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                    Kriyeta hackathon framework, PitchBiz investor arenas, judge scoring rubrics, and prototype tracks.
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2 }}>
+                    Stage Management &amp; Emceeing
+                  </div>
+                  <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                    Dignitary cueing, run-of-show synchronization, professional anchoring, and fireside keynotes.
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2 }}>
+                    Audio / Visual (AV) Engineering
+                  </div>
+                  <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                    Multi-feed projection, auditorium acoustics, live streaming consoles, and atmospheric stage lighting.
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2 }}>
+                    Gate &amp; Crowd Logistics
+                  </div>
+                  <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                    QR delegate pass check-in, turnstile safety protocols, venue apparatus staging, and vendor coordination.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Domain 3: Partnerships & Ecosystem Relations */}
+          <div
+            className="card"
+            style={{
+              padding: '28px 24px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              border: '1px solid var(--border-hairline)',
+              borderRadius: 'var(--radius-panel)',
+              background: 'var(--surface)',
+            }}
+          >
+            <div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 12px', borderRadius: 999, background: 'rgba(192, 30, 48, 0.08)', color: 'var(--color-3-accent-personality)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 16 }}>
+                Pillar 03 · Alliances &amp; Capital
+              </div>
+              <h3 style={{ margin: '0 0 6px', fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+                Partnerships &amp; Ecosystem Relations
+              </h3>
+              <p style={{ margin: '0 0 18px', fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                Forging long-term corporate sponsorships, angel syndicate ties, institutional MoUs, and managing high-trust VIP dignitary hospitality.
+              </p>
+
+              <div style={{ borderTop: '1px solid var(--border-hairline)', paddingTop: 16, display: 'grid', gap: 12 }}>
+                <div>
+                  <div style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2 }}>
+                    Corporate Sponsorships &amp; Grants
+                  </div>
+                  <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                    Venture title sponsorships, prize pool underwriting, brand booth fulfillment, and corporate deliverables.
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2 }}>
+                    Institutional Alliances &amp; MoUs
+                  </div>
+                  <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                    Incubator MoUs via AIIH Foundation, chamber of commerce partnerships, and national accelerator conduits.
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2 }}>
+                    Guest Protocol &amp; Hospitality
+                  </div>
+                  <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                    VIP keynote speakers, angel investor hosting, transit logistics, green room protocol, and felicitation.
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2 }}>
+                    Alumni Founder Network
+                  </div>
+                  <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                    Startup founder mentorship circles, investment syndication, and graduate career referrals.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

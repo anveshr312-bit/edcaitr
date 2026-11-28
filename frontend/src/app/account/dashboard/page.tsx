@@ -295,7 +295,7 @@ export default async function DashboardPage() {
                   My Event Work
                 </h3>
                 <p className="card-meta" style={{ margin: 0, lineHeight: 1.5 }}>
-                  View assigned operational tasks across the 12 confirmed teams (RD, AV, Logistics, Stage, Clix, and more).
+                  View assigned operational tasks across our 3 official domains (Research &amp; Digital, Programs &amp; Experiences, Partnerships &amp; Ecosystem).
                 </p>
               </div>
               <div style={{ marginTop: 20, paddingTop: 14, borderTop: '1px solid var(--border-hairline)' }}>

@@ -68,7 +68,7 @@ export default async function EventTeamsPage({
           <div>
             <h1 style={{ margin: '0 0 6px', fontSize: 'clamp(1.4rem, 2.6vw, 2rem)', fontWeight: 700, color: 'var(--text-primary)' }}>Operational Teams</h1>
             <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 14 }}>
-              {normalizedMembers.length} member{normalizedMembers.length !== 1 ? 's' : ''} across 12 confirmed teams.
+              {normalizedMembers.length} member{normalizedMembers.length !== 1 ? 's' : ''} assigned across operational squads.
             </p>
           </div>
         </div>
