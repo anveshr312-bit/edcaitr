@@ -32,7 +32,7 @@ const PRESET_BANNERS: Array<{ label: string; src: string; alt: string }> = [
     alt: 'Student builders collaborating during hackathon sprint',
   },
   {
-    label: 'CSI FabLab',
+    label: 'AIIH FabLab',
     src: EDITORIAL_IMAGES.csiFablab,
     alt: 'Campus Startup Initiative prototyping floor at AIIH',
   },

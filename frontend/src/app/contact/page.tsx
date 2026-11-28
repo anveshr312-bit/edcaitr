@@ -1,33 +1,7 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
-
-const COORDINATORS = [
-  {
-    name: 'Kavyansh Singh Rajput',
-    role: 'Lead Coordinator',
-    phone: '+91 8839988997',
-    email: 'kavyanshsinghrajput@gmail.com',
-  },
-  {
-    name: 'Pradhyumn Mehta',
-    role: 'Event Coordinator',
-    phone: '+91 8770527096',
-    email: 'pradhyumnmehta231355@acropolis.in',
-  },
-  {
-    name: 'Ishaan Dadoo',
-    role: 'Operations Coordinator',
-    phone: '+91 6232400399',
-    email: 'ishaandadoo230858@acropolis.in',
-  },
-  {
-    name: 'Prince Joshi',
-    role: 'Corporate & Media Coordinator',
-    phone: '+91 8209657305',
-    email: 'princejoshi0290@gmail.com',
-  },
-];
+import { Mail, MapPin, Building, Clock, ArrowRight, Camera } from 'lucide-react';
 
 export default function ContactPage() {
   const [name, setName] = useState('');
@@ -53,7 +27,7 @@ export default function ContactPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'Failed to send inquiry.');
 
-      setStatus('Thank you! Your message has been received by the EDC AITR team.');
+      setStatus('Thank you. Your message has been received by the EDC AITR Secretariat.');
       setName('');
       setEmail('');
       setSubject('');
@@ -67,32 +41,32 @@ export default function ContactPage() {
   }
 
   return (
-    <div style={{ display: 'grid', gap: 56 }}>
+    <div style={{ display: 'grid', gap: 48 }}>
       {/* Light Header Band */}
-      <section className="card" style={{ background: 'var(--surface)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--radius-panel)', padding: 'clamp(32px, 4vw, 48px)', margin: 0 }}>
+      <section className="card" style={{ background: 'var(--surface)', border: '1px solid var(--border-hairline)', borderRadius: 'var(--radius-panel)', padding: 'clamp(28px, 4vw, 44px)', margin: 0 }}>
         <div style={{ maxWidth: 1100 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 10px', borderRadius: 4, background: 'var(--accent-tint)', border: '1px solid rgba(192,30,48,0.2)', marginBottom: 12 }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-3-accent-personality)' }} />
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.02em', color: 'var(--color-3-accent-personality)' }}>
-              Get in Touch
+              Institutional Inquiries
             </span>
           </div>
           <h1 style={{ margin: '0 0 12px', fontSize: 'clamp(1.8rem, 3.2vw, 2.6rem)', fontWeight: 800, lineHeight: 1.15, color: 'var(--text-primary)' }}>
             Contact &amp; Partnerships
           </h1>
           <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 15, maxWidth: 640, lineHeight: 1.65 }}>
-            Partner with E-Summit 2026, sponsor an event track, inquire about startup pitching, or connect with our student coordinators.
+            Partner with E-Summit 2026, sponsor an event track, inquire about startup pitching, or connect with the EDC AITR Secretariat and AIIH Foundation.
           </p>
         </div>
       </section>
 
-      {/* Main Grid: Form Left, Direct Info Right */}
-      <section style={{ maxWidth: 1100, margin: '0 auto', width: '100%', display: 'grid', gridTemplateColumns: 'minmax(0,1.3fr) minmax(280px,1fr)', gap: 40, alignItems: 'start' }}>
+      {/* Main Grid: Form Left, Institutional Info Right */}
+      <section style={{ maxWidth: 1100, margin: '0 auto', width: '100%', display: 'grid', gridTemplateColumns: 'minmax(0,1.3fr) minmax(280px,1fr)', gap: 36, alignItems: 'start' }}>
         {/* Form Card */}
-        <div className="card" style={{ padding: '36px 32px' }}>
-          <h2 style={{ margin: '0 0 8px', fontSize: '1.3rem', fontWeight: 800 }}>Send Us a Message</h2>
+        <div className="card" style={{ padding: '32px 28px' }}>
+          <h2 style={{ margin: '0 0 8px', fontSize: '1.25rem', fontWeight: 800 }}>Send Us a Message</h2>
           <p style={{ margin: '0 0 24px', fontSize: 14, color: 'var(--text-secondary)' }}>
-            We typically respond within 1–2 business days. For urgent sponsorship inquiries, please reach out directly to the coordinators listed.
+            Inquiries are routed directly to the cell coordinators and responded to within 1–2 working days.
           </p>
 
           {status && !isError ? (
@@ -103,7 +77,7 @@ export default function ContactPage() {
               <p style={{ margin: 0, color: 'var(--success)', fontWeight: 600 }}>{status}</p>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 18 }}>
+            <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 16 }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                 <label style={{ display: 'grid', gap: 6 }}>
                   <span style={{ fontWeight: 600, fontSize: 13 }}>Full Name *</span>
@@ -133,7 +107,7 @@ export default function ContactPage() {
               </div>
 
               <label style={{ display: 'grid', gap: 6 }}>
-                <span style={{ fontWeight: 600, fontSize: 13 }}>Subject / Partnership Interest *</span>
+                <span style={{ fontWeight: 600, fontSize: 13 }}>Subject / Partnership Track *</span>
                 <input
                   type="text"
                   required
@@ -172,64 +146,98 @@ export default function ContactPage() {
           )}
         </div>
 
-        {/* Sidebar: Direct Contacts & Campus Information */}
-        <aside style={{ display: 'grid', gap: 20 }}>
-          {/* Instagram Community Card */}
-          <div className="card" style={{ padding: '24px', background: 'var(--surface)', border: '1px solid var(--border-hairline)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-3-accent-personality)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
-                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
-                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
-              </svg>
-              <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>Official Instagram</h3>
+        {/* Sidebar: Official Desk Channels & Campus Location */}
+        <aside style={{ display: 'grid', gap: 18 }}>
+          {/* Official Secretariat Desks Card */}
+          <div className="card" style={{ padding: '22px 24px', background: 'var(--surface)', border: '1px solid var(--border-hairline)' }}>
+            <h3 style={{ margin: '0 0 14px', fontSize: '0.8125rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)' }}>
+              Official Communication Channels
+            </h3>
+            <div style={{ display: 'grid', gap: 14 }}>
+              <div style={{ borderBottom: '1px solid var(--border-hairline)', paddingBottom: 10 }}>
+                <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--text-primary)' }}>General Secretariat &amp; Inquiries</div>
+                <div style={{ fontSize: 13, color: 'var(--color-3-accent-personality)', marginTop: 2, fontFamily: 'monospace' }}>
+                  edc@acropolis.in
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
+                  Official mailbox for student queries, memberships, and institutional notices.
+                </div>
+              </div>
+
+              <div style={{ borderBottom: '1px solid var(--border-hairline)', paddingBottom: 10 }}>
+                <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--text-primary)' }}>Partnerships &amp; Conclave Sponsorships</div>
+                <div style={{ fontSize: 13, color: 'var(--color-3-accent-personality)', marginTop: 2, fontFamily: 'monospace' }}>
+                  partnerships@acropolis.in
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
+                  Corporate tie-ups, event track underwriting, and PitchBiz investor relations.
+                </div>
+              </div>
+
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--text-primary)' }}>AIIH Foundation Incubation Desk</div>
+                <div style={{ fontSize: 13, color: 'var(--color-3-accent-personality)', marginTop: 2, fontFamily: 'monospace' }}>
+                  aiih@acropolis.in
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
+                  Pre-incubation lab access, prototyping fablab hours, and seed grant routing.
+                </div>
+              </div>
             </div>
-            <p style={{ margin: '0 0 14px', fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.55 }}>
-              Follow our daily summit reveals, behind-the-scenes preparation, and speaker updates.
+          </div>
+
+          {/* Operating Hours Card */}
+          <div className="card" style={{ padding: '20px 24px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <Clock style={{ width: 16, height: 16, color: 'var(--color-3-accent-personality)' }} />
+              <h3 style={{ margin: 0, fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                Office Working Hours
+              </h3>
+            </div>
+            <p style={{ margin: 0, fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.55 }}>
+              Monday – Saturday · 09:30 to 17:30 IST
+            </p>
+            <p style={{ margin: '4px 0 0', fontSize: 12, color: 'var(--text-muted)' }}>
+              Closed on 2nd &amp; 4th Saturdays, Sundays, and public holidays.
+            </p>
+          </div>
+
+          {/* Official Instagram Card */}
+          <div className="card" style={{ padding: '20px 24px', background: 'var(--surface)', border: '1px solid var(--border-hairline)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+              <Camera style={{ width: 18, height: 18, color: 'var(--color-3-accent-personality)' }} />
+              <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)' }}>Official Instagram</h3>
+            </div>
+            <p style={{ margin: '0 0 12px', fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+              Live conclave broadcasts, speaker announcements, and event highlights.
             </p>
             <a
               href="https://www.instagram.com/edc_acropolis"
               target="_blank"
               rel="noopener noreferrer"
               className="btn btn-primary"
-              style={{ fontSize: 13, padding: '8px 18px', width: 'fit-content' }}
+              style={{ fontSize: 12, padding: '6px 14px', width: 'fit-content' }}
             >
               @edc_acropolis →
             </a>
           </div>
 
-          {/* Coordinators Card */}
-          <div className="card" style={{ padding: '24px' }}>
-            <h3 style={{ margin: '0 0 16px', fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>
-              Direct Student Leads
-            </h3>
-            <div style={{ display: 'grid', gap: 14 }}>
-              {COORDINATORS.map((c) => (
-                <div key={c.name} style={{ borderBottom: '1px solid var(--border-hairline)', paddingBottom: 10 }}>
-                  <div style={{ fontWeight: 700, fontSize: 14 }}>{c.name}</div>
-                  <div className="mono-meta" style={{ fontSize: 11, color: 'var(--color-3-accent-personality)', marginBottom: 4 }}>
-                    {c.role}
-                  </div>
-                  <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{c.phone}</div>
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{c.email}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-
           {/* Campus Location Card */}
-          <div className="card" style={{ padding: '24px' }}>
-            <h3 style={{ margin: '0 0 10px', fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>
-              Campus Venue
-            </h3>
-            <p style={{ margin: '0 0 6px', fontSize: 14, fontWeight: 700 }}>
+          <div className="card" style={{ padding: '20px 24px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <MapPin style={{ width: 16, height: 16, color: 'var(--color-3-accent-personality)' }} />
+              <h3 style={{ margin: 0, fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                Campus Venue &amp; Secretariat
+              </h3>
+            </div>
+            <p style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 700 }}>
               Acropolis Institute of Technology &amp; Research (AITR)
             </p>
-            <p style={{ margin: 0, fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.55 }}>
+            <p style={{ margin: 0, fontSize: 12.5, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
               Bypass Road, Manglia Square, Indore, Madhya Pradesh 453771
             </p>
-            <div style={{ marginTop: 12, fontSize: 12, color: 'var(--text-muted)' }}>
-              Transit: Direct Acropolis buses operational from Indore, Dewas, Ujjain, and Maksi.
+            <div style={{ marginTop: 8, fontSize: 11.5, color: 'var(--text-muted)' }}>
+              Transit: Direct Acropolis institutional transit active from Indore, Dewas, Ujjain, and Maksi.
             </div>
           </div>
         </aside>

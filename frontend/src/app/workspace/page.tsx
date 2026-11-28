@@ -252,14 +252,14 @@ export default async function WorkspaceHomePage() {
 
                 <div style={{ padding: '16px', borderRadius: 12, background: 'var(--surface-subtle)', border: '1px solid var(--border-hairline)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, color: 'var(--color-3-accent-personality)' }}>
-                    <Ticket style={{ width: 16, height: 16 }} />
+                    <CheckCircle2 style={{ width: 16, height: 16 }} />
                     <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>Live Gate &amp; Check-in</span>
                   </div>
                   <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', margin: '0 0 12px', lineHeight: 1.5 }}>
-                    Monitor real-time attendee arrivals, validate digital passes, and oversee automated badge and food coupon check-in.
+                    Monitor real-time attendee admissions, verify QR registrations, and oversee accreditation check-in.
                   </p>
                   <Link href="/workspace/events" style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-3-accent-personality)', textDecoration: 'none' }}>
-                    Gate Scanner →
+                    Gate Admissions →
                   </Link>
                 </div>
               </div>

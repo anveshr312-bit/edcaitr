@@ -166,7 +166,7 @@ export function GooeySearch({
     "PitchBiz 5.0 Conclave",
     "FOKUS X E-Summit 2026",
     "Kriyeta Hackathon",
-    "Campus Startup Initiative (CSI)",
+    "AIIH Incubation Hub",
     "AIIH Pre-Incubation Bay",
     "EDC Anchors & Mentors",
   ],

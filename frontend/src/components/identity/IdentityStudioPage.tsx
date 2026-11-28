@@ -1552,7 +1552,7 @@ export const IdentityStudioPage: React.FC = () => {
                             type="text"
                             value={draft.designation}
                             onChange={(e) => updateDraft('designation', e.target.value)}
-                            placeholder="e.g. Student Builder · CSI Cohort 05"
+                            placeholder="e.g. Student Builder · AIIH Pre-Incubation"
                             className="w-full px-3 py-2 text-sm rounded-[8px] bg-[var(--surface)] border border-[var(--border-strong)] text-[var(--color-2-mood)] focus:outline-none focus:border-[#C01E30]"
                           />
                         </div>

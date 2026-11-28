@@ -91,11 +91,11 @@ export const INITIATIVES = [
     image: EDITORIAL_IMAGES.pitchbizArena,
   },
   {
-    code: 'CSI',
-    title: 'Campus Startup Initiative',
+    code: 'INCUBATION',
+    title: 'AIIH Venture Pre-Incubation',
     summary:
-      'Structured 8-month venture pre-incubation cohort co-run with AIIH Foundation offering fablabs, cloud credits, and milestone reviews.',
-    cadence: '8-Month Cohort · AIIH Backed',
+      'Structured venture pre-incubation cohort co-run with AIIH Foundation offering prototyping labs, cloud credits, and milestone reviews.',
+    cadence: 'Multi-Stage · AIIH Backed',
     linkedSlug: 'founder-masterclass-unit-economics',
     image: EDITORIAL_IMAGES.csiFablab,
   },

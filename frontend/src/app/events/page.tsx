@@ -461,23 +461,23 @@ export default async function EventsPage() {
             </div>
           </div>
 
-          {/* Bento Item 3: Campus Startup Initiative (CSI) */}
+          {/* Bento Item 3: AIIH Venture Pre-Incubation */}
           <div className="rounded-2xl border border-border/70 bg-card p-6 flex flex-col justify-between hover:border-border transition-all">
             <div className="space-y-3">
               <div className="w-9 h-9 rounded-xl bg-secondary flex items-center justify-center text-foreground">
                 <Award className="h-4 w-4 text-[#C01E30]" />
               </div>
-              <h3 className="text-base font-bold text-foreground">CSI Pre-Incubation</h3>
+              <h3 className="text-base font-bold text-foreground">AIIH Incubation Hub</h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                8-month structured cohort taking student ideas from lab workbench to incorporation, cloud credits, and DPIIT recognition without upfront equity.
+                Structured pre-incubation taking student ideas from lab workbench to incorporation, cloud credits, and DPIIT recognition without upfront equity.
               </p>
             </div>
             <div className="pt-4 mt-2">
               <span className="text-[11px] text-muted-foreground block mb-2">
-                AIIH Foundation bay
+                AIIH Foundation Bay
               </span>
               <Link
-                href="/#csi"
+                href="/about"
                 className="inline-flex items-center gap-1 text-xs font-semibold text-foreground hover:text-[#C01E30] transition-colors"
               >
                 Explore pipeline <ArrowRight className="h-3 w-3" />

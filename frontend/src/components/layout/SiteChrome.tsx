@@ -43,7 +43,6 @@ const CORE_TEAM_NAV_ITEMS: GooeyNavItem[] = [
   { label: 'Calendar', href: '/workspace/calendar' },
   { label: 'Events Desk', href: '/workspace/events' },
   { label: 'Alumni', href: '/alumni/directory' },
-  { label: 'Passes', href: '/portal' },
 ];
 
 const ALUMNI_NAV_ITEMS: GooeyNavItem[] = [
@@ -124,18 +123,35 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
     return PUBLIC_NAV_ITEMS;
   }, [user, role]);
 
-  const activeIndex = Math.max(
-    0,
-    activeNavItems.findIndex(({ href }) =>
-      href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`)
-    )
-  );
+  const activeIndex = useMemo(() => {
+    // 1. Exact match first
+    const exact = activeNavItems.findIndex((item) => item.href === pathname);
+    if (exact !== -1) return exact;
+
+    // 2. Longest matching path prefix for nested routes
+    let bestIdx = -1;
+    let longestMatch = 0;
+    activeNavItems.forEach((item, idx) => {
+      if (item.href && item.href !== '/') {
+        if (pathname === item.href || pathname.startsWith(`${item.href}/`)) {
+          if (item.href.length > longestMatch) {
+            longestMatch = item.href.length;
+            bestIdx = idx;
+          }
+        }
+      }
+    });
+
+    if (bestIdx !== -1) return bestIdx;
+    if (pathname === '/' && activeNavItems.some((i) => i.href === '/')) return 0;
+    return 0;
+  }, [activeNavItems, pathname]);
 
   const searchItems: SearchResultItem[] = [
     { id: '1', title: 'PitchBiz 5.0 Conclave', category: 'Events', url: '/events' },
     { id: '2', title: 'FOKUS X E-Summit 2026', category: 'Events', url: '/#summit-2026' },
     { id: '3', title: 'EDC Anchors & Leadership', category: 'Directory', url: '/team' },
-    { id: '4', title: 'Campus Startup Initiative (CSI)', category: 'Incubation', url: '/#csi' },
+    { id: '4', title: 'AIIH Incubation Hub', category: 'Incubation', url: '/about' },
     { id: '5', title: 'Alumni Founder Directory', category: 'Alumni', url: '/alumni/directory' },
     { id: '6', title: 'Kriyeta National Hackathon', category: 'Events', url: '/events' },
   ];
