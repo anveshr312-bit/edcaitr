@@ -9,7 +9,7 @@ import { createClient } from '../../lib/supabase/client';
 import { EdcLogo } from '../ui/Primitives';
 import { FooterParticleLogo } from '../ui/FooterParticleLogo';
 import { GooeyNav, type GooeyNavItem } from '../ui/GooeyNav';
-import { WaveGridBackground } from '../ui/WaveGridBackground';
+import { MinimalGridBackground } from '../ui/MinimalGridBackground';
 import { ThemeToggleButton } from '../ui/ThemeToggle';
 import { GooeySearch, type SearchResultItem } from '../ui/GooeySearch';
 import { NotificationsDrawer } from '../ui/NotificationsDrawer';
@@ -141,21 +141,8 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-x-clip bg-[var(--color-1-mood)] text-[var(--color-2-mood)] transition-colors duration-200">
-      {/* Background canvas */}
-      <div className="pointer-events-none fixed inset-0 z-0 opacity-70 dark:opacity-50" aria-hidden="true">
-        <WaveGridBackground
-          gridSize={48}
-          colorBase={isDark ? '#121316' : '#f0f0f2'}
-          colorHigh="#C01E30"
-          waveAmplitude={0.4}
-          waveSpeed={6.0}
-          waveFrequency={1.2}
-          waveWidth={3.0}
-          waveMaxHeight={0.4}
-          autoAnimate
-          vignette
-        />
-      </div>
+      {/* Background canvas: Minimal, professional architectural grid with top ambient glow and vignette mask */}
+      <MinimalGridBackground variant="grid" size={48} interactive />
 
       {/* Staff Public Website Awareness Banner */}
       {isStaffUser && !isWorkspaceRoute && (

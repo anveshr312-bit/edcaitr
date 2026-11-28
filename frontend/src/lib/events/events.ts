@@ -146,28 +146,41 @@ export const getPublicEvents = cache(
       ? ['published', 'ongoing', 'wrap_up', 'closed', 'archived', 'cancelled']
       : ['published', 'ongoing', 'wrap_up', 'closed', 'cancelled'];
 
+    const safeStatuses = includeArchived
+      ? ['published', 'ongoing', 'wrap_up', 'closed', 'archived']
+      : ['published', 'ongoing', 'wrap_up', 'closed'];
+
     let data: any = null;
     let error: any = null;
 
-    const query = await supabase
-      .from('events')
-      .select('id, slug, title, summary, description, venue, starts_at, ends_at, registration_opens_at, registration_closes_at, status, is_paid, fee_amount, poster_ref, max_capacity, cancellation_reason, planning_stage')
-      .or('audience.eq.public,audience.is.null')
-      .in('status', statuses)
-      .order('starts_at', { ascending: false, nullsFirst: false });
-
-    data = query.data;
-    error = query.error;
-
-    if (error && (error.code === '42703' || String(error.message).includes('cancellation_reason'))) {
-      const fallback = await supabase
+    try {
+      const query = await supabase
         .from('events')
-        .select('id, slug, title, summary, description, venue, starts_at, ends_at, registration_opens_at, registration_closes_at, status, is_paid, fee_amount, poster_ref, max_capacity')
+        .select('id, slug, title, summary, description, venue, starts_at, ends_at, registration_opens_at, registration_closes_at, status, is_paid, fee_amount, poster_ref, max_capacity, cancellation_reason, planning_stage')
         .or('audience.eq.public,audience.is.null')
         .in('status', statuses)
         .order('starts_at', { ascending: false, nullsFirst: false });
-      data = fallback.data;
-      error = fallback.error;
+
+      data = query.data;
+      error = query.error;
+    } catch (e: any) {
+      error = e;
+    }
+
+    // Defensive fallback: Handles both missing cancellation_reason (42703) and unmigrated enum 'cancelled' (22P02)
+    if (error) {
+      try {
+        const fallback = await supabase
+          .from('events')
+          .select('id, slug, title, summary, description, venue, starts_at, ends_at, registration_opens_at, registration_closes_at, status, is_paid, fee_amount, poster_ref, max_capacity')
+          .or('audience.eq.public,audience.is.null')
+          .in('status', safeStatuses)
+          .order('starts_at', { ascending: false, nullsFirst: false });
+        data = fallback.data;
+        error = fallback.error;
+      } catch (e: any) {
+        error = e;
+      }
     }
 
     if (error) {
@@ -206,17 +219,21 @@ export const getPublicEventBySlug = cache(
     event = query.data;
     error = query.error;
 
-    if (error && (error.code === '42703' || String(error.message).includes('cancellation_reason'))) {
-      let fallbackBuilder = supabase
-        .from('events')
-        .select('id, slug, title, summary, description, venue, starts_at, ends_at, registration_opens_at, registration_closes_at, status, is_paid, fee_amount, poster_ref, max_capacity')
-        .in('status', ['published', 'ongoing', 'wrap_up', 'closed', 'archived', 'cancelled', 'draft']);
+    if (error) {
+      try {
+        let fallbackBuilder = supabase
+          .from('events')
+          .select('id, slug, title, summary, description, venue, starts_at, ends_at, registration_opens_at, registration_closes_at, status, is_paid, fee_amount, poster_ref, max_capacity')
+          .in('status', ['published', 'ongoing', 'wrap_up', 'closed', 'archived', 'draft']);
 
-      fallbackBuilder = isUuid ? fallbackBuilder.or(`slug.eq.${slug},id.eq.${slug}`) : fallbackBuilder.eq('slug', slug);
+        fallbackBuilder = isUuid ? fallbackBuilder.or(`slug.eq.${slug},id.eq.${slug}`) : fallbackBuilder.eq('slug', slug);
 
-      const fallback = await fallbackBuilder.maybeSingle();
-      event = fallback.data;
-      error = fallback.error;
+        const fallback = await fallbackBuilder.maybeSingle();
+        event = fallback.data;
+        error = fallback.error;
+      } catch (e: any) {
+        error = e;
+      }
     }
 
     if (error) {
